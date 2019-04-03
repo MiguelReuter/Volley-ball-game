@@ -1,7 +1,7 @@
 # encoding : UTF8
 
 import pygame
-import src.Engine.Graphics.camera as camera
+import Engine.Graphics.camera as camera
 
 if __name__ == "__main__":
 	pygame.init()
@@ -30,7 +30,7 @@ if __name__ == "__main__":
 		cam.draw_horizontal_ellipse((ball_position[0], ball_position[1], 0), 0.5)
 		cam.draw_sphere(ball_position, 0.5)
 		
-		cam.draw_sphere((ball_position[0], ball_position[1], 0), 0.5)
+		cam.draw_sphere((ball_position[0], ball_position[1], 0), 0.1)
 		#cam.draw_horizontal_ellipse(ball_position, 0.5)
 
 		# update keyboard events
@@ -55,7 +55,12 @@ if __name__ == "__main__":
 				# quit
 				if event.key in (pygame.K_q, pygame.K_ESCAPE):
 					quit_game = True
-		
+
+			if event.type == pygame.KEYUP:
+				# debug
+				if event.key == pygame.K_SPACE:
+					print("ball pos :", ball_position)
+
 		# update screen
 		pygame.display.flip()
 	

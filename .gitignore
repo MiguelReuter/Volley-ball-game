@@ -2,5 +2,5 @@ project_management/
 data/ 
 .idea/ 
 extras/ 
-__pycache__/
+__pycache__
 *.pyc
