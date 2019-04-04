@@ -5,7 +5,8 @@ from math import tan, radians
 
 
 class Camera:
-	def __init__(self, pos, focus_pt, w=800, h=640, fov_angle=60):
+	def __init__(self, graphics_engine, pos, focus_pt, w=800, h=640, fov_angle=60):
+		self.grpahics_engine = graphics_engine
 		self.w = w
 		self.h = h
 		self.position = Vector3(pos)
@@ -61,3 +62,7 @@ class Camera:
 
 	def draw_polygon(self, pts):
 		draw.polygon(self.surface, (255, 255, 255), [(self.world_to_pixel_coords(pt)) for pt in pts])
+		
+	def draw_lines(self, ptA, ptB):
+		draw.line(self.surface, (100, 100, 255), self.world_to_pixel_coords(ptA), self.world_to_pixel_coords(ptB))
+		
