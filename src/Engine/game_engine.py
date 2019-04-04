@@ -2,7 +2,7 @@
 
 from Engine.Graphics.graphics_engine import *
 from settings import *
-
+from Game.ball import Ball
 
 import pygame as pg
 
@@ -35,10 +35,17 @@ class GameEngine:
 	def _create(self):
 		self.screen = pg.display.set_mode([SCREEN_WIDTH, SCREEN_HEIGHT])
 		pg.display.set_caption(CAPTION)
+		
+		self.ball = Ball((1, 1, 3), 0.5)
 	
 	def run(self):
 		quit_game = False
+		
+		self.ball.velocity += (0, -2, 5)
 		while not quit_game:
+			t1 = pg.time.get_ticks()
+			self.ball.update_physics(0.01)
+			
 			cam = self.graphics_engine.camera
 			ball_position = self.ball_pos
 			
@@ -53,6 +60,10 @@ class GameEngine:
 			
 			cam.draw_sphere((ball_position[0], ball_position[1], 0), 0.1)
 			# cam.draw_horizontal_ellipse(ball_position, 0.5)
+			
+			# draw physics ball and its shadow
+			cam.draw_sphere(self.ball.position, self.ball.radius)
+			cam.draw_horizontal_ellipse((self.ball.position[0], self.ball.position[1], 0), self.ball.radius)
 			
 			# update keyboard events
 			for event in pg.event.get():
@@ -88,3 +99,7 @@ class GameEngine:
 			
 			# update screen
 			pg.display.flip()
+			
+			# fps
+			t2 = pg.time.get_ticks()
+			pg.time.wait(int(1000/30 - (t2-t1)))
