@@ -32,3 +32,4 @@ class Ball(sprite.Sprite):
 		if self.position[2] - self.radius < 0 and self.velocity[2] < 0:
 			self.velocity *= 0.7
 			self.velocity.z *= -1
+		self.position.z = max(self.radius, self.position.z)

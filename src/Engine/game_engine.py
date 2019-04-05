@@ -96,6 +96,8 @@ class GameEngine:
 					# debug
 					if event.key == pg.K_SPACE:
 						print("ball pos :", ball_position)
+						print("physics ball pos :", self.ball.position)
+
 			
 			# update screen
 			pg.display.flip()
