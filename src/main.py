@@ -1,6 +1,6 @@
 # encoding : UTF8
 
-from Engine.game_engine import *
+from Engine import *
 
 import pygame
 
@@ -14,5 +14,4 @@ if __name__ == "__main__":
 	print("exiting game...")
 	pygame.display.quit()
 	pygame.quit()
-	print("exit game")
 	

@@ -1,10 +1,10 @@
 # encoding : UTF-8
 
-from Engine.Graphics.camera import Camera
+from Engine.Display.camera import Camera
 from settings import *
 
 
-class GraphicsEngine:
+class DisplayManager:
 	# TODO : singleton
 	def __init__(self, game_engine):
 		self.game_engine = game_engine

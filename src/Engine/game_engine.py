@@ -1,6 +1,7 @@
 # encoding : UTF-8
 
-from Engine.Graphics.graphics_engine import *
+from Engine import *
+from Engine.Display import *
 from settings import *
 from Game.ball import Ball
 
@@ -27,7 +28,7 @@ def draw_court(camera, w, h, net_h):
 class GameEngine:
 	# TODO : singleton
 	def __init__(self):
-		self.graphics_engine = GraphicsEngine(self)
+		self.display_manager = DisplayManager(self)
 		self._create()
 		
 		self.ball_pos = pg.Vector3(0, 0, 2)
@@ -46,7 +47,7 @@ class GameEngine:
 			t1 = pg.time.get_ticks()
 			self.ball.update_physics(0.01)
 			
-			cam = self.graphics_engine.camera
+			cam = self.display_manager.camera
 			ball_position = self.ball_pos
 			
 			self.screen.blit(cam.surface, (0, 0))
