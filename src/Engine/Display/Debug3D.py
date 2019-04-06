@@ -5,8 +5,12 @@ from settings import *
 
 
 def draw_sphere(camera, center, radius):
-	# TODO : r_px must be processed with a norm2 ?
-	r_px = camera.world_to_pixel_coords(center + Vector3(0, radius, 0))[0] - camera.world_to_pixel_coords(center)[0]
+	# process n_vect, vector normal to camera-sphere vector
+	w_vect = Vector3(camera.position) - Vector3(center)
+	n_vect = w_vect.cross(Vector3(0, 0, 1)).normalize()
+
+	r_px = int((Vector2(camera.world_to_pixel_coords(center + radius * n_vect)) -
+	            Vector2(camera.world_to_pixel_coords(center))).magnitude())
 	draw.circle(camera.surface, DBG_COLOR_SPHERE, camera.world_to_pixel_coords(center), r_px)
 
 def draw_horizontal_ellipse(camera, pos, r):
