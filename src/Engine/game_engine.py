@@ -4,26 +4,9 @@ from Engine import *
 from Engine.Display import *
 from settings import *
 from Game.ball import Ball
+from Game.court import Court
 
 import pygame as pg
-
-
-def draw_court(camera, w, h, net_h):
-	# TODO : refactor and move this function
-	camera.draw_polygon([(-h / 2, -w / 2, 0), (-h / 2, w / 2, 0), (h / 2, w / 2, 0), (h / 2, -w / 2, 0)])
-	
-	# corners
-	camera.draw_lines((-h / 2, -w / 2, 0), (-h / 2, -w / 2, 2))
-	camera.draw_lines((-h / 2, w / 2, 0), (-h / 2, w / 2, 2))
-	camera.draw_lines((h / 2, w / 2, 0), (h / 2, w / 2, 2))
-	camera.draw_lines((h / 2, -w / 2, 0), (h / 2, -w / 2, 2))
-	
-	# net
-	camera.draw_lines((-h / 2, 0, 0), (-h / 2, 0, net_h))
-	camera.draw_lines((h / 2, 0, 0), (h / 2, 0, net_h))
-	camera.draw_lines((-h / 2, 0, net_h), (h / 2, 0, net_h))
-	camera.draw_lines((-h / 2, 0, net_h - 1), (h / 2, 0, net_h - 1))
-	
 	
 class GameEngine:
 	# TODO : singleton
@@ -38,38 +21,36 @@ class GameEngine:
 		pg.display.set_caption(CAPTION)
 		
 		self.ball = Ball((1, 1, 3), 0.5)
+		self.court = Court(10, 6, 1.5, 3)
+		self.objects = [self.court, self.ball]
 	
 	def run(self):
-		quit_game = False
-		
+		running = True
+		frame_count = 0
+
+		# ball initial velocity
 		self.ball.velocity += (0, -2, 5)
-		while not quit_game:
-			t1 = pg.time.get_ticks()
-			self.ball.update_physics(0.01)
+
+		# for framerate
+		t2 = pg.time.get_ticks()
+		t1 = t2
+		t0 = t2  # time of first frame of the game
+
+		while running:
+			##########   PHYSICS   ##########
+			self.ball.update_physics(t2-t1)
 			
 			cam = self.display_manager.camera
-			ball_position = self.ball_pos
-			
+			##########   DISPLAY   ##########
+			self.display_manager.update(self.objects)
 			self.screen.blit(cam.surface, (0, 0))
-			
-			# draw basic polygon on the ground
-			cam.surface.fill((0, 0, 0))
-			draw_court(cam, 10, 6, 3)
-			
-			cam.draw_horizontal_ellipse((ball_position[0], ball_position[1], 0), 0.5)
-			cam.draw_sphere(ball_position, 0.5)
-			
-			cam.draw_sphere((ball_position[0], ball_position[1], 0), 0.1)
-			# cam.draw_horizontal_ellipse(ball_position, 0.5)
-			
-			# draw physics ball and its shadow
-			cam.draw_sphere(self.ball.position, self.ball.radius)
-			cam.draw_horizontal_ellipse((self.ball.position[0], self.ball.position[1], 0), self.ball.radius)
-			
-			# update keyboard events
+			# update screen
+			pg.display.flip()
+
+			##########   KB EVENTS   ##########
 			for event in pg.event.get():
 				if event.type == pg.QUIT:
-					quit_game = True
+					running = False
 				if event.type == pg.KEYDOWN:
 					# move camera
 					if event.key == pg.K_UP:
@@ -80,29 +61,19 @@ class GameEngine:
 						cam.position += (0, -0.1, 0)
 					if event.key == pg.K_RIGHT:
 						cam.position += (0, 0.1, 0)
-					# move ball
-					if event.key == pg.K_i:
-						ball_position -= (0.1, 0, 0)
-					if event.key == pg.K_j:
-						ball_position -= (0, 0.1, 0)
-					if event.key == pg.K_k:
-						ball_position += (0.1, 0, 0)
-					if event.key == pg.K_l:
-						ball_position += (0, 0.1, 0)
 					# quit
 					if event.key in (pg.K_q, pg.K_ESCAPE):
-						quit_game = True
+						running = False
 				
 				if event.type == pg.KEYUP:
 					# debug
 					if event.key == pg.K_SPACE:
-						print("ball pos :", ball_position)
 						print("physics ball pos :", self.ball.position)
 
-			
-			# update screen
-			pg.display.flip()
-			
-			# fps
+			# manage frame rate
+			t1 = t2
 			t2 = pg.time.get_ticks()
-			pg.time.wait(int(1000/30 - (t2-t1)))
+			pg.time.wait(int(1000/NOMINAL_FRAME_RATE - (t2 - t1)))
+			frame_count += 1
+
+		print("run with {} mean fps".format(int(1000 * frame_count / (t2 - t0))))

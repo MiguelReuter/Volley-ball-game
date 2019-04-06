@@ -2,6 +2,7 @@
 
 from pygame import *
 from math import tan, radians
+from settings import *
 
 
 class Camera:
@@ -43,26 +44,3 @@ class Camera:
 			u = int(-self.w / (2 * self.fov) * pt_3c[0] / pt_3c[2] + self.w / 2)
 			v = int(-self.h / (2 * self.fov) * pt_3c[1] / pt_3c[2] + self.h / 2)
 		return u, v
-	
-	def draw_sphere(self, pos, r):
-		# m to pixel
-		# TODO : r_px must be processed with a norm2 ?
-		r_px = self.world_to_pixel_coords(pos + Vector3(0, r, 0))[0] - self.world_to_pixel_coords(pos)[0]
-		draw.circle(self.surface, (255, 0, 0), self.world_to_pixel_coords(pos), r_px)
-
-	def draw_horizontal_ellipse(self, pos, r):
-		# TODO : draft, messy
-		pts = [self.world_to_pixel_coords(Vector3(pos) + (0, -r, 0)),
-		       self.world_to_pixel_coords(Vector3(pos) + (0, r, 0))]
-		pts2 = [self.world_to_pixel_coords(Vector3(pos) + (-r, 0, 0)),
-		       self.world_to_pixel_coords(Vector3(pos) + (r, 0, 0))]
-		rect = Rect(pts[0], (abs(pts[1][0] - pts[0][0]), abs(pts2[1][1] - pts2[0][1])))
-		draw.ellipse(self.surface, (20, 20, 20), rect)
-		draw.rect(self.surface, (0, 255, 0), rect, 2)
-
-	def draw_polygon(self, pts):
-		draw.polygon(self.surface, (255, 255, 255), [(self.world_to_pixel_coords(pt)) for pt in pts])
-		
-	def draw_lines(self, ptA, ptB):
-		draw.line(self.surface, (100, 100, 255), self.world_to_pixel_coords(ptA), self.world_to_pixel_coords(ptB))
-		

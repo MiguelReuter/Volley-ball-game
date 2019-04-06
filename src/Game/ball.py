@@ -1,6 +1,7 @@
 # encoding : UTF-8
 
 from pygame import *
+from Engine.Display import Debug3D
 
 
 class Ball(sprite.Sprite):
@@ -10,7 +11,11 @@ class Ball(sprite.Sprite):
 		self.acceleration = Vector3()
 		self.velocity = Vector3()
 		self.position = Vector3(position)
-		
+
+	def draw(self, display_manager):
+		Debug3D.draw_horizontal_ellipse(display_manager.camera, (self.position[0], self.position[1], 0), self.radius)
+		Debug3D.draw_sphere(display_manager.camera, self.position, self.radius)
+
 	def move_rel(self, dxyz):
 		self.position += Vector3(dxyz)
 	
@@ -25,8 +30,8 @@ class Ball(sprite.Sprite):
 		
 	def update_physics(self, dt):
 		G = Vector3(0, 0, -10)
-		self.add_velocity(dt * G)
-		self.move_rel(dt * self.velocity)
+		self.add_velocity(0.001 * dt * G)
+		self.move_rel(0.001 * dt * self.velocity)
 		
 		# if ball touches the ground
 		if self.position[2] - self.radius < 0 and self.velocity[2] < 0:
