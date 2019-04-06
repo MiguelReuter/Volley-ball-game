@@ -24,3 +24,25 @@ def draw_polygon(camera, pts):
 
 def draw_line(camera, ptA, ptB):
 	draw.line(camera.surface, DBG_COLOR_LINE, camera.world_to_pixel_coords(ptA), camera.world_to_pixel_coords(ptB))
+
+def draw_aligned_axis_box(camera, center, length_x, length_y, length_z):
+	top_pts = [(center.x - length_x/2, center.y - length_y/2, center.z + length_z/2),
+	           (center.x - length_x/2, center.y + length_y/2, center.z + length_z/2),
+	           (center.x + length_x/2, center.y + length_y/2, center.z + length_z/2),
+	           (center.x + length_x/2, center.y - length_y/2, center.z + length_z/2)]
+	bottom_pts = [(center.x - length_x / 2, center.y - length_y / 2, center.z - length_z / 2),
+	              (center.x - length_x / 2, center.y + length_y / 2, center.z - length_z / 2),
+	              (center.x + length_x / 2, center.y + length_y / 2, center.z - length_z / 2),
+	              (center.x + length_x / 2, center.y - length_y / 2, center.z - length_z / 2)]
+
+	# to 2d coords
+	top_pts = [(camera.world_to_pixel_coords(pt)) for pt in top_pts]
+	bottom_pts = [(camera.world_to_pixel_coords(pt)) for pt in bottom_pts]
+
+	draw.polygon(camera.surface, DBG_COLOR_AAB, top_pts, 1)                                 # top quad
+	draw.polygon(camera.surface, DBG_COLOR_AAB, bottom_pts, 1)                              # bottom quad
+	draw.polygon(camera.surface, DBG_COLOR_AAB, [*top_pts[:2], bottom_pts[1], bottom_pts[0]], 1)           # -x quad
+	draw.polygon(camera.surface, DBG_COLOR_AAB, [*top_pts[2:], bottom_pts[3], bottom_pts[2]], 1)           # +x quad
+
+
+

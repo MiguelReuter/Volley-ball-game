@@ -5,6 +5,8 @@ from Engine.Display import *
 from settings import *
 from Game.ball import Ball
 from Game.court import Court
+from Game.character import Character
+
 
 import pygame as pg
 	
@@ -22,7 +24,9 @@ class GameEngine:
 		
 		self.ball = Ball((1, 1, 3), 0.5)
 		self.court = Court(10, 6, 1.5, 3)
-		self.objects = [self.court, self.ball]
+		self.char1 = Character((2, 2, 0))
+		self.char2 = Character((-2, -2, 0))
+		self.objects = [self.court, self.ball, self.char1, self.char2]
 	
 	def run(self):
 		running = True
