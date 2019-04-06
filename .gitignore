@@ -1,3 +1,6 @@
-project_management/
-data/
-.idea/
+project_management/ 
+data/ 
+.idea/ 
+extras/ 
+__pycache__
+*.pyc
