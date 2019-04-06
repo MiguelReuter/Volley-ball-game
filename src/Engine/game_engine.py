@@ -20,7 +20,7 @@ class GameEngine:
 	
 	def _create(self):
 		self.screen = pg.display.set_mode([SCREEN_WIDTH, SCREEN_HEIGHT])
-		pg.display.set_caption(CAPTION)
+		pg.display.set_caption(CAPTION_TITLE)
 		
 		self.ball = Ball((1, 1, 3), 0.5)
 		self.court = Court(10, 6, 1.5, 3)
@@ -32,26 +32,27 @@ class GameEngine:
 		running = True
 		frame_count = 0
 
+		cam = self.display_manager.camera
+
 		# ball initial velocity
 		self.ball.velocity += (0, -2, 5)
 
-		# for framerate
+		# for frame rate
 		t2 = pg.time.get_ticks()
 		t1 = t2
 		t0 = t2  # time of first frame of the game
 
 		while running:
-			##########   PHYSICS   ##########
+			# PHYSICS
 			self.ball.update_physics(t2-t1)
 			
-			cam = self.display_manager.camera
-			##########   DISPLAY   ##########
+			# DISPLAY
 			self.display_manager.update(self.objects)
 			self.screen.blit(cam.surface, (0, 0))
 			# update screen
 			pg.display.flip()
 
-			##########   KB EVENTS   ##########
+			# KB EVENTS
 			for event in pg.event.get():
 				if event.type == pg.QUIT:
 					running = False
@@ -77,7 +78,7 @@ class GameEngine:
 			# manage frame rate
 			t1 = t2
 			t2 = pg.time.get_ticks()
-			pg.time.wait(int(1000/NOMINAL_FRAME_RATE - (t2 - t1)))
+			pg.time.wait(int(1000 / NOMINAL_FRAME_RATE - (t2 - t1)))
 			frame_count += 1
 
 		print("run with {} mean fps".format(int(1000 * frame_count / (t2 - t0))))

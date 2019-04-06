@@ -7,7 +7,7 @@ from settings import *
 
 class Camera:
 	def __init__(self, graphics_engine, pos, focus_pt, w=800, h=640, fov_angle=60):
-		self.grpahics_engine = graphics_engine
+		self.graphics_engine = graphics_engine
 		self.w = w
 		self.h = h
 		self.position = Vector3(pos)
