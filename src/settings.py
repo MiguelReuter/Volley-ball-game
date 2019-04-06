@@ -6,7 +6,7 @@ SCREEN_HEIGHT = 640
 CAPTION_TITLE= "Volley-ball game"
 
 CAMERA_POS = (9, 0, 3)
-FOCUS_POINT = (0, 0, 3)
+FOCUS_POINT = (0, 0, 3)  # y component is ignored
 FOV_ANGLE = 30.
 
 
@@ -20,3 +20,9 @@ DBG_COLOR_SHADOW = (20, 20, 20)
 
 # TIME
 NOMINAL_FRAME_RATE = 30
+
+
+# 3D DEBUG
+
+SIZE_INDEPENDENT_FROM_Y_POS = True
+SIZE_INDEPENDENT_FROM_Z_POS = False

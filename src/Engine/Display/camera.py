@@ -1,17 +1,17 @@
 # encoding : UTF-8
 
 from pygame import *
-from math import tan, radians
+from math import tan, radians, floor
 from settings import *
 
 
 class Camera:
-	def __init__(self, graphics_engine, pos, focus_pt, w=800, h=640, fov_angle=60):
+	def __init__(self, graphics_engine, pos, focus_point, w=800, h=640, fov_angle=60):
 		self.graphics_engine = graphics_engine
 		self.w = w
 		self.h = h
 		self.position = Vector3(pos)
-		self.focus_point = Vector3(focus_pt)
+		self.focus_point = Vector3(focus_point)  # y component will be ignored
 		
 		self.fov_angle = fov_angle
 		self.fov = tan(radians(self.fov_angle))
@@ -20,7 +20,9 @@ class Camera:
 		
 	def world_to_cam_3d_coords(self, w_pt):
 		# w vector in world ref
-		fc = (self.position - self.focus_point).normalize()
+		focus_pt = Vector3(self.focus_point)
+		focus_pt.y = self.position.y
+		fc = (self.position - focus_pt).normalize()
 		
 		# translation
 		t_pt = w_pt - self.position
@@ -41,6 +43,6 @@ class Camera:
 		pt_3c = self.world_to_cam_3d_coords(pt_3d)
 		
 		if pt_3c[2] != 0:
-			u = int(-self.w / (2 * self.fov) * pt_3c[0] / pt_3c[2] + self.w / 2)
-			v = int(-self.h / (2 * self.fov) * pt_3c[1] / pt_3c[2] + self.h / 2)
+			u = int(floor(-self.w / (2 * self.fov) * pt_3c[0] / pt_3c[2]) + self.w / 2)
+			v = int(floor(-self.h / (2 * self.fov) * pt_3c[1] / pt_3c[2]) + self.h / 2)
 		return u, v
