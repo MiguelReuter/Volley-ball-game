@@ -12,6 +12,8 @@ class Character:
 
 	def draw(self, display_manager):
 		center_pos = Vector3(self.position) + Vector3(0, 0, self.h/2)
+		shadow_pos = Vector3(center_pos) - (0, 0, self.h/2)
+		Debug3D.draw_horizontal_ellipse(display_manager.camera, shadow_pos, self.w/2)
 		Debug3D.draw_aligned_axis_box(display_manager.camera, center_pos, self.w, self.w, self.h)
 
 	def move_rel(self, dxyz):
