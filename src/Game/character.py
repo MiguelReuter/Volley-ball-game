@@ -14,4 +14,7 @@ class Character:
 		center_pos = Vector3(self.position) + Vector3(0, 0, self.h/2)
 		Debug3D.draw_aligned_axis_box(display_manager.camera, center_pos, self.w, self.w, self.h)
 
+	def move_rel(self, dxyz):
+		self.position += Vector3(dxyz)
+
 

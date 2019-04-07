@@ -24,8 +24,8 @@ class GameEngine:
 		
 		self.ball = Ball((1, 1, 3), 0.5)
 		self.court = Court(10, 6, 1.5, 3)
-		self.char1 = Character((2, 2, 0))
-		self.char2 = Character((-2, -2, 0))
+		self.char1 = Character((-2, -2, 0))
+		self.char2 = Character((2, 2, 0))
 		self.objects = [self.court, self.ball, self.char1, self.char2]
 	
 	def run(self):
@@ -57,6 +57,16 @@ class GameEngine:
 				if event.type == pg.QUIT:
 					running = False
 				if event.type == pg.KEYDOWN:
+					# move left player
+					if event.key == pg.K_z:
+						self.char1.move_rel((-0.1, 0, 0))
+					if event.key == pg.K_s:
+						self.char1.move_rel((0.1, 0, 0))
+					if event.key == pg.K_q:
+						self.char1.move_rel((0, -0.1, 0))
+					if event.key == pg.K_d:
+						self.char1.move_rel((0, 0.1, 0))
+
 					# move camera
 					if event.key == pg.K_UP:
 						cam.position += (0, 0, 0.1)
@@ -67,7 +77,7 @@ class GameEngine:
 					if event.key == pg.K_RIGHT:
 						cam.position += (0, 0.1, 0)
 					# quit
-					if event.key in (pg.K_q, pg.K_ESCAPE):
+					if event.key == pg.K_ESCAPE:
 						running = False
 				
 				if event.type == pg.KEYUP:
