@@ -1,13 +1,18 @@
-Simple 2D Volley-ball game written from scratch with Pygame and Python3.
+**WIP** : Simple 2D retro Volley-ball game written from scratch with Pygame and Python3.
+
+Check [Projects](https://github.com/MiguelReuter/Volley-ball-game/projects) page on Github to see the progress !
+
 
 # Dependencies
+- python3
+- pygame 1.9.5
 
-python3, pygame
-
-# Install and launch game
-
+# Launch game
+```python3
+cd src/
 python3 main.py
+```
 
 # Licence
 
-The code and assets (images, sounds and music) are under the MIT license terms.
+The code is under the MIT license terms.
