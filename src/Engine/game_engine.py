@@ -2,6 +2,8 @@
 
 from Engine import *
 from Engine.Display import *
+from Engine.Input import *
+
 from settings import *
 from Game.ball import Ball
 from Game.court import Court
@@ -14,9 +16,10 @@ class GameEngine:
 	# TODO : singleton
 	def __init__(self):
 		self.display_manager = DisplayManager(self)
+		self.input_manager = InputManager(self)
+
+		self.running = True
 		self._create()
-		
-		self.ball_pos = pg.Vector3(0, 0, 2)
 	
 	def _create(self):
 		self.screen = pg.display.set_mode([SCREEN_WIDTH, SCREEN_HEIGHT])
@@ -27,9 +30,11 @@ class GameEngine:
 		self.char1 = Character((-2, -2, 0))
 		self.char2 = Character((2, 2, 0))
 		self.objects = [self.court, self.ball, self.char1, self.char2]
-	
+
+	def request_quit(self):
+		self.running = False
+
 	def run(self):
-		running = True
 		frame_count = 0
 
 		cam = self.display_manager.camera
@@ -42,7 +47,7 @@ class GameEngine:
 		t1 = t2
 		t0 = t2  # time of first frame of the game
 
-		while running:
+		while self.running:
 			# PHYSICS
 			self.ball.update_physics(t2-t1)
 			
@@ -53,37 +58,33 @@ class GameEngine:
 			pg.display.flip()
 
 			# KB EVENTS
-			for event in pg.event.get():
-				if event.type == pg.QUIT:
-					running = False
-				if event.type == pg.KEYDOWN:
-					# move left player
-					if event.key == pg.K_z:
-						self.char1.move_rel((-0.1, 0, 0))
-					if event.key == pg.K_s:
-						self.char1.move_rel((0.1, 0, 0))
-					if event.key == pg.K_q:
-						self.char1.move_rel((0, -0.1, 0))
-					if event.key == pg.K_d:
-						self.char1.move_rel((0, 0.1, 0))
-
-					# move camera
-					if event.key == pg.K_UP:
-						cam.position += (0, 0, 0.1)
-					if event.key == pg.K_DOWN:
-						cam.position += (0, 0, -0.1)
-					if event.key == pg.K_LEFT:
-						cam.position += (0, -0.1, 0)
-					if event.key == pg.K_RIGHT:
-						cam.position += (0, 0.1, 0)
-					# quit
-					if event.key == pg.K_ESCAPE:
-						running = False
+			self.input_manager.update()
+			# quit
+			if self.input_manager.keys[pg.K_ESCAPE] == KeyState.PRESSED:
+				self.running = False
+			# move camera
+			if self.input_manager.keys[pg.K_UP] == KeyState.PRESSED:
+				cam.position += (0, 0, 0.1)
+			if self.input_manager.keys[pg.K_DOWN] == KeyState.PRESSED:
+				cam.position += (0, 0, -0.1)
+			if self.input_manager.keys[pg.K_LEFT] == KeyState.PRESSED:
+				cam.position += (0, -0.1, 0)
+			if self.input_manager.keys[pg.K_RIGHT] == KeyState.PRESSED:
+				cam.position += (0, 0.1, 0)
 				
-				if event.type == pg.KEYUP:
-					# debug
-					if event.key == pg.K_SPACE:
-						print("physics ball pos :", self.ball.position)
+			# move left player
+			if self.input_manager.keys[pg.K_z] == KeyState.PRESSED:
+				self.char1.move_rel((-0.1, 0, 0))
+			if self.input_manager.keys[pg.K_s] == KeyState.PRESSED:
+				self.char1.move_rel((0.1, 0, 0))
+			if self.input_manager.keys[pg.K_q] == KeyState.PRESSED:
+				self.char1.move_rel((0, -0.1, 0))
+			if self.input_manager.keys[pg.K_d] == KeyState.PRESSED:
+				self.char1.move_rel((0, 0.1, 0))
+
+			# debug ball position
+			if self.input_manager.keys[pg.K_SPACE] == KeyState.JUST_PRESSED:
+				print("ball position :", self.ball.position)
 
 			# manage frame rate
 			t1 = t2

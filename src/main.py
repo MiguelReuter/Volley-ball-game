@@ -9,7 +9,7 @@ from Engine import *
 
 if __name__ == "__main__":
 	pygame.init()
-	pygame.key.set_repeat(10)
+	#pygame.key.set_repeat(10)
 
 	game_engine = GameEngine()
 	game_engine.run()
