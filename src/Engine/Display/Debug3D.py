@@ -24,9 +24,12 @@ def draw_horizontal_ellipse(camera, pos, r):
 	b_r = camera.world_to_pixel_coords(Vector3(pos) + (r, r, 0))
 
 	# approximate rect
-	r_pos = (int(0.5 * (t_l[0] + b_l[0])), t_l[1])
+	r_pos = [int(0.5 * (t_l[0] + b_l[0])), t_l[1]]
 	r_w = int(0.5 * (t_r[0] + b_r[0]) - r_pos[0])
 	r_h = b_r[1] - r_pos[1]
+	if r_h < 0:
+		r_pos[1] += r_h
+		r_h = -r_h
 	rect = Rect(r_pos, (r_w, r_h))
 
 	draw.ellipse(camera.surface, DBG_COLOR_SHADOW, rect)
