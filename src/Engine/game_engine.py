@@ -73,14 +73,11 @@ class GameEngine:
 				cam.position += (0, 0.1, 0)
 				
 			# move left player
-			if self.input_manager.keys[pg.K_z] == KeyState.PRESSED:
-				self.char1.move_rel((-0.1, 0, 0))
-			if self.input_manager.keys[pg.K_s] == KeyState.PRESSED:
-				self.char1.move_rel((0.1, 0, 0))
-			if self.input_manager.keys[pg.K_q] == KeyState.PRESSED:
-				self.char1.move_rel((0, -0.1, 0))
-			if self.input_manager.keys[pg.K_d] == KeyState.PRESSED:
-				self.char1.move_rel((0, 0.1, 0))
+			b_up = self.input_manager.keys[pg.K_z] == KeyState.PRESSED
+			b_down = self.input_manager.keys[pg.K_s] == KeyState.PRESSED
+			b_left = self.input_manager.keys[pg.K_q] == KeyState.PRESSED
+			b_right = self.input_manager.keys[pg.K_d] == KeyState.PRESSED
+			self.char1.move(b_up, b_down, b_left, b_right, t2 - t1)
 
 			# debug ball position
 			if self.input_manager.keys[pg.K_SPACE] == KeyState.JUST_PRESSED:
