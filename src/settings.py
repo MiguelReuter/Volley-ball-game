@@ -34,10 +34,10 @@ FOV_ANGLE = 30.
 
 # INPUTS
 class KeyState(Enum):
-	UNPRESSED = 0
+	RELEASED = 0
 	JUST_PRESSED = 1
 	PRESSED = 2
-	JUST_RELEASE = 3
+	JUST_RELEASED = 3
 
 # keyboard keys used in game (other keys are ignored)
 KEYS = (K_z, K_s, K_q, K_d,

@@ -22,16 +22,16 @@ def test_press_key(input_manager):
 	# get first key
 	key_code = list(input_manager.keys.keys())[0]
 	
-	assert input_manager.keys[key_code] == KeyState.UNPRESSED
+	assert input_manager.keys[key_code] == KeyState.RELEASED
 	input_manager.update()
-	assert input_manager.keys[key_code] == KeyState.UNPRESSED
+	assert input_manager.keys[key_code] == KeyState.RELEASED
 	
 	# press 'key_code' key
 	event = pg.event.Event(pg.KEYDOWN)
 	event.key = key_code
 	pg.event.post(event)
 	
-	assert input_manager.keys[key_code] == KeyState.UNPRESSED  # input_manager is not updated yet
+	assert input_manager.keys[key_code] == KeyState.RELEASED  # input_manager is not updated yet
 	input_manager.update()
 	assert input_manager.keys[key_code] == KeyState.JUST_PRESSED
 	input_manager.update()
@@ -46,9 +46,9 @@ def test_press_key(input_manager):
 	
 	assert input_manager.keys[key_code] == KeyState.PRESSED
 	input_manager.update()
-	assert input_manager.keys[key_code] == KeyState.JUST_RELEASE
+	assert input_manager.keys[key_code] == KeyState.JUST_RELEASED
 	input_manager.update()
-	assert input_manager.keys[key_code] == KeyState.UNPRESSED
+	assert input_manager.keys[key_code] == KeyState.RELEASED
 
 	
 
