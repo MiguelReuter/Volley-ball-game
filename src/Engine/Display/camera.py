@@ -42,7 +42,7 @@ class Camera:
 		
 		pt_3c = self.world_to_cam_3d_coords(pt_3d)
 		
-		if pt_3c[2] != 0:
+		if pt_3c[2] != 0:  # if point is distinct from camera center
 			u = int(floor(-self.w / (2 * self.fov) * pt_3c[0] / pt_3c[2]) + self.w / 2)
 			v = int(floor(-self.h / (2 * self.fov) * pt_3c[1] / pt_3c[2]) + self.h / 2)
 		return u, v

@@ -9,9 +9,9 @@ from Game.ball import Ball
 from Game.court import Court
 from Game.character import Character
 
-
 import pygame as pg
-	
+
+
 class GameEngine:
 	# TODO : singleton
 	def __init__(self):

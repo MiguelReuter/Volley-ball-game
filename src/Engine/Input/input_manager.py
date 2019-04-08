@@ -5,6 +5,7 @@ from settings import *
 
 
 class InputManager:
+	# TODO : singleton
 	def __init__(self, game_engine):
 		self.game_engine = game_engine
 		self.keys = {k: KeyState.UNPRESSED for k in KEYS}
