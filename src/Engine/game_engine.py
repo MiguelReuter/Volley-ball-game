@@ -35,13 +35,13 @@ class GameEngine:
 		self.running = False
 		
 	def update_actions(self, action_events, dt):
-		for action in action_events:
-			action_code = action.code
-			if action_code == "QUIT":
+		for event in action_events:
+			action = event.action
+			if action == "QUIT":
 				self.running = False
-			elif action_code == "PAUSE":
-				print(action_code, "not implemented yet")
-			elif action_code == "SPACE_TEST":
+			elif action == "PAUSE":
+				print(action, "not implemented yet")
+			elif action == "SPACE_TEST":
 				# debug ball position
 				print("ball position :", self.ball.position)
 	
@@ -71,9 +71,8 @@ class GameEngine:
 			# KB EVENTS
 			self.input_manager.update()
 			
-			# TODO : add new EventType for action_event
 			# TODO : take in account origin of action event (player index for ex.) ?
-			actions_events_queue = pg.event.get(pg.USEREVENT)
+			actions_events_queue = pg.event.get(ACTIONEVENT)
 			# UPDATE ACTIONS
 			self.char1.update_actions(actions_events_queue, t2 - t1)
 			cam.update_actions(actions_events_queue, t2 - t1)

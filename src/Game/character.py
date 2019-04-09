@@ -31,12 +31,12 @@ class Character:
 		action_events = list(action_events)
 		b_up = b_down = b_left = b_right = False
 		
-		for action in action_events:
-			action_code = action.code
-			b_up |= (action_code == "MOVE_UP")
-			b_down |= (action_code == "MOVE_DOWN")
-			b_left |= (action_code == "MOVE_LEFT")
-			b_right |= (action_code == "MOVE_RIGHT")
+		for event in action_events:
+			action = event.action
+			b_up |= (action == "MOVE_UP")
+			b_down |= (action == "MOVE_DOWN")
+			b_left |= (action == "MOVE_LEFT")
+			b_right |= (action == "MOVE_RIGHT")
 			
 		self.move(b_up, b_down, b_left, b_right, dt)
 			

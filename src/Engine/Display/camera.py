@@ -129,14 +129,14 @@ class Camera:
 	def update_actions(self, action_events, dt):
 		action_events = list(action_events)
 		
-		for action in action_events:
-			action_code = action.code
-			if action_code == "CAMERA_MOVE_UP":
+		for event in action_events:
+			action = event.action
+			if action == "CAMERA_MOVE_UP":
 				self.position += (0, 0, 0.1)
-			elif action_code == "CAMERA_MOVE_DOWN":
+			elif action == "CAMERA_MOVE_DOWN":
 				self.position += (0, 0, -0.1)
-			elif action_code == "CAMERA_MOVE_LEFT":
+			elif action == "CAMERA_MOVE_LEFT":
 				self.position += (0, -0.1, 0)
-			elif action_code == "CAMERA_MOVE_RIGHT":
+			elif action == "CAMERA_MOVE_RIGHT":
 				self.position += (0, 0.1, 0)
 		

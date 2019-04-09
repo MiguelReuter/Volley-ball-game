@@ -43,7 +43,7 @@ class InputManager:
 		for (key, key_state) in self.key_action_bind:
 			if self.keys[key] == key_state:
 				action = self.key_action_bind[(key, key_state)]
-				event = pg.event.Event(pg.USEREVENT, {'code': action})
+				event = pg.event.Event(ACTIONEVENT, {'action': action})
 				pg.event.post(event)
 	
 	def _bind_key_to_action(self):
