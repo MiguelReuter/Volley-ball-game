@@ -3,12 +3,17 @@
 import pygame as pg
 from settings import *
 
+from _settings import *
+
+# TODO : rename settings.py or _settings module
 
 class InputManager:
 	# TODO : singleton
 	def __init__(self, game_engine):
+		# TODO : remove reference of self.keys
 		self.game_engine = game_engine
 		self.keys = {k: KeyState.RELEASED for k in KEYS}
+		self.key_action_bind = self._bind_key_to_action()
 		
 	def update(self):
 		# update state
@@ -19,7 +24,8 @@ class InputManager:
 				self.keys[k] = KeyState.RELEASED
 				
 		# detect a state modification (with pygame event)
-		for event in pg.event.get():
+		# only catch KEYUP, KEYDOWN and QUIT events
+		for event in pg.event.get((pg.KEYUP, pg.KEYDOWN, pg.QUIT)):
 			if event.type == pg.QUIT:
 				self.game_engine.request_quit()
 			if event.type == pg.KEYDOWN:
@@ -29,3 +35,23 @@ class InputManager:
 			if event.type == pg.KEYUP:
 				if event.key in KEYS:
 					self.keys[event.key] = KeyState.JUST_RELEASED
+					
+		# generate actions
+		self.generate_actions()
+	
+	def generate_actions(self):
+		for (key, key_state) in self.key_action_bind:
+			if self.keys[key] == key_state:
+				action = self.key_action_bind[(key, key_state)]
+				event = pg.event.Event(pg.USEREVENT, {'code': action})
+				pg.event.post(event)
+	
+	def _bind_key_to_action(self):
+		# TODO : bind action for each connected input device (keyboard, joysticks...)
+		key_action_bind = {}
+		# (key, key_state): action
+		for action in INPUT_PRESET_KEYBOARD:
+			key = INPUT_PRESET_KEYBOARD[action]
+			key_state = INPUT_ACTIONS[action]
+			key_action_bind[(key, key_state)] = action
+		return key_action_bind

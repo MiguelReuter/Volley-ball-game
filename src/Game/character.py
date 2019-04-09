@@ -26,6 +26,20 @@ class Character:
 		if (b_UP or b_DOWN) and (b_LEFT or b_RIGHT):
 			dxyz *= 0.7071  # sqrt(2)
 		self.move_rel(dxyz)
+		
+	def update_actions(self, action_events, dt):
+		action_events = list(action_events)
+		b_up = b_down = b_left = b_right = False
+		
+		for action in action_events:
+			action_code = action.code
+			b_up |= (action_code == "MOVE_UP")
+			b_down |= (action_code == "MOVE_DOWN")
+			b_left |= (action_code == "MOVE_LEFT")
+			b_right |= (action_code == "MOVE_RIGHT")
+			
+		self.move(b_up, b_down, b_left, b_right, dt)
+			
 
 
 
