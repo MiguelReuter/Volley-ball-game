@@ -44,6 +44,8 @@ class Camera:
 		self._fov = tan(radians(self.fov_angle))
 		self._w_vect = Vector3(1, 0, 0)
 		
+		self._process_w_vector()
+		
 		self.surface = Surface((self.w, self.h))
 	
 	@property  # a change of self.position may change self._w_vect
@@ -74,7 +76,6 @@ class Camera:
 		focus_pt = Vector3(self.focus_point)
 		focus_pt.y = self.position.y
 		self._w_vect = (self.position - focus_pt).normalize()
-		print("df")
 	
 	def world_to_cam_3d_coords(self, w_pt):
 		"""
