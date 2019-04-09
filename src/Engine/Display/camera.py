@@ -11,7 +11,8 @@ class Camera:
 	
 	Camera object can move along each world axis (X, Y, Z) and rotate along Y axis.
 	Rotation is automatically compute with self.position and self.focus_point, the 3D point to focus on in world
-	coordinates. 'y' component of focused point is ignored; camera always points in a (XZ) direction.
+	coordinates. 'y' component of focused point is ignored for camera rotation but not for translation ; camera always
+	points in a (XZ) direction.
 	
 	Camera object is defined by :
 		- :var pygame.Vector3 self.position: 3D camera position in world coordinates
@@ -36,14 +37,45 @@ class Camera:
 		self.display_manager = display_manager
 		self.w = w
 		self.h = h
-		self.position = Vector3(position)
-		self.focus_point = Vector3(focus_point)  # y component will be ignored
+		self._position = Vector3(position)
+		self._focus_point = Vector3(focus_point)  # y component will be ignored
 		
 		self.fov_angle = fov_angle
 		self._fov = tan(radians(self.fov_angle))
+		self._w_vect = Vector3(1, 0, 0)
 		
 		self.surface = Surface((self.w, self.h))
+	
+	@property  # a change of self.position may change self._w_vect
+	def position(self):
+		return self._position
+	
+	@position.setter
+	def position(self, value):
+		self._position = value
+		self._process_w_vector()
+	
+	@property # a change of self.focus_point may change self._w_vect
+	def focus_point(self):
+		return self._focus_point
+	
+	@focus_point.setter
+	def focus_point(self, value):
+		self._focus_point = value
+		self._position.y = value.y
+		self._process_w_vector()
+	
+	def _process_w_vector(self):
+		"""
+		Process w vector, normalised vector in (camera position/focus point) direction.
 		
+		:return: None
+		"""
+		focus_pt = Vector3(self.focus_point)
+		focus_pt.y = self.position.y
+		self._w_vect = (self.position - focus_pt).normalize()
+		print("df")
+	
 	def world_to_cam_3d_coords(self, w_pt):
 		"""
 		Return coordinates from a 3D point from world to camera referential.
@@ -59,18 +91,12 @@ class Camera:
 		:return: w_pt in camera coordinates (xc, yc, zc)
 		:rtype pygame.Vector3
 		"""
-		# TODO : process w vector (fc) in other method called when self.position or self.focus_point are changed
-		# w vector in world ref
-		focus_pt = Vector3(self.focus_point)
-		focus_pt.y = self.position.y
-		fc = (self.position - focus_pt).normalize()
-		
 		# translation
 		t_pt = w_pt - self.position
 		
 		# rotation
-		sin_a = fc[2]
-		cos_a = fc[0]
+		sin_a = self._w_vect[2]
+		cos_a = self._w_vect[0]
 		
 		c_pt = Vector3(t_pt[1], sin_a * t_pt[0] - cos_a * t_pt[2], cos_a * t_pt[0] + sin_a * t_pt[2])
 		
