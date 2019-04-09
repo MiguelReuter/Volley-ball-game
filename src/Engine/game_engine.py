@@ -33,10 +33,21 @@ class GameEngine:
 
 	def request_quit(self):
 		self.running = False
-
+		
+	def update_actions(self, action_events, dt):
+		for event in action_events:
+			action = event.action
+			if action == "QUIT":
+				self.running = False
+			elif action == "PAUSE":
+				print(action, "not implemented yet")
+			elif action == "SPACE_TEST":
+				# debug ball position
+				print("ball position :", self.ball.position)
+	
 	def run(self):
 		frame_count = 0
-
+		
 		cam = self.display_manager.camera
 
 		# ball initial velocity
@@ -59,29 +70,13 @@ class GameEngine:
 
 			# KB EVENTS
 			self.input_manager.update()
-			# quit
-			if self.input_manager.keys[pg.K_ESCAPE] == KeyState.PRESSED:
-				self.running = False
-			# move camera
-			if self.input_manager.keys[pg.K_UP] == KeyState.PRESSED:
-				cam.position += (0, 0, 0.1)
-			if self.input_manager.keys[pg.K_DOWN] == KeyState.PRESSED:
-				cam.position += (0, 0, -0.1)
-			if self.input_manager.keys[pg.K_LEFT] == KeyState.PRESSED:
-				cam.position += (0, -0.1, 0)
-			if self.input_manager.keys[pg.K_RIGHT] == KeyState.PRESSED:
-				cam.position += (0, 0.1, 0)
-				
-			# move left player
-			b_up = self.input_manager.keys[pg.K_z] == KeyState.PRESSED
-			b_down = self.input_manager.keys[pg.K_s] == KeyState.PRESSED
-			b_left = self.input_manager.keys[pg.K_q] == KeyState.PRESSED
-			b_right = self.input_manager.keys[pg.K_d] == KeyState.PRESSED
-			self.char1.move(b_up, b_down, b_left, b_right, t2 - t1)
-
-			# debug ball position
-			if self.input_manager.keys[pg.K_SPACE] == KeyState.JUST_PRESSED:
-				print("ball position :", self.ball.position)
+			
+			# TODO : take in account origin of action event (player index for ex.) ?
+			actions_events_queue = pg.event.get(ACTIONEVENT)
+			# UPDATE ACTIONS
+			self.char1.update_actions(actions_events_queue, t2 - t1)
+			cam.update_actions(actions_events_queue, t2 - t1)
+			self.update_actions(actions_events_queue, t2 - t1)
 
 			# manage frame rate
 			t1 = t2

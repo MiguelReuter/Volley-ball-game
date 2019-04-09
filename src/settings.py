@@ -32,3 +32,6 @@ KEYS = (K_z, K_s, K_q, K_d,
         K_ESCAPE,
         K_SPACE,
         K_p)
+
+# events
+ACTIONEVENT = USEREVENT + 1

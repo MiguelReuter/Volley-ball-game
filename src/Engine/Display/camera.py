@@ -126,3 +126,17 @@ class Camera:
 			v = int(floor(-self.h / (2 * self._fov) * pt_3c[1] / pt_3c[2]) + self.h / 2)
 		return u, v
 	
+	def update_actions(self, action_events, dt):
+		action_events = list(action_events)
+		
+		for event in action_events:
+			action = event.action
+			if action == "CAMERA_MOVE_UP":
+				self.position += (0, 0, 0.1)
+			elif action == "CAMERA_MOVE_DOWN":
+				self.position += (0, 0, -0.1)
+			elif action == "CAMERA_MOVE_LEFT":
+				self.position += (0, -0.1, 0)
+			elif action == "CAMERA_MOVE_RIGHT":
+				self.position += (0, 0.1, 0)
+		
