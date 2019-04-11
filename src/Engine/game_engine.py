@@ -15,19 +15,20 @@ from math import log2, pow
 class GameEngine:
 	# TODO : singleton
 	def __init__(self):
-		self.display_manager = DisplayManager(self)
-		self.input_manager = InputManager(self)
+		self.screen = None  # will be set in self._create_window()
 		
 		self.window_mode = WindowMode.FIXED_SIZE
 		self.window_resize_2n = WINDOW_RESIZE_2N
 		self.screen_scale_factor_2n = None
+		self._create_window()
+		
+		self.display_manager = DisplayManager(self, debug_surface_size=self.screen.get_size())
+		self.input_manager = InputManager(self)
 
 		self.running = True
 		self._create()
 	
 	def _create(self):
-		self._create_window()
-		
 		self.ball = Ball((1, 1, 3), 0.5)
 		self.court = Court(10, 6, 1.5, 3)
 		self.char1 = Character((-2, -2, 0))
@@ -98,10 +99,14 @@ class GameEngine:
 			
 			# DISPLAY
 			self.display_manager.update(self.objects)
-			new_surface = self._resize_surface(cam.surface)
-			self.surface.blit(new_surface, (0, 0))
-			self.screen.blit(self.surface, (0, 0))
 			
+			# TODO : move this in DisplayManager + display_manager.surface_wo_scale and display_manager.scaled_surface
+			new_surface = self._resize_surface(self.display_manager.surface)
+			self.surface.blit(new_surface, (0, 0))
+			
+			self.screen.blit(self.surface, (0, 0))
+			self.screen.blit(self.display_manager.debug_surface, (0, 0))
+
 			# update screen
 			pg.display.flip()
 

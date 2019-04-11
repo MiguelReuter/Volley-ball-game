@@ -13,8 +13,8 @@ class Ball(sprite.Sprite):
 		self.position = Vector3(position)
 
 	def draw(self, display_manager):
-		Debug3D.draw_horizontal_ellipse(display_manager.camera, (self.position[0], self.position[1], 0), self.radius)
-		Debug3D.draw_sphere(display_manager.camera, self.position, self.radius)
+		Debug3D.draw_horizontal_ellipse(display_manager, (self.position[0], self.position[1], 0), self.radius)
+		Debug3D.draw_sphere(display_manager, self.position, self.radius)
 
 	def move_rel(self, dxyz):
 		self.position += Vector3(dxyz)

@@ -23,20 +23,16 @@ class Camera:
 		- :var pygame.Surface self.surface: camera screen surface
 		
 	"""
-	def __init__(self, display_manager, position, focus_point, w=800, h=640, fov_angle=60):
+	def __init__(self, display_manager, position, focus_point, fov_angle=60):
 		"""
 		Init object.
 		
 		:param DisplayManager display_manager: Display manager on which camera is attached
 		:param pygame.Vector3 position: 3D position of camera in world coordinates
 		:param pygame.Vector3 focus_point: 3D point in which camera focus on
-		:param int w: pixel width of camera screen
-		:param int h: pixel height of camera screen
 		:param float fov_angle: angle in degrees of camera FOV
 		"""
 		self.display_manager = display_manager
-		self.w = w
-		self.h = h
 		self._position = Vector3(position)
 		self._focus_point = Vector3(focus_point)  # y component will be ignored
 		
@@ -45,8 +41,6 @@ class Camera:
 		self._w_vect = Vector3(1, 0, 0)
 		
 		self._process_w_vector()
-		
-		self.surface = Surface((self.w, self.h))
 	
 	@property  # a change of self.position may change self._w_vect
 	def position(self):
@@ -103,29 +97,31 @@ class Camera:
 		
 		return c_pt
 		
-	def world_to_pixel_coords(self, pt_3d):
+	def world_to_pixel_coords(self, pt_3d, screen_size):
 		"""
 		Return pixel coordinates from a 3D world point.
 		
 		From a 3D point in world coordinates, process and return pixel coordinates.
 		Pixel coordinates/camera-screen emplacement :
-			- (0, 0)        : top-left corner
-			- (self.w, 0)   : top-right corner
-			- (0, self.h)   : bottom-left corner
+			- (0, 0)                : top-left corner
+			- (screen_size[0], 0)   : top-right corner
+			- (0, screen_size[1])   : bottom-left corner
 		
 		:param pygame.Vector3 pt_3d: 3D world point
+		:param tuple(int, int) screen_size: size in pixel of desired camera screen
 		:return: (u, v) camera-screen coordinates
 		:rtype: tuple(int, int)
 		"""
+		w, h = screen_size
 		u, v = 0, 0
 		
 		pt_3c = self.world_to_cam_3d_coords(pt_3d)
 		
 		if pt_3c[2] != 0:  # if point is distinct from camera center
-			u = int(floor(-self.w / (2 * self._fov) * pt_3c[0] / pt_3c[2]) + self.w / 2)
-			v = int(floor(-self.h / (2 * self._fov) * pt_3c[1] / pt_3c[2]) + self.h / 2)
+			u = int(floor((-w / (2 * self._fov) * pt_3c[0] / pt_3c[2]) / (w / max(w, h))) + w / 2)
+			v = int(floor((-h / (2 * self._fov) * pt_3c[1] / pt_3c[2]) / (h / max(w, h))) + h / 2)
 		return u, v
-	
+		
 	def update_actions(self, action_events, dt):
 		action_events = list(action_events)
 		
