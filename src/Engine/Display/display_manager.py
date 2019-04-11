@@ -28,21 +28,22 @@ class DisplayManager:
 	
 	def _create_window(self):
 		w, h = NOMINAL_RESOLUTION
-		if self.window_mode == WindowMode.FIXED_SIZE:
+		
+		fl = pg.RESIZABLE if self.window_mode == WindowMode.RESIZABLE else 0
+		
+		if self.window_mode == WindowMode.FIXED_SIZE or self.window_mode == WindowMode.RESIZABLE:
 			if not self.window_resize_2n:
 				pass
 			else:
 				self.screen_scale_factor_2n = self._process_screen_factor_scale()
 				w = int(NOMINAL_RESOLUTION[0] * pow(2, self.screen_scale_factor_2n))
 				h = int(NOMINAL_RESOLUTION[1] * pow(2, self.screen_scale_factor_2n))
-		elif self.window_mode == WindowMode.RESIZABLE:
-			# TODO : to implement
-			print(self.window_mode, " mode not implemented")
+				
 		elif self.window_mode == WindowMode.FULL_SCREEN:
 			# TODO : to implement
 			print(self.window_mode, " mode not implemented")
 		
-		self.screen = pg.display.set_mode((w, h))
+		self.screen = pg.display.set_mode((w, h), flags=fl)
 		self.scaled_surface = pg.Surface((w, h))
 		self.unscaled_surface = pg.Surface(NOMINAL_RESOLUTION)
 		
@@ -57,6 +58,19 @@ class DisplayManager:
 				new_size = [new_size[i] * 2 for i in (0, 1)]
 				new_surface = pg.transform.scale2x(new_surface)
 			return new_surface
+		if self.window_mode == WindowMode.RESIZABLE:
+			new_size = self.scaled_surface.get_size()
+			for event in pg.event.get(pg.VIDEORESIZE):
+				new_screen_size = event.size
+				f_w, f_h = tuple(new_screen_size[i] / surface.get_size()[i] for i in (0, 1))
+				f = min(f_w, f_h)
+				self.screen = pg.Surface(new_screen_size)
+				new_size = tuple(int(f * surface.get_size()[i]) for i in (0, 1))
+				self.scaled_surface = pg.Surface(new_size)
+				
+			self.debug_surface = pg.transform.scale(self.debug_surface, (new_size))
+			return pg.transform.smoothscale(surface, new_size)
+		
 		return surface
 	
 	def _process_screen_factor_scale(self):
@@ -70,6 +84,7 @@ class DisplayManager:
 		return (0, 0)
 	
 	def update(self, objects):
+		print("---")
 		self.screen.fill((50, 50, 0))
 		self.unscaled_surface.fill((0, 0, 50))
 		self.debug_surface.fill((0, 0, 0))
@@ -79,6 +94,11 @@ class DisplayManager:
 		# resize
 		self.scaled_surface = self._resize_surface(self.unscaled_surface)
 		
+		print("unscaled :", self.unscaled_surface.get_size())
+		print("scaled :", self.scaled_surface.get_size())
+		print("debug :", self.debug_surface.get_size())
+		print("screen :", self.screen.get_size())
+
 		self.screen.blit(self.scaled_surface, self._get_blit_position(self.screen.get_size(), self.scaled_surface.get_size()))
 		self.screen.blit(self.debug_surface, self._get_blit_position(self.screen.get_size(), self.debug_surface.get_size()))
 		# update screen
