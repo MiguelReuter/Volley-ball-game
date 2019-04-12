@@ -28,6 +28,9 @@ class GameEngine:
 		self.char2 = Character((2, 2, 0))
 		self.objects = [self.court, self.ball, self.char1, self.char2]
 
+		pg.event.set_blocked([i for i in range(pg.NUMEVENTS)])
+		pg.event.set_allowed([pg.KEYDOWN, pg.KEYUP, pg.QUIT, pg.VIDEORESIZE, ACTIONEVENT])
+
 	def request_quit(self):
 		self.running = False
 		
@@ -63,7 +66,6 @@ class GameEngine:
 			self.input_manager.update()
 			# TODO : take in account origin of action event (player index for ex.) ?
 			actions_events_queue = pg.event.get(ACTIONEVENT)
-			
 			# UPDATE ACTIONS
 			self.char1.update_actions(actions_events_queue, t2 - t1)
 			cam.update_actions(actions_events_queue, t2 - t1)
