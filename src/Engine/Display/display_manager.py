@@ -90,7 +90,16 @@ class DisplayManager:
 		f_h = int(log2(pg.display.Info().current_h / NOMINAL_RESOLUTION[1]))
 		return min(f_w, f_h)
 	
-	def _get_blit_position(self, size_1, size_2):
+	@staticmethod
+	def _get_position_to_blit_centered_surfaces(size_1, size_2):
+		"""
+		Get position to draw a centered surface onto another.
+		
+		:param tuple(int, int) size_1: size of surface to draw on
+		:param tuple(int, int) size_2: size of surface to draw
+		:return: left-top corner position of surface to draw on
+		:rtype tuple(int, int):
+		"""
 		if size_1[0] >= size_2[0] and size_1[1] >= size_2[1]:
 			return tuple(int(size_1[i] / 2 - size_2[i] / 2) for i in (0, 1))
 		return (0, 0)
@@ -104,8 +113,8 @@ class DisplayManager:
 		
 		self.resize_display()
 		
-		self.screen.blit(self.scaled_surface, self._get_blit_position(self.screen.get_size(), self.scaled_surface.get_size()))
-		self.screen.blit(self.debug_surface, self._get_blit_position(self.screen.get_size(), self.debug_surface.get_size()))
+		self.screen.blit(self.scaled_surface, self._get_position_to_blit_centered_surfaces(self.screen.get_size(), self.scaled_surface.get_size()))
+		self.screen.blit(self.debug_surface, self._get_position_to_blit_centered_surfaces(self.screen.get_size(), self.debug_surface.get_size()))
 		# update screen
 		pg.display.flip()
 			
