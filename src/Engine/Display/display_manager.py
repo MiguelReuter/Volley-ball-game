@@ -25,27 +25,34 @@ class DisplayManager:
 		self.camera = Camera(self, CAMERA_POS, FOCUS_POINT, FOV_ANGLE)
 
 	def _create_window(self):
-		w, h = NOMINAL_RESOLUTION
+		scaled_size = NOMINAL_RESOLUTION
+		screen_size = NOMINAL_RESOLUTION
+		fl = 0
+		
 		if self.window_mode == WindowMode.FIXED_SIZE or self.window_mode == WindowMode.RESIZABLE:
+			fl = pg.RESIZABLE if self.window_mode == WindowMode.RESIZABLE else 0
 			if not self.window_resize_2n:
 				pass
 			else:
 				self.screen_scale_factor_2n = self._process_screen_factor_scale()
-				w = int(w * pow(2, self.screen_scale_factor_2n))
-				h = int(h * pow(2, self.screen_scale_factor_2n))
+				scaled_size = tuple(int(NOMINAL_RESOLUTION[i] * pow(2, self.screen_scale_factor_2n)) for i in (0, 1))
+				screen_size = scaled_size
 				
 		elif self.window_mode == WindowMode.FULL_SCREEN:
-			# TODO : to implement
-			print(self.window_mode, " mode not implemented")
+			fl = pg.FULLSCREEN
+			screen_size = pg.display.Info().current_w, pg.display.Info().current_h
+			print(screen_size)
+			
+			f_w, f_h = tuple(screen_size[i] / NOMINAL_RESOLUTION[i] for i in (0, 1))
+			f = min(f_w, f_h)
+			scaled_size = tuple(int(f * NOMINAL_RESOLUTION[i]) for i in (0, 1))
 		
-		self.scaled_surface = pg.Surface((w, h))
 		self.unscaled_surface = pg.Surface(NOMINAL_RESOLUTION)
-		self.debug_surface = pg.Surface((w, h))
+		self.scaled_surface = pg.Surface(scaled_size)
+		self.debug_surface = pg.Surface(scaled_size)
 		self.debug_surface.set_colorkey((0, 0, 0))
 		
-		fl = pg.RESIZABLE if self.window_mode == WindowMode.RESIZABLE else 0
-		self.screen = pg.display.set_mode((w, h), flags=fl)
-
+		self.screen = pg.display.set_mode(screen_size, flags=fl)
 		pg.display.set_caption(CAPTION_TITLE)
 		
 	def resize_display(self):
@@ -72,6 +79,9 @@ class DisplayManager:
 			# TODO : use smoothscale instead of scale ?
 			self.scaled_surface = pg.transform.scale(self.unscaled_surface, scaled_size)
 			self.debug_surface = pg.transform.scale(self.debug_surface, scaled_size)
+		elif self.window_mode == WindowMode.FULL_SCREEN:
+			scaled_size = self.scaled_surface.get_size()
+			self.scaled_surface = pg.transform.scale(self.unscaled_surface, scaled_size)
 		else:
 			self.scaled_surface = self.unscaled_surface.copy()
 	
