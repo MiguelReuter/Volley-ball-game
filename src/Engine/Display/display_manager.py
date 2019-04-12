@@ -14,6 +14,7 @@ class DisplayManager:
 		self.screen = None
 		self.unscaled_surface = None
 		self.scaled_surface = None
+		self.debug_surface = None
 
 		self.window_mode = WINDOW_MODE
 		self.window_resize_2n = WINDOW_RESIZE_2N
@@ -22,56 +23,57 @@ class DisplayManager:
 		
 		self.game_engine = game_engine
 		self.camera = Camera(self, CAMERA_POS, FOCUS_POINT, FOV_ANGLE)
-		
-		self.debug_surface = pg.Surface(self.screen.get_size())
-		self.debug_surface.set_colorkey((0, 0, 0))
-	
+
 	def _create_window(self):
 		w, h = NOMINAL_RESOLUTION
-		
-		fl = pg.RESIZABLE if self.window_mode == WindowMode.RESIZABLE else 0
-		
 		if self.window_mode == WindowMode.FIXED_SIZE or self.window_mode == WindowMode.RESIZABLE:
 			if not self.window_resize_2n:
 				pass
 			else:
 				self.screen_scale_factor_2n = self._process_screen_factor_scale()
-				w = int(NOMINAL_RESOLUTION[0] * pow(2, self.screen_scale_factor_2n))
-				h = int(NOMINAL_RESOLUTION[1] * pow(2, self.screen_scale_factor_2n))
+				w = int(w * pow(2, self.screen_scale_factor_2n))
+				h = int(h * pow(2, self.screen_scale_factor_2n))
 				
 		elif self.window_mode == WindowMode.FULL_SCREEN:
 			# TODO : to implement
 			print(self.window_mode, " mode not implemented")
 		
-		self.screen = pg.display.set_mode((w, h), flags=fl)
 		self.scaled_surface = pg.Surface((w, h))
 		self.unscaled_surface = pg.Surface(NOMINAL_RESOLUTION)
+		self.debug_surface = pg.Surface((w, h))
+		self.debug_surface.set_colorkey((0, 0, 0))
 		
+		fl = pg.RESIZABLE if self.window_mode == WindowMode.RESIZABLE else 0
+		self.screen = pg.display.set_mode((w, h), flags=fl)
+
 		pg.display.set_caption(CAPTION_TITLE)
 		
-	def _resize_surface(self, surface):
+	def resize_display(self):
+		surface = self.unscaled_surface
 		if self.window_mode == WindowMode.FIXED_SIZE and self.window_resize_2n:
 			new_size = list(surface.get_size())
 			new_surface = pg.Surface(new_size)
 			new_surface.blit(surface, (0, 0))
 			for _ in range(self.screen_scale_factor_2n):
 				new_size = [new_size[i] * 2 for i in (0, 1)]
-				new_surface = pg.transform.scale2x(new_surface)
-			return new_surface
-		if self.window_mode == WindowMode.RESIZABLE:
-			new_size = self.scaled_surface.get_size()
+				self.scaled_surface = pg.transform.scale2x(new_surface)
+				
+		elif self.window_mode == WindowMode.RESIZABLE:
+			scaled_size = self.scaled_surface.get_size()
 			for event in pg.event.get(pg.VIDEORESIZE):
 				new_screen_size = event.size
-				f_w, f_h = tuple(new_screen_size[i] / surface.get_size()[i] for i in (0, 1))
-				f = min(f_w, f_h)
-				self.screen = pg.Surface(new_screen_size)
-				new_size = tuple(int(f * surface.get_size()[i]) for i in (0, 1))
-				self.scaled_surface = pg.Surface(new_size)
+				self.screen = pg.display.set_mode(new_screen_size, flags=pg.RESIZABLE)
 				
-			self.debug_surface = pg.transform.scale(self.debug_surface, (new_size))
-			return pg.transform.smoothscale(surface, new_size)
-		
-		return surface
+				# process size for displayed surfaces
+				f_w, f_h = tuple(new_screen_size[i] / self.unscaled_surface.get_size()[i] for i in (0, 1))
+				f = min(f_w, f_h)
+				scaled_size = tuple(int(f * self.unscaled_surface.get_size()[i]) for i in (0, 1))
+				
+			# TODO : use smoothscale instead of scale ?
+			self.scaled_surface = pg.transform.scale(self.unscaled_surface, scaled_size)
+			self.debug_surface = pg.transform.scale(self.debug_surface, scaled_size)
+		else:
+			self.scaled_surface = self.unscaled_surface.copy()
 	
 	def _process_screen_factor_scale(self):
 		f_w = int(log2(pg.display.Info().current_w / NOMINAL_RESOLUTION[0]))
@@ -84,21 +86,14 @@ class DisplayManager:
 		return (0, 0)
 	
 	def update(self, objects):
-		print("---")
 		self.screen.fill((50, 50, 0))
 		self.unscaled_surface.fill((0, 0, 50))
 		self.debug_surface.fill((0, 0, 0))
 		for obj in objects:
 			obj.draw(self)
 		
-		# resize
-		self.scaled_surface = self._resize_surface(self.unscaled_surface)
+		self.resize_display()
 		
-		print("unscaled :", self.unscaled_surface.get_size())
-		print("scaled :", self.scaled_surface.get_size())
-		print("debug :", self.debug_surface.get_size())
-		print("screen :", self.screen.get_size())
-
 		self.screen.blit(self.scaled_surface, self._get_blit_position(self.screen.get_size(), self.scaled_surface.get_size()))
 		self.screen.blit(self.debug_surface, self._get_blit_position(self.screen.get_size(), self.debug_surface.get_size()))
 		# update screen

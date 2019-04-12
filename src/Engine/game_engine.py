@@ -42,6 +42,11 @@ class GameEngine:
 			elif action == "PAUSE":
 				print(action, "not implemented yet")
 			elif action == "SPACE_TEST":
+				# debug window resize
+				size = (1200, 800)
+				resize_event = pg.event.Event(pg.VIDEORESIZE, {"size": size, 'w': size[0], 'h': size[1]})
+				pg.event.post(resize_event)
+				
 				# debug ball position
 				print("ball position :", self.ball.position)
 	
