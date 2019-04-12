@@ -41,7 +41,7 @@ class Camera:
 		self._focus_point = Vector3(focus_point)  # y component will be ignored
 		
 		self.fov_angle = fov_angle
-		self._fov = tan(radians(self.fov_angle))
+		self._fov = tan(radians(self.fov_angle / 2))
 		self._w_vect = Vector3(1, 0, 0)
 		
 		self._process_w_vector()
