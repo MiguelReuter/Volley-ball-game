@@ -9,7 +9,7 @@ from Game.ball import Ball
 from Game.court import Court
 from Game.character import Character
 
-from Engine.utils import Collisions
+from Engine.Collisions import *
 
 import pygame as pg
 
@@ -19,7 +19,7 @@ class GameEngine:
 	def __init__(self):
 		self.display_manager = DisplayManager(self)
 		self.input_manager = InputManager(self)
-
+		self.collisions_manager = CollisionsManager(self)
 		self.running = True
 		self._create()
 	
@@ -69,20 +69,32 @@ class GameEngine:
 		cam = self.display_manager.camera
 
 		# ball initial velocity
-		self.ball.velocity += (0, -2, 5)
+		self.ball.velocity += (0, -5, 2)
 
 		# for frame rate
 		t2 = pg.time.get_ticks()
 		t1 = t2
 		t0 = t2  # time of first frame of the game
-
 		while self.running:
 			# PHYSICS
 			self.ball.update_physics(t2-t1)
 			# COLLISIONS
-			if Collisions.are_sphere_and_AABB_colliding(self.ball.position, self.ball.radius,
-			                                            self.char1.position, Vector3(self.char1.w, self.char1.w, self.char1.h)):
-				print("Collisions")
+			self.collisions_manager.update(None, None, None)
+			# TODO : refactor in CollisionsManager
+			if are_sphere_and_AABB_colliding(self.ball.collider, self.char1.collider):
+				self.ball.velocity = pg.Vector3(0, 0, 10)
+
+			# TEST !
+			if self.ball.previous_position[1] * self.ball.position[1] < 0:
+				dy = self.ball.position[1] - self.ball.previous_position[1]
+				dy_center = self.ball.previous_position[1] / dy
+				dxyz = dy_center * (self.ball.position - self.ball.previous_position).normalize()
+				centered_ball_collider = SphereCollider(self.ball.previous_position + dxyz, self.ball.radius)
+				self.ball.is_colliding_net = are_sphere_and_AABB_colliding(centered_ball_collider,
+				                                                                      self.court.collider)
+			else:
+				self.ball.is_colliding_net = are_sphere_and_AABB_colliding(self.ball.collider,
+				                                                                      self.court.collider)
 
 			# KB EVENTS
 			self.input_manager.update()
