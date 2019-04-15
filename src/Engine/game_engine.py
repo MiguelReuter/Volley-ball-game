@@ -9,6 +9,8 @@ from Game.ball import Ball
 from Game.court import Court
 from Game.character import Character
 
+from Engine.utils import Collisions
+
 import pygame as pg
 
 
@@ -77,12 +79,17 @@ class GameEngine:
 		while self.running:
 			# PHYSICS
 			self.ball.update_physics(t2-t1)
-			
+			# COLLISIONS
+			if Collisions.are_sphere_and_AABB_colliding(self.ball.position, self.ball.radius,
+			                                            self.char1.position, Vector3(self.char1.w, self.char1.w, self.char1.h)):
+				print("Collisions")
+
 			# KB EVENTS
 			self.input_manager.update()
 			# TODO : take in account origin of action event (player index for ex.) ?
 			actions_events_queue = pg.event.get(ACTIONEVENT)
 			# UPDATE ACTIONS
+			# TODO : iterator for objects who have update_actions method
 			self.char1.update_actions(actions_events_queue, t2 - t1)
 			cam.update_actions(actions_events_queue, t2 - t1)
 			self.update_actions(actions_events_queue, t2 - t1)

@@ -4,24 +4,34 @@ from Engine.utils import Collisions
 
 
 def test_spheres_collisions():
-	assert Collisions.are_spheres_colliding(Vector3(0, 0, 0), 1, Vector3(2, 0, 0), 1) is True
-	assert Collisions.are_spheres_colliding(Vector3(0, 0, 0), 1, Vector3(2.001, 0, 0), 1) is False
-	assert Collisions.are_spheres_colliding(Vector3(0, 0, 0), 1, Vector3(2, 0, 0), 0.5) is False
+	sphere_a = Collisions.SphereCollider(Vector3(0, 0, 0), 1)
+	sphere_b = Collisions.SphereCollider(Vector3(2, 0, 0), 1)
+
+	assert Collisions.are_spheres_colliding(sphere_a, sphere_b) is True
+	
+	sphere_b.center = Vector3(2.001, 0, 0)
+	assert Collisions.are_spheres_colliding(sphere_a, sphere_b) is False
+	
+	sphere_b.center = Vector3(2, 0, 0)
+	sphere_b.radius = 0.5
+	assert Collisions.are_spheres_colliding(sphere_a, sphere_b) is False
+
 
 def test_sphere_and_aabb_collisions():
-	sp_center = Vector3(0, 0, 0)
-	sp_r = 1
-	aabb_size3 = Vector3(2, 2, 2)
+	sphere = Collisions.SphereCollider(Vector3(0, 0, 0), 1)
+	aabb = Collisions.AABBCollider(Vector3(2, 0, 0), Vector3(2, 2, 2))
 	
-	assert Collisions.are_sphere_and_AABB_colliding(sp_center, sp_r, Vector3(2, 0, 0), aabb_size3) is True
-	assert Collisions.are_sphere_and_AABB_colliding(sp_center, sp_r, Vector3(2.001, 0, 0), aabb_size3) is False
+	assert Collisions.are_sphere_and_AABB_colliding(sphere, aabb) is True
+	
+	aabb.center = Vector3(2.001, 0, 0)
+	assert Collisions.are_sphere_and_AABB_colliding(sphere, aabb) is False
 	
 	
 def test_aabb_collisions():
-	center_a = Vector3(0, 0, 0)
-	center_b = Vector3(2, 0, 0)
-	size3_a = Vector3(2, 2, 2)
-	size3_b = Vector3(2, 2, 2)
+	aabb_a = Collisions.AABBCollider(Vector3(0, 0, 0), Vector3(2, 2, 2))
+	aabb_b = Collisions.AABBCollider(Vector3(2, 0, 0), Vector3(2, 2, 2))
 	
-	assert Collisions.are_AABB_colliding(center_a, size3_a, center_b, size3_b) is True
-	assert Collisions.are_AABB_colliding(center_a, size3_a, center_b+(0.1, 0, 0), size3_b) is False
+	assert Collisions.are_AABB_colliding(aabb_a, aabb_b) is True
+	
+	aabb_b.center = Vector3(2.1, 0, 0)
+	assert Collisions.are_AABB_colliding(aabb_a, aabb_b) is False
