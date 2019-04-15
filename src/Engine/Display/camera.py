@@ -123,6 +123,7 @@ class Camera:
 		return u, v
 		
 	def update_actions(self, action_events, dt):
+		# TODO : derive current class from another with abstract update_actions method
 		action_events = list(action_events)
 		
 		for event in action_events:

@@ -27,11 +27,17 @@ class GameEngine:
 		self.char1 = Character((-2, -2, 0))
 		self.char2 = Character((2, 2, 0))
 		self.objects = [self.court, self.ball, self.char1, self.char2]
-
+		
+		# allowed pygame events
 		pg.event.set_blocked([i for i in range(pg.NUMEVENTS)])
 		pg.event.set_allowed([pg.KEYDOWN, pg.KEYUP, pg.QUIT, pg.VIDEORESIZE, ACTIONEVENT])
 
 	def request_quit(self):
+		"""
+		Call this method to quit main loop and game.
+		
+		:return: None
+		"""
 		self.running = False
 		
 	def update_actions(self, action_events, dt):
@@ -51,6 +57,11 @@ class GameEngine:
 				print("ball position :", self.ball.position)
 	
 	def run(self):
+		"""
+		Main loop, call different manager (input, display...) etc.
+		
+		:return: None
+		"""
 		frame_count = 0
 		
 		cam = self.display_manager.camera

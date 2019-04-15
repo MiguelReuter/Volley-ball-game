@@ -16,6 +16,11 @@ class InputManager:
 		self.key_action_bind = self._bind_key_to_action()
 		
 	def update(self):
+		"""
+		Update keys state.
+		
+		:return: None
+		"""
 		# update state
 		for k in self.keys:
 			if self.keys[k] == KeyState.JUST_PRESSED:
@@ -40,6 +45,11 @@ class InputManager:
 		self.generate_actions()
 	
 	def generate_actions(self):
+		"""
+		Generate action events from input states.
+		
+		:return: None
+		"""
 		for (key, key_state) in self.key_action_bind:
 			if self.keys[key] == key_state:
 				action = self.key_action_bind[(key, key_state)]
@@ -47,6 +57,16 @@ class InputManager:
 				pg.event.post(event)
 	
 	def _bind_key_to_action(self):
+		"""
+		Bind actions and keys.
+		
+		Link between keys and actions are set in:
+		- input_actions.py
+		- input_presets.py
+		
+		:return: None
+		"""
+		
 		# TODO : bind action for each connected input device (keyboard, joysticks...)
 		key_action_bind = {}
 		# (key, key_state): action
