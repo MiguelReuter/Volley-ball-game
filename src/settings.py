@@ -39,7 +39,7 @@ NOMINAL_FRAME_RATE = 30
 
 # CAMERA
 CAMERA_POS = (9, 0, 3)
-FOCUS_POINT = (0, 0, 3)  # y component is ignored
+FOCUS_POINT = (0, 0, 3)
 FOV_ANGLE = 60.
 
 

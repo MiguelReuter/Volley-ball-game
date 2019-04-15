@@ -63,7 +63,7 @@ class DisplayManager:
 		self.screen = pg.display.set_mode(screen_size, flags=fl)
 		pg.display.set_caption(CAPTION_TITLE)
 		
-	def resize_display(self):
+	def _resize_display(self):
 		"""
 		Resize display for each frame.
 		
@@ -124,7 +124,7 @@ class DisplayManager:
 		for obj in objects:
 			obj.draw(self)
 		
-		self.resize_display()
+		self._resize_display()
 		
 		self.screen.blit(self.scaled_surface, self._get_position_to_blit_centered_surfaces(self.screen.get_size(), self.scaled_surface.get_size()))
 		self.screen.blit(self.debug_surface, self._get_position_to_blit_centered_surfaces(self.screen.get_size(), self.debug_surface.get_size()))
@@ -135,7 +135,14 @@ class DisplayManager:
 	def _get_position_to_blit_centered_surfaces(main_surface_size, surface_to_draw_size):
 		"""
 		Get position to draw a centered surface onto another.
-
+		
+		example 1 :
+			>>> DisplayManager._get_position_to_blit_centered_surfaces((50, 100), (10, 10))
+			(20, 45)
+		example 2 :
+			>>> DisplayManager._get_position_to_blit_centered_surfaces((50, 100), (1000, 1000))
+			(0, 0)
+			
 		:param tuple(int, int) main_surface_size: size of main surface to draw on
 		:param tuple(int, int) surface_to_draw_size: size of surface to draw
 		:return: left-top corner position of surface to draw on
