@@ -51,13 +51,8 @@ class GameEngine:
 			elif action == "PAUSE":
 				print(action, "not implemented yet")
 			elif action == "SPACE_TEST":
-				# debug window resize
-				size = (1200, 800)
-				resize_event = pg.event.Event(pg.VIDEORESIZE, {"size": size, 'w': size[0], 'h': size[1]})
-				pg.event.post(resize_event)
-				
-				# debug ball position
-				print("ball position :", self.ball.position)
+				self.ball.position = pg.Vector3(-2, 1, 3)
+				self.ball.velocity = pg.Vector3(0, -4, 4)
 	
 	def update_ball_throwing(self):
 		for ev in pg.event.get(THROWEVENT):
@@ -74,7 +69,7 @@ class GameEngine:
 		cam = self.display_manager.camera
 
 		# ball initial velocity
-		self.ball.velocity += (0, -4, 4)
+		self.ball.velocity += (0, -4, 6)
 
 		# for frame rate
 		t2 = pg.time.get_ticks()

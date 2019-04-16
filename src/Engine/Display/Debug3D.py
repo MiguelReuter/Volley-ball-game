@@ -66,8 +66,9 @@ def draw_horizontal_ellipse(display_manager, center, radius):
 		r_pos[1] += r_h
 		r_h = -r_h
 	rect = Rect(r_pos, (r_w, r_h))
-
-	draw.ellipse(display_manager.debug_surface, DBG_COLOR_HOR_ELLIPSE, rect)
+	
+	if r_w >= r_h:
+		draw.ellipse(display_manager.debug_surface, DBG_COLOR_HOR_ELLIPSE, rect)
 	draw.polygon(display_manager.debug_surface, DBG_COLOR_SHADOW_HOR_ELLIPSE_TRAPEZE, [t_l, t_r, b_r, b_l], 1)
 
 

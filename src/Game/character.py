@@ -16,6 +16,7 @@ class Character:
 		                             Vector3(w, w, h))
 		self.is_colliding_ball = False
 		self.max_velocity = max_velocity  # m/s
+		self.direction = Vector2(0, 0)
 
 	@property
 	def position(self):
@@ -34,7 +35,8 @@ class Character:
 		self.position += Vector3(dxyz)
 
 	def move(self, b_UP, b_DOWN, b_LEFT, b_RIGHT, dt):
-		dxyz = 0.001 * dt * Vector3(b_DOWN - b_UP, b_RIGHT - b_LEFT, 0) * self.max_velocity
+		self.direction = Vector3(b_DOWN - b_UP, b_RIGHT - b_LEFT, 0)
+		dxyz = 0.001 * dt * self.direction * self.max_velocity
 		# normalize
 		if (b_UP or b_DOWN) and (b_LEFT or b_RIGHT):
 			dxyz *= 0.7071  # sqrt(2)
@@ -44,6 +46,7 @@ class Character:
 		action_events = list(action_events)
 		b_up = b_down = b_left = b_right = False
 		
+		throw_ball = False
 		for act_event in action_events:
 			action = act_event.action
 			# move
@@ -53,11 +56,15 @@ class Character:
 			b_right |= (action == "MOVE_RIGHT")
 			# throw
 			if action == "THROW_BALL" and self.is_colliding_ball:
-				vel = Vector3(0, 4, 4)
-				event.post(event.Event(THROWEVENT, {"velocity": vel}))
-			
-			
+				throw_ball = True
+				
 		self.move(b_up, b_down, b_left, b_right, dt)
+		
+		if throw_ball:
+			# foo values
+			dir = self.direction + Vector3(0, 0, 1)
+			vel = 7 * dir
+			event.post(event.Event(THROWEVENT, {"velocity": vel}))
 			
 
 
