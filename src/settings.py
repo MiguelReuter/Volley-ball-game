@@ -52,6 +52,7 @@ class KeyState(Enum):
 
 # keyboard keys used in game (other keys are ignored)
 KEYS = (K_z, K_s, K_q, K_d,
+        K_j,
         K_UP, K_DOWN, K_LEFT, K_RIGHT,
         K_ESCAPE,
         K_SPACE,
@@ -59,3 +60,4 @@ KEYS = (K_z, K_s, K_q, K_d,
 
 # events
 ACTIONEVENT = USEREVENT + 1
+THROWEVENT = USEREVENT + 2

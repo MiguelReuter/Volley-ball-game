@@ -34,13 +34,7 @@ class CollisionsManager:
 		# ball / character's collision
 		ball.is_colliding_character = False
 		for char in characters_list:
-			if are_sphere_and_AABB_colliding(ball.collider, char.collider):
-				ball.is_colliding_character = True
-				char.is_colliding_ball = True
-				ball.velocity = pg.Vector3(0, 0, 10)
-			else:
-				ball.is_colliding_character = False
-				
+			char.is_colliding_ball = are_sphere_and_AABB_colliding(ball.collider, char.collider)
 			
-		
-		
+			if char.is_colliding_ball:
+				ball.is_colliding_character = True

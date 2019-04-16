@@ -3,6 +3,7 @@
 from pygame import *
 from Engine.Display import Debug3D
 from Engine.Collisions import AABBCollider
+from settings import *
 
 
 class Character:
@@ -43,12 +44,18 @@ class Character:
 		action_events = list(action_events)
 		b_up = b_down = b_left = b_right = False
 		
-		for event in action_events:
-			action = event.action
+		for act_event in action_events:
+			action = act_event.action
+			# move
 			b_up |= (action == "MOVE_UP")
 			b_down |= (action == "MOVE_DOWN")
 			b_left |= (action == "MOVE_LEFT")
 			b_right |= (action == "MOVE_RIGHT")
+			# throw
+			if action == "THROW_BALL" and self.is_colliding_ball:
+				vel = Vector3(0, 4, 4)
+				event.post(event.Event(THROWEVENT, {"velocity": vel}))
+			
 			
 		self.move(b_up, b_down, b_left, b_right, dt)
 			

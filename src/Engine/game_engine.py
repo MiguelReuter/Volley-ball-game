@@ -24,15 +24,16 @@ class GameEngine:
 		self._create()
 	
 	def _create(self):
-		self.ball = Ball((1, 1, 3), 0.5)
+		self.ball = Ball((-2, 1, 3), 0.5)
 		self.court = Court(10, 6, 1.5, 3)
-		self.char1 = Character((-2, -2, 0))
+		self.char1 = Character((-2, -3.5, 0))
 		self.char2 = Character((2, 2, 0))
 		self.objects = [self.court, self.ball, self.char1, self.char2]
 		
 		# allowed pygame events
 		pg.event.set_blocked([i for i in range(pg.NUMEVENTS)])
-		pg.event.set_allowed([pg.KEYDOWN, pg.KEYUP, pg.QUIT, pg.VIDEORESIZE, ACTIONEVENT])
+		pg.event.set_allowed([pg.KEYDOWN, pg.KEYUP, pg.QUIT, pg.VIDEORESIZE,
+		                      ACTIONEVENT, THROWEVENT])
 
 	def request_quit(self):
 		"""
@@ -58,6 +59,10 @@ class GameEngine:
 				# debug ball position
 				print("ball position :", self.ball.position)
 	
+	def update_ball_throwing(self):
+		for ev in pg.event.get(THROWEVENT):
+			self.ball.velocity = ev.velocity
+		
 	def run(self):
 		"""
 		Main loop, call different manager (input, display...) etc.
@@ -69,7 +74,7 @@ class GameEngine:
 		cam = self.display_manager.camera
 
 		# ball initial velocity
-		self.ball.velocity += (0, -2, 2)
+		self.ball.velocity += (0, -4, 4)
 
 		# for frame rate
 		t2 = pg.time.get_ticks()
@@ -91,6 +96,9 @@ class GameEngine:
 			self.char1.update_actions(actions_events_queue, t2 - t1)
 			cam.update_actions(actions_events_queue, t2 - t1)
 			self.update_actions(actions_events_queue, t2 - t1)
+			
+			# throw event
+			self.update_ball_throwing()
 			
 			# DISPLAY
 			self.display_manager.update(self.objects)
