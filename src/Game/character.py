@@ -2,20 +2,32 @@
 
 from pygame import *
 from Engine.Display import Debug3D
+from Engine.Collisions import AABBCollider
 
 
 class Character:
-	def __init__(self, position, w=0.4, h=1.5, max_velocity=4):
-		self.position = Vector3(position)
+	def __init__(self, position, w=0.4, h=1, max_velocity=4):
+		self._position = Vector3(position)
 		self.w = w
 		self.h = h
+		self.collider_relative_position = Vector3(0, 0, h/2)
+		self.collider = AABBCollider(self._position + self.collider_relative_position,
+		                             Vector3(w, w, h))
+		self.is_colliding_ball = False
 		self.max_velocity = max_velocity  # m/s
 
+	@property
+	def position(self):
+		return self._position
+
+	@position.setter
+	def position(self, value):
+		self._position = value
+		self.collider.center = self._position + self.collider_relative_position
+
 	def draw(self, display_manager):
-		center_pos = Vector3(self.position) + Vector3(0, 0, self.h/2)
-		shadow_pos = Vector3(center_pos) - (0, 0, self.h/2)
-		Debug3D.draw_horizontal_ellipse(display_manager, shadow_pos, self.w/2)
-		Debug3D.draw_aligned_axis_box(display_manager, center_pos, self.w, self.w, self.h)
+		Debug3D.draw_horizontal_ellipse(display_manager, self.position, self.w / 2)
+		self.collider.draw(display_manager)
 
 	def move_rel(self, dxyz):
 		self.position += Vector3(dxyz)

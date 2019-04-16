@@ -9,6 +9,8 @@ from Game.ball import Ball
 from Game.court import Court
 from Game.character import Character
 
+from Engine.Collisions import *
+
 import pygame as pg
 
 
@@ -17,7 +19,7 @@ class GameEngine:
 	def __init__(self):
 		self.display_manager = DisplayManager(self)
 		self.input_manager = InputManager(self)
-
+		self.collisions_manager = CollisionsManager(self)
 		self.running = True
 		self._create()
 	
@@ -67,22 +69,25 @@ class GameEngine:
 		cam = self.display_manager.camera
 
 		# ball initial velocity
-		self.ball.velocity += (0, -2, 5)
+		self.ball.velocity += (0, -2, 2)
 
 		# for frame rate
 		t2 = pg.time.get_ticks()
 		t1 = t2
 		t0 = t2  # time of first frame of the game
-
 		while self.running:
 			# PHYSICS
 			self.ball.update_physics(t2-t1)
+			
+			# COLLISIONS
+			self.collisions_manager.update(self.ball, self.court, [self.char1, self.char2])
 			
 			# KB EVENTS
 			self.input_manager.update()
 			# TODO : take in account origin of action event (player index for ex.) ?
 			actions_events_queue = pg.event.get(ACTIONEVENT)
 			# UPDATE ACTIONS
+			# TODO : iterator for objects who have update_actions method
 			self.char1.update_actions(actions_events_queue, t2 - t1)
 			cam.update_actions(actions_events_queue, t2 - t1)
 			self.update_actions(actions_events_queue, t2 - t1)
