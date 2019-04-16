@@ -113,11 +113,11 @@ class Camera:
 		:rtype: tuple(int, int)
 		"""
 		w, h = screen_size
-		u, v = 0, 0
+		u, v = -1, -1
 		
 		pt_3c = self.world_to_cam_3d_coords(pt_3d)
 		
-		if pt_3c[2] != 0:  # if point is distinct from camera center
+		if pt_3c[2] < 0:  # if point is distinct from camera center
 			u = int(floor((-w / (2 * self._fov) * pt_3c[0] / pt_3c[2]) / (w / max(w, h))) + w / 2)
 			v = int(floor((-h / (2 * self._fov) * pt_3c[1] / pt_3c[2]) / (h / max(w, h))) + h / 2)
 		return u, v

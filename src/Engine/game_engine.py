@@ -51,6 +51,7 @@ class GameEngine:
 			elif action == "PAUSE":
 				print(action, "not implemented yet")
 			elif action == "SPACE_TEST":
+				print(self.ball.position)
 				self.ball.position = pg.Vector3(-2, 1, 3)
 				self.ball.velocity = pg.Vector3(0, -4, 4)
 	

@@ -16,7 +16,7 @@ class Character:
 		                             Vector3(w, w, h))
 		self.is_colliding_ball = False
 		self.max_velocity = max_velocity  # m/s
-		self.direction = Vector2(0, 0)
+		self.direction = Vector3(0, 0, 0)
 
 	@property
 	def position(self):
@@ -64,6 +64,7 @@ class Character:
 			# foo values
 			dir = self.direction + Vector3(0, 0, 1)
 			vel = 7 * dir
+			# TODO: set vel vector according to velocity, direction and target processed with polynomial function ?
 			event.post(event.Event(THROWEVENT, {"velocity": vel}))
 			
 
