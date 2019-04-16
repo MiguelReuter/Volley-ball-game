@@ -13,6 +13,7 @@ class Character:
 		self.collider_relative_position = Vector3(0, 0, h/2)
 		self.collider = AABBCollider(self._position + self.collider_relative_position,
 		                             Vector3(w, w, h))
+		self.is_colliding_ball = False
 		self.max_velocity = max_velocity  # m/s
 
 	@property

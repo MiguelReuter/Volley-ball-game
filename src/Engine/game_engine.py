@@ -69,7 +69,7 @@ class GameEngine:
 		cam = self.display_manager.camera
 
 		# ball initial velocity
-		self.ball.velocity += (0, -5, 2)
+		self.ball.velocity += (0, -2, 2)
 
 		# for frame rate
 		t2 = pg.time.get_ticks()
@@ -78,24 +78,10 @@ class GameEngine:
 		while self.running:
 			# PHYSICS
 			self.ball.update_physics(t2-t1)
+			
 			# COLLISIONS
-			self.collisions_manager.update(None, None, None)
-			# TODO : refactor in CollisionsManager
-			if are_sphere_and_AABB_colliding(self.ball.collider, self.char1.collider):
-				self.ball.velocity = pg.Vector3(0, 0, 10)
-
-			# TEST !
-			if self.ball.previous_position[1] * self.ball.position[1] < 0:
-				dy = self.ball.position[1] - self.ball.previous_position[1]
-				dy_center = self.ball.previous_position[1] / dy
-				dxyz = dy_center * (self.ball.position - self.ball.previous_position).normalize()
-				centered_ball_collider = SphereCollider(self.ball.previous_position + dxyz, self.ball.radius)
-				self.ball.is_colliding_net = are_sphere_and_AABB_colliding(centered_ball_collider,
-				                                                                      self.court.collider)
-			else:
-				self.ball.is_colliding_net = are_sphere_and_AABB_colliding(self.ball.collider,
-				                                                                      self.court.collider)
-
+			self.collisions_manager.update(self.ball, self.court, [self.char1, self.char2])
+			
 			# KB EVENTS
 			self.input_manager.update()
 			# TODO : take in account origin of action event (player index for ex.) ?

@@ -52,17 +52,3 @@ class Ball(sprite.Sprite):
 		self.add_velocity(0.001 * dt * G)
 		self.move_rel(0.001 * dt * self.velocity)
 		
-		# ground collisions
-		if self.position[2] - self.radius < 0 and self.velocity[2] < 0:
-			self.velocity *= 0.7
-			self.velocity.z *= -1
-		self.position.z = max(self.radius, self.position.z)
-
-		# net collisions
-		if self.is_colliding_net:
-			self.velocity.y *= 0.8
-			self.velocity.y *= -1
-			self.position.y = self.previous_position.y
-
-			self.is_colliding_net = False
-
