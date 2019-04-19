@@ -15,6 +15,8 @@ class CollisionsManager:
 			ball.velocity *= 0.7
 			ball.velocity.z *= -1
 			ball.position.z = max(ball.radius, ball.position.z)
+			print(ball.position)
+
 		
 		# ball / net collision
 		ball.is_colliding_net = are_sphere_and_AABB_colliding(ball.collider, court.collider)

@@ -10,8 +10,14 @@ from Game.court import Court
 from Game.character import Character
 
 from Engine.Collisions import *
+from Engine import TrajectorySolver
 
 import pygame as pg
+
+
+INITIAL_POS = pg.Vector3(0, 5, 0.5)
+TARGET_POS = pg.Vector3(3, -5, 0.5)
+WANTED_H = 4
 
 
 class GameEngine:
@@ -27,7 +33,7 @@ class GameEngine:
 		self.ball = Ball((-2, 1, 3), 0.5)
 		self.court = Court(10, 6, 1.5, 3)
 		self.char1 = Character((-2, -3.5, 0))
-		self.char2 = Character((2, 2, 0))
+		self.char2 = Character((0, 5, 0))
 		self.objects = [self.court, self.ball, self.char1, self.char2]
 		
 		# allowed pygame events
@@ -51,9 +57,8 @@ class GameEngine:
 			elif action == "PAUSE":
 				print(action, "not implemented yet")
 			elif action == "SPACE_TEST":
-				print(self.ball.position)
-				self.ball.position = pg.Vector3(-2, 1, 3)
-				self.ball.velocity = pg.Vector3(0, -4, 4)
+				self.ball.position = pg.Vector3(INITIAL_POS)
+				self.ball.velocity = TrajectorySolver.find_initial_velocity(INITIAL_POS, TARGET_POS, WANTED_H)
 	
 	def update_ball_throwing(self):
 		for ev in pg.event.get(THROWEVENT):
@@ -70,7 +75,8 @@ class GameEngine:
 		cam = self.display_manager.camera
 
 		# ball initial velocity
-		self.ball.velocity += (0, -4, 6)
+		self.ball.position = pg.Vector3(INITIAL_POS)
+		self.ball.velocity = TrajectorySolver.find_initial_velocity(INITIAL_POS, TARGET_POS, WANTED_H)
 
 		# for frame rate
 		t2 = pg.time.get_ticks()
