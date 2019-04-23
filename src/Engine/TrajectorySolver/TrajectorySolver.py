@@ -40,7 +40,7 @@ def find_initial_velocity(origin_pos, target_pos, wanted_height):
 	
 	# uh, zh : coordinates of point above the net in (u, z) ref
 	alpha = 0.5
-	if origin_pos.y * target_pos.y <on 0:  # if target and origin points are not in the same court side
+	if origin_pos.y * target_pos.y < 0:  # if target and origin points are not in the same court side
 		alpha = abs(origin_pos.y / (target_pos.y - origin_pos.y))
 	uh = alpha * ut
 	zh = wanted_height - origin_pos.z
@@ -91,8 +91,3 @@ def _apply_signed_threshold(value, min_thr=None, max_thr=None):
 			sat_val = max(sat_val, max_thr)
 			
 	return sat_val
-			
-			
-	
-	
-	
