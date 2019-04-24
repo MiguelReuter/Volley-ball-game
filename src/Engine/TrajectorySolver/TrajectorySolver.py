@@ -89,6 +89,35 @@ def find_target_position(origin_pos, initial_velocity, wanted_z=0):
 	return u_t * u + origin_pos + Vector3(0, 0, z_t)
 	
 
+def get_n_points_in_trajectory(n, origin_pos, initial_velocity, wanted_z=0):
+	# z_t
+	z_t = wanted_z - origin_pos.z
+	
+	# u vector : unit vector in XY plane from origin to target position
+	u = Vector3(initial_velocity)
+	u.z = 0
+	u = u.normalize()
+	
+	# find t_t : final time
+	a = G / 2
+	b = -initial_velocity.z
+	c = z_t
+	
+	delta = b ** 2 - 4 * a * c
+	assert delta > 0
+	t_t = (-b + sqrt(delta)) / (2 * a)
+	
+	dt = t_t / n
+	pts = []
+	for i in range(n+1):
+		t_i = i * dt
+		u_i = t_i * initial_velocity.dot(u)
+		z_i = -t_i**2 / 2 * G + t_i * initial_velocity.z
+		pts.append(Vector3(u_i * u + origin_pos + Vector3(0, 0, z_i)))
+		
+	return pts
+
+
 def find_effective_target_position(origin_pos, target_pos, wanted_height):
 	# all targets and wanted heights are not physically possible for the player : huge velocity needed, skills...
 	

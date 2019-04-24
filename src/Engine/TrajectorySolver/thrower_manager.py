@@ -12,6 +12,8 @@ random.seed(datetime.now())  # for random throwing
 class ThrowerManager:
 	def __init__(self):
 		self.target_position = Vector3()
+		self.origin_position = Vector3()
+		self.debug_trajectory_pts = []
 		
 	def set_target_position(self):
 		# target pos = court center +/- player direction +/- player position
@@ -24,7 +26,11 @@ class ThrowerManager:
 		draw_sphere(display_manager, self.target_position, 0.1, color=(255, 255, 0))
 		draw_line(display_manager, self.target_position, ground_pos)
 		
-		# TODO : draw trajectory
+		# draw trajectory
+		for i in range(len(self.debug_trajectory_pts) - 1):
+			draw_line(display_manager, self.debug_trajectory_pts[i], self.debug_trajectory_pts[i + 1],
+			          color=(255, 0, 255))
+
 	
 	def throw_at_random_target_position(self, ball, initial_pos, wanted_height, corner_1=[-1.5, -5], corner_2=[1.5, -2]):
 		"""
@@ -56,9 +62,6 @@ class ThrowerManager:
 			
 			self.throw_ball(ball, ball.position, Vector3(0, 3, ball.radius))
 		
-
-		
-		
 	def throw_ball(self, ball, initial_pos, target_pos, wanted_height=4):
 		"""
 		Throw ball from an initial position to a specified target position.
@@ -70,6 +73,10 @@ class ThrowerManager:
 		:return: None
 		"""
 		self.target_position = Vector3(target_pos)
+		self.origin_position = Vector3(initial_pos)
 		ball.position = Vector3(initial_pos)
 		ball.velocity = find_initial_velocity(initial_pos, target_pos, wanted_height)
+		
+		# process trajectory points for debug display
+		self.debug_trajectory_pts = get_n_points_in_trajectory(10, initial_pos, ball.velocity, target_pos.z)
 		
