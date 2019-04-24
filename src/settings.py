@@ -36,9 +36,11 @@ elif FULL_SCREEN
 # TIME
 NOMINAL_FRAME_RATE = 30
 
+# PHYSICS
+G = 10
 
 # CAMERA
-CAMERA_POS = (9, 0, 3)
+CAMERA_POS = (11, 0, 3)
 FOCUS_POINT = (0, 0, 3)
 FOV_ANGLE = 60.
 
@@ -52,6 +54,7 @@ class KeyState(Enum):
 
 # keyboard keys used in game (other keys are ignored)
 KEYS = (K_z, K_s, K_q, K_d,
+        K_j,
         K_UP, K_DOWN, K_LEFT, K_RIGHT,
         K_ESCAPE,
         K_SPACE,
@@ -59,3 +62,6 @@ KEYS = (K_z, K_s, K_q, K_d,
 
 # events
 ACTIONEVENT = USEREVENT + 1
+THROWEVENT = USEREVENT + 2
+TRAJECTORY_CHANGED_EVENT = USEREVENT + 3
+

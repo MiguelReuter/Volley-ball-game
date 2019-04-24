@@ -10,8 +10,16 @@ from Game.court import Court
 from Game.character import Character
 
 from Engine.Collisions import *
+from Engine import TrajectorySolver
+from .TrajectorySolver import ThrowerManager
+
 
 import pygame as pg
+
+
+INITIAL_POS = pg.Vector3(0, 5, 1)
+TARGET_POS = pg.Vector3(2, -3, 0.5)
+WANTED_H = 4
 
 
 class GameEngine:
@@ -20,19 +28,21 @@ class GameEngine:
 		self.display_manager = DisplayManager(self)
 		self.input_manager = InputManager(self)
 		self.collisions_manager = CollisionsManager(self)
+		self.thrower_manager = ThrowerManager()
 		self.running = True
 		self._create()
 	
 	def _create(self):
-		self.ball = Ball((1, 1, 3), 0.5)
+		self.ball = Ball((-2, 1, 3), 0.5)
 		self.court = Court(10, 6, 1.5, 3)
-		self.char1 = Character((-2, -2, 0))
-		self.char2 = Character((2, 2, 0))
+		self.char1 = Character((-2, -3.5, 0))
+		self.char2 = Character((0, 5, 0))
 		self.objects = [self.court, self.ball, self.char1, self.char2]
 		
 		# allowed pygame events
 		pg.event.set_blocked([i for i in range(pg.NUMEVENTS)])
-		pg.event.set_allowed([pg.KEYDOWN, pg.KEYUP, pg.QUIT, pg.VIDEORESIZE, ACTIONEVENT])
+		pg.event.set_allowed([pg.KEYDOWN, pg.KEYUP, pg.QUIT, pg.VIDEORESIZE,
+		                      ACTIONEVENT, THROWEVENT, TRAJECTORY_CHANGED_EVENT])
 
 	def request_quit(self):
 		"""
@@ -50,17 +60,11 @@ class GameEngine:
 			elif action == "PAUSE":
 				print(action, "not implemented yet")
 			elif action == "SPACE_TEST":
-				# debug window resize
-				size = (1200, 800)
-				resize_event = pg.event.Event(pg.VIDEORESIZE, {"size": size, 'w': size[0], 'h': size[1]})
-				pg.event.post(resize_event)
-				
-				# debug ball position
-				print("ball position :", self.ball.position)
-	
+				self.thrower_manager.throw_at_random_target_position(self.ball, INITIAL_POS, WANTED_H)
+		
 	def run(self):
 		"""
-		Main loop, call different manager (input, display...) etc.
+		Main loop, call different managers (input, display...) etc.
 		
 		:return: None
 		"""
@@ -69,8 +73,8 @@ class GameEngine:
 		cam = self.display_manager.camera
 
 		# ball initial velocity
-		self.ball.velocity += (0, -2, 2)
-
+		self.thrower_manager.throw_ball(self.ball, INITIAL_POS, TARGET_POS, WANTED_H)
+		
 		# for frame rate
 		t2 = pg.time.get_ticks()
 		t1 = t2
@@ -92,8 +96,11 @@ class GameEngine:
 			cam.update_actions(actions_events_queue, t2 - t1)
 			self.update_actions(actions_events_queue, t2 - t1)
 			
+			# throw event
+			self.thrower_manager.update(pg.event.get(THROWEVENT), pg.event.get(TRAJECTORY_CHANGED_EVENT), self.ball)
+			
 			# DISPLAY
-			self.display_manager.update(self.objects)
+			self.display_manager.update([*self.objects, self.thrower_manager])
 
 			# manage frame rate
 			t1 = t2

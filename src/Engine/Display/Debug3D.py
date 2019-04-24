@@ -15,15 +15,19 @@ DBG_COLOR_HOR_ELLIPSE = (20, 20, 20)
 DBG_COLOR_SHADOW_HOR_ELLIPSE_TRAPEZE = (255, 0, 255)
 
 
-def draw_sphere(display_manager, center, radius):
+def draw_sphere(display_manager, center, radius, color=None):
 	"""
 	Draw a filled sphere on camera screen.
 	
 	:param Camera camera: camera on which sphere will be drawn
 	:param pygame.Vector3 center: center of sphere
 	:param float radius: radius (world scale, not in pixel) of sphere
+	:param tuple(int, int, int) color: drawing color. default is :var DBG_COLOR_SPHERE:
 	:return: None
 	"""
+	if color is None:
+		color = DBG_COLOR_SPHERE
+	
 	# process r_px : radius in pixel
 	camera = display_manager.camera
 	surface_size = display_manager.debug_surface.get_size()
@@ -36,7 +40,7 @@ def draw_sphere(display_manager, center, radius):
 	r_px = int((Vector2(camera.world_to_pixel_coords(c_pos, surface_size) -
 	            Vector2(camera.world_to_pixel_coords(c_pos + radius * Vector3(0, 1, 0), surface_size))).magnitude()))
 
-	draw.circle(display_manager.debug_surface, DBG_COLOR_SPHERE,
+	draw.circle(display_manager.debug_surface, color,
 	            camera.world_to_pixel_coords(center, surface_size), r_px)
 
 
@@ -66,44 +70,52 @@ def draw_horizontal_ellipse(display_manager, center, radius):
 		r_pos[1] += r_h
 		r_h = -r_h
 	rect = Rect(r_pos, (r_w, r_h))
-
-	draw.ellipse(display_manager.debug_surface, DBG_COLOR_HOR_ELLIPSE, rect)
+	
+	if r_w >= r_h:
+		draw.ellipse(display_manager.debug_surface, DBG_COLOR_HOR_ELLIPSE, rect)
 	draw.polygon(display_manager.debug_surface, DBG_COLOR_SHADOW_HOR_ELLIPSE_TRAPEZE, [t_l, t_r, b_r, b_l], 1)
 
 
-def draw_polygon(display_manager, pts):
+def draw_polygon(display_manager, pts, color=None):
 	"""
 	Draw a closed 3D polygon on camera screen.
 	
 	:param Camera camera: camera on which polygon will be drawn
 	:param list(pygame.Vector3) pts: 3D world points which define polygon
+	:param tuple(int, int, int) color: drawing color. default is :var DBG_COLOR_POLYGON:
 	:return: None
 	"""
+	if color is None:
+		color = DBG_COLOR_POLYGON
 	camera = display_manager.camera
 	surface_size = display_manager.debug_surface.get_size()
 
-	draw.polygon(display_manager.debug_surface, DBG_COLOR_POLYGON,
+	draw.polygon(display_manager.debug_surface, color,
 	             [(camera.world_to_pixel_coords(pt, surface_size)) for pt in pts])
 
 
-def draw_line(display_manager, ptA, ptB):
+def draw_line(display_manager, ptA, ptB, color=None):
 	"""
 	Draw a 3D line on camera screen.
 	
 	:param Camera camera: camera on which line will be drawn
 	:param pygame.Vector3 ptA: 3D point of line start
 	:param pygame.Vector3 ptB: 3D point of line end
+	:param tuple(int, int, int) color: drawing color. default is :var DBG_COLOR_LINE:
 	:return: None
 	"""
+	if color is None:
+		color = DBG_COLOR_LINE
+		
 	camera = display_manager.camera
 	surface_size = display_manager.debug_surface.get_size()
 
-	draw.line(display_manager.debug_surface, DBG_COLOR_LINE,
+	draw.line(display_manager.debug_surface, color,
 	          camera.world_to_pixel_coords(ptA, surface_size),
 	          camera.world_to_pixel_coords(ptB, surface_size))
 
 
-def draw_aligned_axis_box(display_manager, center, length_x, length_y, length_z):
+def draw_aligned_axis_box(display_manager, center, length_x, length_y, length_z, color=None):
 	"""
 	Draw an 3D aligned-axis box on camera screen.
 	
@@ -114,8 +126,12 @@ def draw_aligned_axis_box(display_manager, center, length_x, length_y, length_z)
 	:param float length_x: box length along x axis
 	:param float length_y: box length along y axis
 	:param float length_z: box length along z axis
+	:param tuple(int, int, int) color: drawing color. default is :var DBG_COLOR_AAB:
 	:return: None
 	"""
+	if color is None:
+		color = DBG_COLOR_AAB
+		
 	camera = display_manager.camera
 	surface_size = display_manager.debug_surface.get_size()
 
@@ -132,7 +148,7 @@ def draw_aligned_axis_box(display_manager, center, length_x, length_y, length_z)
 	top_pts = [(camera.world_to_pixel_coords(pt, surface_size)) for pt in top_pts]
 	bottom_pts = [(camera.world_to_pixel_coords(pt, surface_size)) for pt in bottom_pts]
 
-	draw.polygon(display_manager.debug_surface, DBG_COLOR_AAB, top_pts, 1)                                 # top quad
-	draw.polygon(display_manager.debug_surface, DBG_COLOR_AAB, bottom_pts, 1)                              # bottom quad
-	draw.polygon(display_manager.debug_surface, DBG_COLOR_AAB, [*top_pts[:2], bottom_pts[1], bottom_pts[0]], 1)  # -x quad
-	draw.polygon(display_manager.debug_surface, DBG_COLOR_AAB, [*top_pts[2:], bottom_pts[3], bottom_pts[2]], 1)  # +x quad
+	draw.polygon(display_manager.debug_surface, color, top_pts, 1)                                 # top quad
+	draw.polygon(display_manager.debug_surface, color, bottom_pts, 1)                              # bottom quad
+	draw.polygon(display_manager.debug_surface, color, [*top_pts[:2], bottom_pts[1], bottom_pts[0]], 1)  # -x quad
+	draw.polygon(display_manager.debug_surface, color, [*top_pts[2:], bottom_pts[3], bottom_pts[2]], 1)  # +x quad
