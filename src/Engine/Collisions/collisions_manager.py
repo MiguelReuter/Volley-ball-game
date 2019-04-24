@@ -2,6 +2,8 @@
 
 from Engine.Collisions.collider import *
 import pygame as pg
+from settings import *
+from ..TrajectorySolver.TrajectorySolver import *
 
 
 class CollisionsManager:
@@ -9,12 +11,15 @@ class CollisionsManager:
 		self.game_engine = game_engine
 
 	def update(self, ball, court, characters_list):
+		b_refresh_target_ball_position = False
+		
 		# ball / ground collision
 		ball.is_colliding_ground = ball.position[2] - ball.radius < 0 and ball.velocity[2] < 0
 		if ball.is_colliding_ground:
 			ball.velocity *= 0.7
 			ball.velocity.z *= -1
 			ball.position.z = max(ball.radius, ball.position.z)
+			b_refresh_target_ball_position = True
 		
 		# ball / net collision
 		ball.is_colliding_net = are_sphere_and_AABB_colliding(ball.collider, court.collider)
@@ -30,6 +35,7 @@ class CollisionsManager:
 			ball.velocity.y *= 0.8
 			ball.velocity.y *= -1
 			ball.position.y = ball.previous_position.y
+			b_refresh_target_ball_position = True
 		
 		# ball / character's collision
 		ball.is_colliding_character = False
@@ -38,3 +44,8 @@ class CollisionsManager:
 			
 			if char.is_colliding_ball:
 				ball.is_colliding_character = True
+				
+		# ball velocity checked to prevent to fill event queue
+		if b_refresh_target_ball_position and ball.velocity.length_squared() > 0.1:
+			target_pos = find_target_position(ball.position, ball.velocity, ball.radius)
+			pg.event.post(pg.event.Event(TRAJECTORY_CHANGED_EVENT, {"target_pos": target_pos}))
