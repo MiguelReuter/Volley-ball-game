@@ -61,11 +61,9 @@ class Character:
 		self.move(b_up, b_down, b_left, b_right, dt)
 		
 		if throw_ball:
-			# foo values
-			dir = self.direction + Vector3(0, 0, 1)
-			vel = 7 * dir
-			# TODO: set vel vector according to velocity, direction and target processed with polynomial function ?
-			event.post(event.Event(THROWEVENT, {"velocity": vel}))
+			# TODO : add other values to THROWEVENT ?
+			event.post(event.Event(THROWEVENT, {"direction": self.direction,
+			                                    "position": self.position}))
 			
 
 

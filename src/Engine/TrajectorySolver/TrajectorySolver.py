@@ -56,6 +56,39 @@ def find_initial_velocity(origin_pos, target_pos, wanted_height):
 	return Vector3(vo_u * u + Vector3(0, 0, vo_z))
 
 
+def find_target_position(origin_pos, initial_velocity, wanted_z=0):
+	"""
+	Find and return target ball position with a specified initial velocity and position.
+	
+	:param pygame.Vector3 origin_pos: initial ball position in world coordinates
+	:param pygame.Vector3 initial_velocity: initial ball velocity in world coordinates
+	:param float wanted_z: specify at which z value target position will be found
+	:return: target ball position
+	:rtype pygame.Vector3:
+	"""
+	# z_t
+	z_t = wanted_z - origin_pos.z
+	
+	# u vector : unit vector in XY plane from origin to target position
+	u = Vector3(initial_velocity)
+	u.z = 0
+	u = u.normalize()
+	
+	# find t_t : final time
+	a = G / 2
+	b = -initial_velocity.z
+	c = z_t
+	
+	delta = b**2 - 4 * a * c
+	assert delta > 0
+	t_t = (-b + sqrt(delta)) / (2 * a)
+	
+	# u_t
+	u_t = t_t * initial_velocity.dot(u)
+	
+	return u_t * u + origin_pos + Vector3(0, 0, z_t)
+	
+
 def find_effective_target_position(origin_pos, target_pos, wanted_height):
 	# all targets and wanted heights are not physically possible for the player : huge velocity needed, skills...
 	

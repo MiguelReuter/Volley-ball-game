@@ -3,9 +3,10 @@
 from pygame import *
 from ..Display.Debug3D import *
 from .TrajectorySolver import *
+
 import random
 from datetime import datetime
-random.seed(datetime.now())
+random.seed(datetime.now())  # for random throwing
 
 
 class ThrowerManager:
@@ -25,22 +26,50 @@ class ThrowerManager:
 		
 		# TODO : draw trajectory
 	
-	def update(self):
-		pass
+	def throw_at_random_target_position(self, ball, initial_pos, wanted_height, corner_1=[-1.5, -5], corner_2=[1.5, -2]):
+		"""
+		Throw ball at random target position in a specified area from an initial position.
+		
+		:param Ball ball: the ball to throw
+		:param pygame.Vector3 initial_pos: initial position of ball in world coordinates
+		:param wanted_height: wanted height at net place (or at middle trajectory)
+		:param tuple(float, float) corner_1: 1st corner of area, min x and min y
+		:param tuple(float, float) corner_2: 2nd corner of area, max x and max y
+		:return:
+		"""
+		cen = [(corner_1[i] + corner_2[i]) / 2 for i in (0, 1)]
+		amp = [(corner_1[i] - corner_2[i]) / 2 for i in (0, 1)]
+		
+		target_pos = Vector3(2 * random.random(), 2 * random.random(), ball.radius) - (1, 1, 0)  # x and y in ]-1, 1[
+		target_pos.x = amp[0] * target_pos.x + cen[0]
+		target_pos.y = amp[1] * target_pos.y + cen[1]
+		
+		self.throw_ball(ball, initial_pos, target_pos, wanted_height)
 	
-	def throw_ball(self, ball, initial_pos, target_pos, wanted_height):
+	def update(self, throw_events, trajectory_changes_events, ball):
+		for ev in trajectory_changes_events:
+			self.target_position = ev.target_pos
+		
+		for ev in throw_events:
+			dir = ev.direction
+			char_pos = ev.position
+			
+			self.throw_ball(ball, ball.position, Vector3(0, 3, ball.radius))
+		
+
+		
+		
+	def throw_ball(self, ball, initial_pos, target_pos, wanted_height=4):
+		"""
+		Throw ball from an initial position to a specified target position.
+		
+		:param Ball ball:
+		:param pygame.Vector3 initial_pos:
+		:param pygame.Vector3 target_pos:
+		:param float wanted_height:
+		:return: None
+		"""
 		self.target_position = Vector3(target_pos)
 		ball.position = Vector3(initial_pos)
 		ball.velocity = find_initial_velocity(initial_pos, target_pos, wanted_height)
 		
-	def throw_at_random_target_position(self, ball, initial_pos, wanted_height):
-		target_pos = Vector3(random.random(), random.random(), ball.radius) - (0.5, 0.5, 0)
-		
-		# more or less in left court side
-		target_pos.x = 3 * target_pos.x
-		target_pos.y = 4 * target_pos.y - 3
-		
-		self.target_position = target_pos
-		self.throw_ball(ball, initial_pos, target_pos, wanted_height)
-		
-	
