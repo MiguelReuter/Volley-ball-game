@@ -6,7 +6,6 @@ from Engine.Collisions import AABBCollider
 from Settings import *
 
 
-from .CharacterAction import *
 from .character_states import *
 
 
@@ -51,8 +50,12 @@ class Character:
 	def update_actions(self, action_events, dt):
 		action_events = list(action_events)
 
+		# state machine :
+		# run current state
 		self.state.run(action_events, dt=dt)
-		self.state = self.state.next(input, action_events, dt=dt)
+
+		# eventually switch state
+		self.state = self.state.next(action_events, dt=dt)
 			
 
 
