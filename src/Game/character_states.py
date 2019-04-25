@@ -68,7 +68,7 @@ class Throwing(State):
 	def __init__(self, character, action_events=None, **kwargs):
 		super().__init__(character)
 		self.t0 = time.get_ticks()
-		self.run(action_events)
+		self.run(action_events, kwargs)
 	
 	def run(self, action_events, **kwargs):
 		if self.character.is_colliding_ball:
