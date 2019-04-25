@@ -3,7 +3,7 @@
 import pygame as pg
 import pytest
 
-from settings import *
+from Settings import *
 from Engine.Input import InputManager
 
 

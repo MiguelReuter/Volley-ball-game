@@ -1,8 +1,7 @@
 # encoding : UTF-8
 
-from pygame import *
 from math import tan, radians, floor
-from settings import *
+from Settings.general_settings import *
 
 
 class Camera:

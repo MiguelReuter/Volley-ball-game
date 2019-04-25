@@ -2,7 +2,7 @@
 
 from pygame import *
 from math import sqrt
-from settings import G
+from Settings import G
 
 
 THR_NEAR_ZONE = 2

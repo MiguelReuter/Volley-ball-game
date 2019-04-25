@@ -21,17 +21,17 @@ def test_sphere_and_aabb_collisions():
 	sphere = SphereCollider(Vector3(0, 0, 0), 1)
 	aabb = AABBCollider(Vector3(2, 0, 0), Vector3(2, 2, 2))
 	
-	assert are_sphere_and_AABB_colliding(sphere, aabb) is True
+	assert are_sphere_and_aabb_colliding(sphere, aabb) is True
 	
 	aabb.center = Vector3(2.001, 0, 0)
-	assert are_sphere_and_AABB_colliding(sphere, aabb) is False
+	assert are_sphere_and_aabb_colliding(sphere, aabb) is False
 	
 	
 def test_aabb_collisions():
 	aabb_a = AABBCollider(Vector3(0, 0, 0), Vector3(2, 2, 2))
 	aabb_b = AABBCollider(Vector3(2, 0, 0), Vector3(2, 2, 2))
 	
-	assert are_AABB_colliding(aabb_a, aabb_b) is True
+	assert are_aabb_colliding(aabb_a, aabb_b) is True
 	
 	aabb_b.center = Vector3(2.1, 0, 0)
-	assert are_AABB_colliding(aabb_a, aabb_b) is False
+	assert are_aabb_colliding(aabb_a, aabb_b) is False

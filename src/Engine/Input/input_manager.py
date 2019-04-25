@@ -1,11 +1,10 @@
 # encoding : UTF-8
 
 import pygame as pg
-from settings import *
 
-from _settings import *
+from Settings import *
 
-# TODO : rename settings.py or _settings module
+# TODO : rename general_settings.py or Settings module
 
 class InputManager:
 	# TODO : singleton

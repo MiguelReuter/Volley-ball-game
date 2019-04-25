@@ -4,7 +4,7 @@ from Engine import *
 from .Display import *
 from .Input import *
 
-from settings import *
+from Settings import *
 from Game.ball import Ball
 from Game.court import Court
 from Game.character import Character

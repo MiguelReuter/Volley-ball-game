@@ -2,7 +2,7 @@
 
 from Engine.Collisions.collider import *
 import pygame as pg
-from settings import *
+from Settings import *
 from ..TrajectorySolver.TrajectorySolver import *
 
 

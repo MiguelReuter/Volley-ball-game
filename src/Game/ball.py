@@ -4,7 +4,7 @@ from pygame import *
 
 from Engine.Display import Debug3D
 from Engine.Collisions import SphereCollider
-from settings import G
+from Settings import G
 
 
 class Ball(sprite.Sprite):

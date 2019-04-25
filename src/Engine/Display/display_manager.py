@@ -1,7 +1,7 @@
 # encoding : UTF-8
 
 from .camera import Camera
-from settings import *
+from Settings import *
 
 import pygame as pg
 from math import log2, pow

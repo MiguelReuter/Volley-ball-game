@@ -3,7 +3,7 @@
 from pygame import *
 from Engine.Display import Debug3D
 from Engine.Collisions import AABBCollider
-from settings import *
+from Settings import *
 
 
 class Character:
