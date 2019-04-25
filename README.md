@@ -3,22 +3,25 @@
 Check [Projects](https://github.com/MiguelReuter/Volley-ball-game/projects) page on Github to see progress !
 
 
+# Demo (only debug display)
+
+![](demo.gif)
+
+
 # Dependencies
 - python3
 - pygame 1.9.5
-- pytest for run tests (optional)
+- pytest to run tests (optional)
 
 # Launch game
 ```
-cd src/
-python3 main.py
+python3 src/main.py
 ```
 
-# Run tests
-To run tests (without pytest warnings) :
+# Run tests (optional)
+To run tests :
 ```
-cd src/
-py.test --disable-pytest-warnings .
+py.test .
 ```
 
 # Licence
