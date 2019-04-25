@@ -31,7 +31,7 @@ class Ball(sprite.Sprite):
 		self.collider.center = self._position
 	
 	def draw(self, display_manager):
-		Debug3D.draw_horizontal_ellipse(display_manager, (self.position[0], self.position[1], 0), self.radius)
+		Debug3D.draw_horizontal_ellipse(display_manager, Vector3(self.position[0], self.position[1], 0), self.radius)
 		self.collider.draw(display_manager)
 	
 	def move_rel(self, dxyz):

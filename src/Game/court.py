@@ -24,28 +24,28 @@ class Court:
 
 		# corners
 		Debug3D.draw_line(display_manager,
-		                  (-self.h / 2, -self.w / 2, 0),
-		                  (-self.h / 2, -self.w / 2, corners_h))
+		                  Vector3(-self.h / 2, -self.w / 2, 0),
+		                  Vector3(-self.h / 2, -self.w / 2, corners_h))
 		Debug3D.draw_line(display_manager,
-		                  (-self.h / 2, self.w / 2, 0),
-		                  (-self.h / 2, self.w / 2, corners_h))
+		                  Vector3(-self.h / 2, self.w / 2, 0),
+		                  Vector3(-self.h / 2, self.w / 2, corners_h))
 		Debug3D.draw_line(display_manager,
-		                  (self.h / 2, self.w / 2, 0),
-		                  (self.h / 2, self.w / 2, corners_h))
+		                  Vector3(self.h / 2, self.w / 2, 0),
+		                  Vector3(self.h / 2, self.w / 2, corners_h))
 		Debug3D.draw_line(display_manager,
-		                  (self.h / 2, -self.w / 2, 0),
-		                  (self.h / 2, -self.w / 2, corners_h))
+		                  Vector3(self.h / 2, -self.w / 2, 0),
+		                  Vector3(self.h / 2, -self.w / 2, corners_h))
 
 		# net
 		Debug3D.draw_line(display_manager,
-		                  (-self.h / 2, 0, 0),
-		                  (-self.h / 2, 0, self.net_z2))
+		                  Vector3(-self.h / 2, 0, 0),
+		                  Vector3(-self.h / 2, 0, self.net_z2))
 		Debug3D.draw_line(display_manager,
-		                  (self.h / 2, 0, 0),
-		                  (self.h / 2, 0, self.net_z2))
+		                  Vector3(self.h / 2, 0, 0),
+		                  Vector3(self.h / 2, 0, self.net_z2))
 		Debug3D.draw_line(display_manager,
-		                  (-self.h / 2, 0, self.net_z2),
-		                  (self.h / 2, 0, self.net_z2))
+		                  Vector3(-self.h / 2, 0, self.net_z2),
+		                  Vector3(self.h / 2, 0, self.net_z2))
 		Debug3D.draw_line(display_manager,
-		                  (-self.h / 2, 0, self.net_z1),
-		                  (self.h / 2, 0, self.net_z1))
+		                  Vector3(-self.h / 2, 0, self.net_z1),
+		                  Vector3(self.h / 2, 0, self.net_z1))

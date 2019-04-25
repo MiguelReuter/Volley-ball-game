@@ -1,8 +1,8 @@
 # encoding : UTF-8
 
-from pygame.math import *
+from pygame import *
 
-from ..Display import Debug3D
+from Engine.Display import Debug3D
 
 
 class Collider:

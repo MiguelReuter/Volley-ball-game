@@ -1,6 +1,5 @@
 # encoding : UTF-8
 
-from Engine import *
 from .Display import *
 from .Input import *
 
@@ -10,7 +9,6 @@ from Game.court import Court
 from Game.character import Character
 
 from Engine.Collisions import *
-from Engine import TrajectorySolver
 from .TrajectorySolver import ThrowerManager
 
 

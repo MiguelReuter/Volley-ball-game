@@ -1,8 +1,8 @@
 # encoding : UTF-8
 
 from pygame import *
-from ..Display.Debug3D import *
-from .TrajectorySolver import *
+from Engine.Display.Debug3D import *
+from Engine.TrajectorySolver import *
 
 import random
 from datetime import datetime
