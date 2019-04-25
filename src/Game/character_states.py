@@ -5,7 +5,7 @@ from .CharacterAction import CharacterAction
 from pygame import time
 
 
-THROW_DURATION = 500 # in ms
+THROW_DURATION = 500  # in ms
 
 
 class State:
@@ -68,7 +68,7 @@ class Throwing(State):
 	def __init__(self, character, action_events=None, **kwargs):
 		super().__init__(character)
 		self.t0 = time.get_ticks()
-		self.run(action_events, kwargs)
+		self.run(action_events, **kwargs)
 	
 	def run(self, action_events, **kwargs):
 		if self.character.is_colliding_ball:
