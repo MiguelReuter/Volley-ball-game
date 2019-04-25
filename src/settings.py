@@ -25,7 +25,7 @@ if FIXED_SIZE :
 		
 elif RESIZABLE:
 	- initial window size = nominal_resolution or nominal_resolution * 2^n  according to WINDOW_RESIZE_2N
-	- if window is resized ingame :
+	- if window is resized in-game :
 		- window content size = highest possible, centered content (float factor for size)
 		
 elif FULL_SCREEN

@@ -19,9 +19,8 @@ class Court:
 
 		corners_h = 2
 		# court ground
-		Debug3D.draw_polygon(display_manager,
-		                     [(-self.h / 2, -self.w / 2, 0), (-self.h / 2, self.w / 2, 0),
-		                      (self.h / 2, self.w / 2, 0), (self.h / 2, -self.w / 2, 0)])
+		Debug3D.draw_polygon(display_manager, [(-self.h / 2, -self.w / 2, 0), (-self.h / 2, self.w / 2, 0),
+		                                       (self.h / 2, self.w / 2, 0), (self.h / 2, -self.w / 2, 0)])
 
 		# corners
 		Debug3D.draw_line(display_manager,

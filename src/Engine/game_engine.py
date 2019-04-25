@@ -1,8 +1,8 @@
 # encoding : UTF-8
 
 from Engine import *
-from Engine.Display import *
-from Engine.Input import *
+from .Display import *
+from .Input import *
 
 from settings import *
 from Game.ball import Ball

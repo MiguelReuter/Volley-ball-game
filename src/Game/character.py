@@ -34,11 +34,11 @@ class Character:
 	def move_rel(self, dxyz):
 		self.position += Vector3(dxyz)
 
-	def move(self, b_UP, b_DOWN, b_LEFT, b_RIGHT, dt):
-		self.direction = Vector3(b_DOWN - b_UP, b_RIGHT - b_LEFT, 0)
+	def move(self, b_up, b_down, b_left, b_RIGHT, dt):
+		self.direction = Vector3(b_down - b_up, b_RIGHT - b_left, 0)
 		dxyz = 0.001 * dt * self.direction * self.max_velocity
 		# normalize
-		if (b_UP or b_DOWN) and (b_LEFT or b_RIGHT):
+		if (b_up or b_down) and (b_left or b_RIGHT):
 			dxyz *= 0.7071  # sqrt(2)
 		self.move_rel(dxyz)
 		

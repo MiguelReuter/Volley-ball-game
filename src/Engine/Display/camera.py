@@ -51,7 +51,7 @@ class Camera:
 		self._position = value
 		self._process_w_vector()
 	
-	@property # a change of self.focus_point may change self._w_vect
+	@property  # a change of self.focus_point may change self._w_vect
 	def focus_point(self):
 		return self._focus_point
 	
@@ -126,8 +126,8 @@ class Camera:
 		# TODO : derive current class from another with abstract update_actions method
 		action_events = list(action_events)
 		
-		for event in action_events:
-			action = event.action
+		for ev in action_events:
+			action = ev.action
 			if action == "CAMERA_MOVE_UP":
 				self.position += (0, 0, 0.1)
 			elif action == "CAMERA_MOVE_DOWN":
@@ -136,4 +136,4 @@ class Camera:
 				self.position += (0, -0.1, 0)
 			elif action == "CAMERA_MOVE_RIGHT":
 				self.position += (0, 0.1, 0)
-		
+				

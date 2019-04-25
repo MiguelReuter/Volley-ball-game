@@ -32,10 +32,10 @@ def find_initial_velocity(origin_pos, target_pos, wanted_height):
 	u = u.normalize()
 	
 	# ut, zt : coordinates of target point in (u, z) ref
-	TO = (target_pos - origin_pos)
-	TO.z = 0
+	to_vect = (target_pos - origin_pos)
+	to_vect.z = 0
 	
-	ut = TO.length()
+	ut = to_vect.length()
 	zt = target_pos.z - origin_pos.z
 	
 	# uh, zh : coordinates of point above the net in (u, z) ref

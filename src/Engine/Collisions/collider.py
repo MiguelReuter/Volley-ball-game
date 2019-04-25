@@ -2,7 +2,7 @@
 
 from pygame.math import *
 
-from Engine.Display import Debug3D
+from ..Display import Debug3D
 
 
 class Collider:
@@ -45,7 +45,7 @@ def are_spheres_colliding(sphere_a, sphere_b):
 	return (sphere_a.center - sphere_b.center).length_squared() <= (sphere_a.radius + sphere_b.radius)**2
 
 
-def are_AABB_colliding(a, b):
+def are_aabb_colliding(a, b):
 	"""
 	Return True if given AABB are colliding.
 	
@@ -64,7 +64,7 @@ def are_AABB_colliding(a, b):
 	       (a_min[2] <= b_max[2] and a_max[2] >= b_min[2])
 
 
-def are_sphere_and_AABB_colliding(sphere, aabb):
+def are_sphere_and_aabb_colliding(sphere, aabb):
 	"""
 	Return True if given sphere and AABB are colliding.
 	

@@ -1,6 +1,6 @@
 # encoding : UTF-8
 
-from Engine.Display.camera import Camera
+from .camera import Camera
 from settings import *
 
 import pygame as pg
@@ -101,7 +101,8 @@ class DisplayManager:
 		else:
 			self.scaled_surface = self.unscaled_surface.copy()
 	
-	def _process_screen_factor_scale(self):
+	@staticmethod
+	def _process_screen_factor_scale():
 		"""
 		Process a factor (2^n) to adapt window size.
 		
@@ -126,21 +127,21 @@ class DisplayManager:
 		
 		self._resize_display()
 		
-		self.screen.blit(self.scaled_surface, self._get_position_to_blit_centered_surfaces(self.screen.get_size(), self.scaled_surface.get_size()))
-		self.screen.blit(self.debug_surface, self._get_position_to_blit_centered_surfaces(self.screen.get_size(), self.debug_surface.get_size()))
+		self.screen.blit(self.scaled_surface, self.get_position_to_blit_centered_surfaces(self.screen.get_size(), self.scaled_surface.get_size()))
+		self.screen.blit(self.debug_surface, self.get_position_to_blit_centered_surfaces(self.screen.get_size(), self.debug_surface.get_size()))
 		# update screen
 		pg.display.flip()
 	
 	@staticmethod
-	def _get_position_to_blit_centered_surfaces(main_surface_size, surface_to_draw_size):
+	def get_position_to_blit_centered_surfaces(main_surface_size, surface_to_draw_size):
 		"""
 		Get position to draw a centered surface onto another.
 		
 		example 1 :
-			>>> DisplayManager._get_position_to_blit_centered_surfaces((50, 100), (10, 10))
+			>>> DisplayManager.get_position_to_blit_centered_surfaces((50, 100), (10, 10))
 			(20, 45)
 		example 2 :
-			>>> DisplayManager._get_position_to_blit_centered_surfaces((50, 100), (1000, 1000))
+			>>> DisplayManager.get_position_to_blit_centered_surfaces((50, 100), (1000, 1000))
 			(0, 0)
 			
 		:param tuple(int, int) main_surface_size: size of main surface to draw on
@@ -150,4 +151,5 @@ class DisplayManager:
 		"""
 		if main_surface_size[0] >= surface_to_draw_size[0] and main_surface_size[1] >= surface_to_draw_size[1]:
 			return tuple(int(main_surface_size[i] / 2 - surface_to_draw_size[i] / 2) for i in (0, 1))
-		return (0, 0)
+		return 0, 0
+	

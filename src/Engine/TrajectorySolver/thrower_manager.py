@@ -23,16 +23,15 @@ class ThrowerManager:
 		# draw target position
 		ground_pos = Vector3(self.target_position)
 		ground_pos.z = 0
-		draw_sphere(display_manager, self.target_position, 0.1, color=(255, 255, 0))
+		draw_sphere(display_manager, self.target_position, 0.1, col=(255, 255, 0))
 		draw_line(display_manager, self.target_position, ground_pos)
 		
 		# draw trajectory
 		for i in range(len(self.debug_trajectory_pts) - 1):
 			draw_line(display_manager, self.debug_trajectory_pts[i], self.debug_trajectory_pts[i + 1],
-			          color=(255, 0, 255))
+			          col=(255, 0, 255))
 
-	
-	def throw_at_random_target_position(self, ball, initial_pos, wanted_height, corner_1=[-1.5, -5], corner_2=[1.5, -2]):
+	def throw_at_random_target_position(self, ball, initial_pos, wanted_height, corner_1=None, corner_2=None):
 		"""
 		Throw ball at random target position in a specified area from an initial position.
 		
@@ -43,6 +42,10 @@ class ThrowerManager:
 		:param tuple(float, float) corner_2: 2nd corner of area, max x and max y
 		:return:
 		"""
+		if corner_1 is None:
+			corner_1 = [-1.5, -5]
+		if corner_2 is None:
+			corner_2 = [1.5, -2]
 		cen = [(corner_1[i] + corner_2[i]) / 2 for i in (0, 1)]
 		amp = [(corner_1[i] - corner_2[i]) / 2 for i in (0, 1)]
 		
@@ -57,8 +60,8 @@ class ThrowerManager:
 			self.target_position = ev.target_pos
 		
 		for ev in throw_events:
-			dir = ev.direction
-			char_pos = ev.position
+			direction = ev.direction
+			char_position = ev.position
 			
 			self.throw_ball(ball, ball.position, Vector3(0, 3, ball.radius))
 		
