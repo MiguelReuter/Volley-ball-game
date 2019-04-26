@@ -98,16 +98,8 @@ class Running(State):
 			- :var float dt: time between 2 function calls
 		"""
 		dt = kwargs["dt"] if "dt" in kwargs.keys() else 0
-		
-		b_up = b_down = b_left = b_right = False
-		for act_event in action_events:
-			action = act_event.action
-			# move
-			b_up |= (action == "MOVE_UP")
-			b_down |= (action == "MOVE_DOWN")
-			b_left |= (action == "MOVE_LEFT")
-			b_right |= (action == "MOVE_RIGHT")
-		self.character.move(b_up, b_down, b_left, b_right, dt)
+		direction = get_normalized_direction_requested(action_events)
+		self.character.move(direction, dt)
 	
 	def next(self, action_events, **kwargs):
 		"""
@@ -145,9 +137,14 @@ class Throwing(State):
 		:return: None
 		"""
 		if self.character.is_colliding_ball:
+			# throwing velocity efficiency
+			vel_eff = get_velocity_efficiency(time.get_ticks() - self.t0)
+			
+			direction = get_normalized_direction_requested(action_events)
 			# TODO : add other values to THROWEVENT ?
-			event.post(event.Event(THROWEVENT, {"direction": self.character.direction,
-			                                    "position": self.character.position}))
+			event.post(event.Event(THROWEVENT, {"direction": direction,
+			                                    "position": self.character.position,
+			                                    "velocity_efficiency": vel_eff}))
 		
 	def next(self, action_events, **kwargs):
 		"""
@@ -192,3 +189,41 @@ def is_throwing_requested(action_events):
 	for act_event in action_events:
 		b_throwing |= act_event.action == "THROW_BALL"
 	return b_throwing
+
+
+def get_normalized_direction_requested(action_events):
+	b_up = b_down = b_left = b_right = False
+	for act_event in action_events:
+		action = act_event.action
+		b_up |= (action == "MOVE_UP")
+		b_down |= (action == "MOVE_DOWN")
+		b_left |= (action == "MOVE_LEFT")
+		b_right |= (action == "MOVE_RIGHT")
+	
+	direction = Vector3(b_down - b_up, b_right - b_left, 0)
+	
+	# normalize
+	if (b_left | b_right) & (b_up | b_down):
+		direction *= 0.7071
+		
+	return direction
+
+
+def get_velocity_efficiency(dt, period=THROW_DURATION):
+	"""
+	Process and return throwing velocity efficiency.
+	
+	Efficiency is maximum when character hits the ball at the moment when he touch the ball (not too early).
+	
+	:param int dt: time in ms between throw request and effective throw, i.e. when payer touches the ball
+	:param int period: duration of throwing. :var dt: / :var period: will be used to process velocity efficiency
+	:return: throwing velocity efficiency in [0, 1]
+	:rtype float:
+	"""
+	# some parameters
+	thr = 0.4
+	a = 0.8
+	
+	x = dt / period  # x in [0, 1]
+	y = 1 if x < thr else 1 - a * x + thr
+	return y
