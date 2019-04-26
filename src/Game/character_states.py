@@ -3,8 +3,7 @@
 from Game.character import *
 from pygame import time, event
 
-
-THROW_DURATION = 500  # in ms
+from Settings import G, THROW_DURATION, JUMP_VELOCITY
 
 
 class State:
@@ -67,6 +66,8 @@ class Idling(State):
 		
 		if is_throwing_requested(action_events):
 			return Throwing(self.character, action_events)
+		elif is_jumping_requested(action_events):
+			return Jumping(self.character, action_events, dt=dt)
 		elif is_running_requested(action_events):
 			return Running(self.character, action_events, dt=dt)
 		
@@ -110,9 +111,12 @@ class Running(State):
 		:return a state
 		:rtype State:
 		"""
+		dt = kwargs["dt"] if "dt" in kwargs.keys() else 0
+		
 		if is_throwing_requested(action_events):
 			return Throwing(self.character, action_events, **kwargs)
-		
+		elif is_jumping_requested(action_events):
+			return Jumping(self.character, action_events, dt=dt)
 		elif not is_running_requested(action_events):
 			return Idling(self.character)
 		
@@ -163,6 +167,45 @@ class Throwing(State):
 		return self
 
 
+class Jumping(State):
+	"""
+	Character state for jumping
+	"""
+	
+	def __init__(self, character, action_events=None, **kwargs):
+		super().__init__(character)
+		self.character.velocity = Vector3(0, 0, JUMP_VELOCITY)
+	
+	def run(self, action_events, **kwargs):
+		"""
+		Main function for this state, usually called at each frame.
+
+		:param list[pygame.event.Event(ACTIONEVENT)] action_events: list of action events
+		:param kwargs: some other parameters
+		:return: None
+		"""
+		dt = kwargs["dt"] if "dt" in kwargs.keys() else 0
+
+		self.character.velocity += Vector3(0, 0, -0.001 * dt * G)
+		self.character.move_rel(0.001 * dt * self.character.velocity)
+	
+	def next(self, action_events, **kwargs):
+		"""
+		Function called to change (or stay same) state, usually called at each frame.
+
+		:param list[pygame.event.Event(ACTIONEVENT)] action_events: list of action events
+		:param kwargs: some other parameters
+		:return a state
+		:rtype State:
+		"""
+		
+		# player touches ground
+		if self.character.position.z <= 0:
+			self.character.position.z = 0
+			return Idling(self.character)
+		return self
+
+
 def is_running_requested(action_events):
 	"""
 	Return true if running action is requested.
@@ -189,6 +232,20 @@ def is_throwing_requested(action_events):
 	for act_event in action_events:
 		b_throwing |= act_event.action == "THROW_BALL"
 	return b_throwing
+
+
+def is_jumping_requested(action_events):
+	"""
+	Return true if jumping action is requested.
+
+	:param list[pygame.event.Event(ACTIONEVENT)] action_events: list of action events
+	:return: True if jumping action is requested
+	:rtype bool:
+	"""
+	b_jumping = False
+	for act_event in action_events:
+		b_jumping |= act_event.action == "JUMP"
+	return b_jumping
 
 
 def get_normalized_direction_requested(action_events):
