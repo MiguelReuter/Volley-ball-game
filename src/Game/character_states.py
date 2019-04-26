@@ -148,8 +148,9 @@ class Throwing(State):
 			# throwing velocity efficiency
 			vel_eff = get_velocity_efficiency(time.get_ticks() - self.t0)
 			
+			direction = get_normalized_direction_requested(action_events)
 			# TODO : add other values to THROWEVENT ?
-			event.post(event.Event(THROWEVENT, {"direction": self.character.direction,
+			event.post(event.Event(THROWEVENT, {"direction": direction,
 			                                    "position": self.character.position,
 			                                    "velocity_efficiency": vel_eff}))
 		
@@ -196,6 +197,24 @@ def is_throwing_requested(action_events):
 	for act_event in action_events:
 		b_throwing |= act_event.action == "THROW_BALL"
 	return b_throwing
+
+
+def get_normalized_direction_requested(action_events):
+	b_up = b_down = b_left = b_right = False
+	for act_event in action_events:
+		action = act_event.action
+		b_up |= (action == "MOVE_UP")
+		b_down |= (action == "MOVE_DOWN")
+		b_left |= (action == "MOVE_LEFT")
+		b_right |= (action == "MOVE_RIGHT")
+	
+	direction = Vector3(b_down - b_up, b_right - b_left, 0)
+	
+	# normalize
+	if (b_left | b_right) & (b_up | b_down):
+		direction *= 0.7071
+		
+	return direction
 
 
 def get_velocity_efficiency(dt, period=THROW_DURATION):

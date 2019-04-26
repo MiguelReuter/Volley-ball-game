@@ -15,9 +15,32 @@ class ThrowerManager:
 		self.origin_position = Vector3()
 		self.debug_trajectory_pts = []
 		
-	def set_target_position(self):
+	@staticmethod
+	def get_effective_target_position(initial_position, direction, character_position, target_z=0):
+		"""
+		Process and get an effective target position for ball throwing depending on character position and direction.
+		
+		:param pygame.Vector3 initial_position: initial position, usually ball position
+		:param pygame.Vector3 direction: direction of throwing
+		:param pygame.Vector3 character_position: position of character on the court
+		:param float target_z: height wanted for target position, usually ball radius
+		:return: effective target position
+		:rtype pygame.Vector3:
+		"""
+		# TODO : take in account character position and refactor AMP
+		AMP = (2, 1.4)
+		
 		# target pos = court center +/- player direction +/- player position
-		pass
+		# direction
+		center = Vector3(0, 3, target_z)
+		if initial_position.y > 0:
+			center.y *= -1
+			
+		amplified_direction = Vector3(direction)  # [-1, 1]
+		amplified_direction.x *= AMP[0]
+		amplified_direction.y *= AMP[1]
+		
+		return center + amplified_direction
 	
 	def draw(self, display_manager):
 		# draw target position
@@ -64,7 +87,9 @@ class ThrowerManager:
 			char_position = ev.position
 			velocity_efficiency = ev.velocity_efficiency
 			
-			self.throw_ball(ball, ball.position, Vector3(0, 3, ball.radius), velocity_efficiency=velocity_efficiency)
+			target_position = self.get_effective_target_position(ball.position, direction, char_position,
+			                                                     target_z=ball.radius)
+			self.throw_ball(ball, ball.position, target_position, velocity_efficiency=velocity_efficiency)
 		
 	def throw_ball(self, ball, initial_pos, target_pos, wanted_height=4, **kwargs):
 		"""
@@ -80,12 +105,12 @@ class ThrowerManager:
 		velocity = velocity_efficiency * find_initial_velocity(initial_pos, target_pos, wanted_height)
 		
 		# target position changed due to velocity_efficiency
-		eff_target_pos = find_target_position(initial_pos, ball.velocity, target_pos.z)
+		eff_target_pos = find_target_position(initial_pos, velocity, target_pos.z)
 		self.target_position = Vector3(eff_target_pos)
 		self.origin_position = Vector3(initial_pos)
 		
 		# process trajectory points for debug display
-		self.debug_trajectory_pts = get_n_points_in_trajectory(10, initial_pos, ball.velocity, target_pos.z)
+		self.debug_trajectory_pts = get_n_points_in_trajectory(10, initial_pos, velocity, target_pos.z)
 		
 		# throw the ball
 		ball.position = Vector3(initial_pos)
