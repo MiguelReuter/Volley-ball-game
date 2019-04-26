@@ -145,9 +145,13 @@ class Throwing(State):
 		:return: None
 		"""
 		if self.character.is_colliding_ball:
+			# throwing velocity efficiency
+			vel_eff = get_velocity_efficiency(time.get_ticks() - self.t0)
+			
 			# TODO : add other values to THROWEVENT ?
 			event.post(event.Event(THROWEVENT, {"direction": self.character.direction,
-			                                    "position": self.character.position}))
+			                                    "position": self.character.position,
+			                                    "velocity_efficiency": vel_eff}))
 		
 	def next(self, action_events, **kwargs):
 		"""
@@ -192,3 +196,23 @@ def is_throwing_requested(action_events):
 	for act_event in action_events:
 		b_throwing |= act_event.action == "THROW_BALL"
 	return b_throwing
+
+
+def get_velocity_efficiency(dt, period=THROW_DURATION):
+	"""
+	Process and return throwing velocity efficiency.
+	
+	Efficiency is maximum when character hits the ball at the moment when he touch the ball (not too early).
+	
+	:param int dt: time in ms between throw request and effective throw, i.e. when payer touches the ball
+	:param int period: duration of throwing. :var dt: / :var period: will be used to process velocity efficiency
+	:return: throwing velocity efficiency in [0, 1]
+	:rtype float:
+	"""
+	# some parameters
+	thr = 0.4
+	a = 0.8
+	
+	x = dt / period  # x in [0, 1]
+	y = 1 if x < thr else 1 - a * x + thr
+	return y

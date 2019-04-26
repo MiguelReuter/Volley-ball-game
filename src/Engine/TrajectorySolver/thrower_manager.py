@@ -62,10 +62,11 @@ class ThrowerManager:
 		for ev in throw_events:
 			direction = ev.direction
 			char_position = ev.position
+			velocity_efficiency = ev.velocity_efficiency
 			
-			self.throw_ball(ball, ball.position, Vector3(0, 3, ball.radius))
+			self.throw_ball(ball, ball.position, Vector3(0, 3, ball.radius), velocity_efficiency=velocity_efficiency)
 		
-	def throw_ball(self, ball, initial_pos, target_pos, wanted_height=4):
+	def throw_ball(self, ball, initial_pos, target_pos, wanted_height=4, **kwargs):
 		"""
 		Throw ball from an initial position to a specified target position.
 		
@@ -75,11 +76,17 @@ class ThrowerManager:
 		:param float wanted_height:
 		:return: None
 		"""
-		self.target_position = Vector3(target_pos)
+		velocity_efficiency = kwargs["velocity_efficiency"] if "velocity_efficiency" in kwargs.keys() else 1
+		velocity = velocity_efficiency * find_initial_velocity(initial_pos, target_pos, wanted_height)
+		
+		# target position changed due to velocity_efficiency
+		eff_target_pos = find_target_position(initial_pos, ball.velocity, target_pos.z)
+		self.target_position = Vector3(eff_target_pos)
 		self.origin_position = Vector3(initial_pos)
-		ball.position = Vector3(initial_pos)
-		ball.velocity = find_initial_velocity(initial_pos, target_pos, wanted_height)
 		
 		# process trajectory points for debug display
 		self.debug_trajectory_pts = get_n_points_in_trajectory(10, initial_pos, ball.velocity, target_pos.z)
 		
+		# throw the ball
+		ball.position = Vector3(initial_pos)
+		ball.velocity = Vector3(velocity)
