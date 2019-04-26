@@ -6,6 +6,9 @@ from Engine.Collisions import AABBCollider
 from Settings import *
 
 
+from .character_states import *
+
+
 class Character:
 	def __init__(self, position, w=0.4, h=1, max_velocity=4):
 		self._position = Vector3(position)
@@ -17,6 +20,8 @@ class Character:
 		self.is_colliding_ball = False
 		self.max_velocity = max_velocity  # m/s
 		self.direction = Vector3(0, 0, 0)
+		
+		self.state = Idling(self)
 
 	@property
 	def position(self):
@@ -44,29 +49,14 @@ class Character:
 		
 	def update_actions(self, action_events, dt):
 		action_events = list(action_events)
-		b_up = b_down = b_left = b_right = False
-		
-		throw_ball = False
-		for act_event in action_events:
-			action = act_event.action
-			# move
-			b_up |= (action == "MOVE_UP")
-			b_down |= (action == "MOVE_DOWN")
-			b_left |= (action == "MOVE_LEFT")
-			b_right |= (action == "MOVE_RIGHT")
-			# throw
-			if action == "THROW_BALL" and self.is_colliding_ball:
-				throw_ball = True
-				
-		self.move(b_up, b_down, b_left, b_right, dt)
-		
-		if throw_ball:
-			# TODO : add other values to THROWEVENT ?
-			event.post(event.Event(THROWEVENT, {"direction": self.direction,
-			                                    "position": self.position}))
+
+		# state machine :
+		# run current state
+		self.state.run(action_events, dt=dt)
+
+		# eventually switch state
+		self.state = self.state.next(action_events, dt=dt)
 			
-
-
 
 
 
