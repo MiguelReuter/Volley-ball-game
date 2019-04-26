@@ -98,16 +98,8 @@ class Running(State):
 			- :var float dt: time between 2 function calls
 		"""
 		dt = kwargs["dt"] if "dt" in kwargs.keys() else 0
-		
-		b_up = b_down = b_left = b_right = False
-		for act_event in action_events:
-			action = act_event.action
-			# move
-			b_up |= (action == "MOVE_UP")
-			b_down |= (action == "MOVE_DOWN")
-			b_left |= (action == "MOVE_LEFT")
-			b_right |= (action == "MOVE_RIGHT")
-		self.character.move(b_up, b_down, b_left, b_right, dt)
+		direction = get_normalized_direction_requested(action_events)
+		self.character.move(direction, dt)
 	
 	def next(self, action_events, **kwargs):
 		"""
