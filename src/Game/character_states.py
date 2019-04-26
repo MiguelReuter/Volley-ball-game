@@ -201,7 +201,9 @@ class Jumping(State):
 		
 		# player touches ground
 		if self.character.position.z <= 0:
-			self.character.position.z = 0
+			ground_pos = Vector3(self.character.position)
+			ground_pos.z = 0
+			self.character.position = ground_pos
 			return Idling(self.character)
 		return self
 
