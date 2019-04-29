@@ -63,8 +63,8 @@ KEYS = (K_z, K_s, K_q, K_d,
 
 # PLAYER ACTIONS PARAMETERS
 THROW_DURATION = 500    # in ms
-JUMP_VELOCITY = 5       # in m/s
-
+JUMP_VELOCITY = 8       # in m/s
+SMASH_VELOCITY = 15     # in m/s
 
 
 # events

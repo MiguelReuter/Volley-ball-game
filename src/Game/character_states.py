@@ -148,7 +148,8 @@ class Throwing(State):
 			# TODO : add other values to THROWEVENT ?
 			event.post(event.Event(THROWEVENT, {"direction": direction,
 			                                    "position": self.character.position,
-			                                    "velocity_efficiency": vel_eff}))
+			                                    "velocity_efficiency": vel_eff,
+			                                    "is_smashed": False}))
 		
 	def next(self, action_events, **kwargs):
 		"""
@@ -185,6 +186,13 @@ class Jumping(State):
 		:return: None
 		"""
 		dt = kwargs["dt"] if "dt" in kwargs.keys() else 0
+		
+		if self.character.is_colliding_ball and is_throwing_requested(action_events):
+			direction = get_normalized_direction_requested(action_events)
+			event.post(event.Event(THROWEVENT, {"direction": direction,
+			                                    "position": self.character.position,
+			                                    "velocity_efficiency": -1,
+			                                    "is_smashed": True}))
 
 		self.character.velocity += Vector3(0, 0, -0.001 * dt * G)
 		self.character.move_rel(0.001 * dt * self.character.velocity)
