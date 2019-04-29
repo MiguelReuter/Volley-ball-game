@@ -44,6 +44,15 @@ CAMERA_POS = (11, 0, 3)
 FOCUS_POINT = (0, 0, 3)
 FOV_ANGLE = 60.
 
+# WORLD
+# court
+COURT_DIM_X = 6
+COURT_DIM_Y = 10
+NET_HEIGHT_BTM = 1.5
+NET_HEIGHT_TOP = 3
+
+# ball
+BALL_RADIUS = 0.5
 
 # INPUTS
 class KeyState(Enum):
@@ -65,6 +74,14 @@ KEYS = (K_z, K_s, K_q, K_d,
 THROW_DURATION = 500    # in ms
 JUMP_VELOCITY = 8       # in m/s
 SMASH_VELOCITY = 15     # in m/s
+
+# THROW PARAMETERS
+THROW_CENTER = Vector3(0, 3, BALL_RADIUS)
+THROW_AMP_DIR = (2, 1.4)
+
+SMASH_CENTER = Vector3(0, 4, BALL_RADIUS)
+SMASH_AMP_DIR = (0, 1.4)
+
 
 
 # events

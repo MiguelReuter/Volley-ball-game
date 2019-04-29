@@ -4,7 +4,6 @@ import pygame as pg
 
 from Settings import *
 
-# TODO : rename general_settings.py or Settings module
 
 class InputManager:
 	# TODO : singleton

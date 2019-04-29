@@ -31,8 +31,8 @@ class GameEngine:
 		self._create()
 	
 	def _create(self):
-		self.ball = Ball((-2, 1, 3), 0.5)
-		self.court = Court(10, 6, 1.5, 3)
+		self.ball = Ball((-2, 1, 3), BALL_RADIUS)
+		self.court = Court(COURT_DIM_Y, COURT_DIM_X, NET_HEIGHT_BTM, NET_HEIGHT_TOP)
 		self.char1 = Character((-2, -3.5, 0))
 		self.char2 = Character((0, 5, 0))
 		self.objects = [self.court, self.ball, self.char1, self.char2]

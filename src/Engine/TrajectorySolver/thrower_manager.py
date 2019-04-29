@@ -3,7 +3,7 @@
 from pygame import *
 from Engine.Display.Debug3D import *
 from Engine.TrajectorySolver import *
-from Settings import SMASH_VELOCITY, TRAJECTORY_CHANGED_EVENT
+from Settings import *
 
 import random
 from datetime import datetime
@@ -27,18 +27,17 @@ class ThrowerManager:
 		:return: effective target position
 		:rtype pygame.Vector3:
 		"""
-		# TODO : take in account character position and refactor AMP
-		AMP = (2, 1.4)
+		# TODO : take in account character position
 		
 		# target pos = court center +/- player direction +/- player position
 		# direction
-		center = Vector3(0, 3, target_z)
+		center = Vector3(THROW_CENTER)
 		if character_position.y > 0:
 			center.y *= -1
 			
 		amplified_direction = Vector3(direction)  # [-1, 1]
-		amplified_direction.x *= AMP[0]
-		amplified_direction.y *= AMP[1]
+		for i in (0, 1):
+			amplified_direction[i] *= THROW_AMP_DIR[i]
 		
 		return center + amplified_direction
 	
@@ -58,11 +57,18 @@ class ThrowerManager:
 		AMP = 1.4
 		
 		# TODO : use character attribute "is_in_left_side" for instance
-		center = Vector3(0, 4, target_z)
+		# center
+		center = Vector3(SMASH_CENTER)
+		center.x = character_position.x
 		if character_position.y > 0:
 			center.y *= -1
-			
-		return Vector3(character_position.x, center.y + direction.y * AMP, target_z)
+		
+		# control
+		amplified_direction = Vector3(direction)  # [-1, 1]
+		for i in (0, 1):
+			amplified_direction[i] *= SMASH_AMP_DIR[i]
+		
+		return center + amplified_direction
 	
 	
 	def draw(self, display_manager):
