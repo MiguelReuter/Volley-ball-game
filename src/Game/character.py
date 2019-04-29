@@ -19,7 +19,8 @@ class Character:
 		                             Vector3(w, w, h))
 		self.is_colliding_ball = False
 		self.max_velocity = max_velocity  # m/s
-		self.direction = Vector3(0, 0, 0)
+		self.velocity = Vector3()
+		self.direction = Vector3()
 		
 		self.state = Idling(self)
 
@@ -33,7 +34,9 @@ class Character:
 		self.collider.center = self._position + self.collider_relative_position
 
 	def draw(self, display_manager):
-		Debug3D.draw_horizontal_ellipse(display_manager, self.position, self.w / 2)
+		ground_pos = Vector3(self.position)
+		ground_pos.z = 0
+		Debug3D.draw_horizontal_ellipse(display_manager, ground_pos, self.w / 2)
 		self.collider.draw(display_manager)
 
 	def move_rel(self, dxyz):

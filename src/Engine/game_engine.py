@@ -15,8 +15,8 @@ from .TrajectorySolver import ThrowerManager
 import pygame as pg
 
 
-INITIAL_POS = pg.Vector3(0, 5, 1)
-TARGET_POS = pg.Vector3(2, -3, 0.5)
+INITIAL_POS = pg.Vector3(-2, 5, 1)
+TARGET_POS = pg.Vector3(-2, -3, 0.5)
 WANTED_H = 4
 
 
@@ -58,7 +58,8 @@ class GameEngine:
 			elif action == "PAUSE":
 				print(action, "not implemented yet")
 			elif action == "SPACE_TEST":
-				self.thrower_manager.throw_at_random_target_position(self.ball, INITIAL_POS, WANTED_H)
+				self.thrower_manager.throw_ball(self.ball, INITIAL_POS, TARGET_POS, WANTED_H)
+				#self.thrower_manager.throw_at_random_target_position(self.ball, INITIAL_POS, WANTED_H)
 		
 	def run(self):
 		"""

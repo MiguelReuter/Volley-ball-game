@@ -3,6 +3,7 @@
 from pygame import *
 from Engine.Display.Debug3D import *
 from Engine.TrajectorySolver import *
+from Settings import SMASH_VELOCITY, TRAJECTORY_CHANGED_EVENT
 
 import random
 from datetime import datetime
@@ -16,11 +17,10 @@ class ThrowerManager:
 		self.debug_trajectory_pts = []
 		
 	@staticmethod
-	def get_effective_target_position(initial_position, direction, character_position, target_z=0):
+	def get_effective_target_position(direction, character_position, target_z=0):
 		"""
 		Process and get an effective target position for ball throwing depending on character position and direction.
 		
-		:param pygame.Vector3 initial_position: initial position, usually ball position
 		:param pygame.Vector3 direction: direction of throwing
 		:param pygame.Vector3 character_position: position of character on the court
 		:param float target_z: height wanted for target position, usually ball radius
@@ -33,7 +33,7 @@ class ThrowerManager:
 		# target pos = court center +/- player direction +/- player position
 		# direction
 		center = Vector3(0, 3, target_z)
-		if initial_position.y > 0:
+		if character_position.y > 0:
 			center.y *= -1
 			
 		amplified_direction = Vector3(direction)  # [-1, 1]
@@ -41,6 +41,29 @@ class ThrowerManager:
 		amplified_direction.y *= AMP[1]
 		
 		return center + amplified_direction
+	
+	@staticmethod
+	def get_effective_smash_target_position(direction, character_position, target_z=0):
+		"""
+		Affect target ball position during smash with character's direction and position.
+		
+		:param pygame.Vector3 direction: direction of smashing
+		:param pygame.Vector3 character_position: position of character on the court
+		:param float target_z: height wanted for target position, usually ball radius
+		:return: effective target position
+		:rtype pygame.Vector3:
+		"""
+		# TODO : refactor AMP
+		# TODO : use x direction to orient smash ?
+		AMP = 1.4
+		
+		# TODO : use character attribute "is_in_left_side" for instance
+		center = Vector3(0, 4, target_z)
+		if character_position.y > 0:
+			center.y *= -1
+			
+		return Vector3(character_position.x, center.y + direction.y * AMP, target_z)
+	
 	
 	def draw(self, display_manager):
 		# draw target position
@@ -85,20 +108,24 @@ class ThrowerManager:
 		for ev in throw_events:
 			direction = ev.direction
 			char_position = ev.position
-			velocity_efficiency = ev.velocity_efficiency
-			
-			target_position = self.get_effective_target_position(ball.position, direction, char_position,
-			                                                     target_z=ball.radius)
-			self.throw_ball(ball, ball.position, target_position, velocity_efficiency=velocity_efficiency)
+			if ev.is_smashed:
+				target_position = self.get_effective_smash_target_position(direction, char_position,
+				                                                           target_z=ball.radius)
+				self.smash_ball(ball, ball.position, target_position)
+				
+			else:
+				velocity_efficiency = ev.velocity_efficiency
+				target_position = self.get_effective_target_position(direction, char_position, target_z=ball.radius)
+				self.throw_ball(ball, ball.position, target_position, velocity_efficiency=velocity_efficiency)
 		
 	def throw_ball(self, ball, initial_pos, target_pos, wanted_height=4, **kwargs):
 		"""
 		Throw ball from an initial position to a specified target position.
 		
-		:param Ball ball:
-		:param pygame.Vector3 initial_pos:
-		:param pygame.Vector3 target_pos:
-		:param float wanted_height:
+		:param Ball ball: ball to throw
+		:param pygame.Vector3 initial_pos: initial position, usually the ball position
+		:param pygame.Vector3 target_pos: target position
+		:param float wanted_height: desired height at net place
 		:return: None
 		"""
 		velocity_efficiency = kwargs["velocity_efficiency"] if "velocity_efficiency" in kwargs.keys() else 1
@@ -115,3 +142,27 @@ class ThrowerManager:
 		# throw the ball
 		ball.position = Vector3(initial_pos)
 		ball.velocity = Vector3(velocity)
+		
+		event.clear(TRAJECTORY_CHANGED_EVENT)
+		
+	def smash_ball(self, ball, initial_pos, target_pos):
+		"""
+		Smash ball from an initial position in the direction of target position.
+		
+		:param Ball ball: ball to smash
+		:param pygame.Vector3 initial_pos: initial position, usually the ball position
+		:param pygame.Vector3 target_pos: target position, used to define smash direction
+		:return: None
+		"""
+		velocity = SMASH_VELOCITY * (target_pos - ball.position).normalize()
+		
+		self.target_position = Vector3(target_pos)
+		self.origin_position = Vector3(initial_pos)
+		
+		# process trajectory points for debug display
+		self.debug_trajectory_pts = get_n_points_in_trajectory(10, initial_pos, velocity, target_pos.z)
+		
+		# throw the ball
+		ball.position = Vector3(initial_pos)
+		ball.velocity = Vector3(velocity)
+		
