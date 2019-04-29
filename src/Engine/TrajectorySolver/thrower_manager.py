@@ -3,7 +3,7 @@
 from pygame import *
 from Engine.Display.Debug3D import *
 from Engine.TrajectorySolver import *
-from Settings import SMASH_VELOCITY
+from Settings import SMASH_VELOCITY, TRAJECTORY_CHANGED_EVENT
 
 import random
 from datetime import datetime
@@ -142,6 +142,8 @@ class ThrowerManager:
 		# throw the ball
 		ball.position = Vector3(initial_pos)
 		ball.velocity = Vector3(velocity)
+		
+		event.clear(TRAJECTORY_CHANGED_EVENT)
 		
 	def smash_ball(self, ball, initial_pos, target_pos):
 		"""
