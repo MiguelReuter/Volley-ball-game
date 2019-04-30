@@ -55,6 +55,12 @@ class Character:
 
 		# eventually switch state
 		self.state = self.state.next(action_events, dt=dt)
+	
+	def update_physics(self, dt):
+		self.previous_position = Vector3(self.position)
+		
+		self.velocity += Vector3(0, 0, -0.001 * dt * G)
+		self.move_rel(0.001 * dt * self.velocity)
 			
 
 

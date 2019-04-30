@@ -193,9 +193,6 @@ class Jumping(State):
 			                                    "position": self.character.position,
 			                                    "velocity_efficiency": -1,
 			                                    "is_smashed": True}))
-
-		self.character.velocity += Vector3(0, 0, -0.001 * dt * G)
-		self.character.move_rel(0.001 * dt * self.character.velocity)
 	
 	def next(self, action_events, **kwargs):
 		"""

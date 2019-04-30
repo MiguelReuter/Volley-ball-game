@@ -12,7 +12,7 @@ class CollisionsManager:
 	
 	def update(self, ball, court, characters_list):
 		b_refresh_target_ball_position = False
-		
+	
 		# ball / ground collision
 		ball.is_colliding_ground = ball.position[2] - ball.radius < 0 and ball.velocity[2] < 0
 		if ball.is_colliding_ground:
@@ -44,6 +44,13 @@ class CollisionsManager:
 			
 			if char.is_colliding_ball:
 				ball.is_colliding_character = True
+			
+			# character / ground
+			if char.position.z < 0:
+				ground_pos = Vector3(char.position)
+				ground_pos.z = 0
+				char.position = ground_pos
+				char.velocity.z = 0
 		
 		# ball velocity checked to prevent to fill event queue
 		if b_refresh_target_ball_position and ball.velocity.length_squared() > 0.1:

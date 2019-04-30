@@ -81,6 +81,8 @@ class GameEngine:
 		while self.running:
 			# PHYSICS
 			self.ball.update_physics(t2-t1)
+			for char in [self.char1, self.char2]:
+				char.update_physics(t2-t1)
 			
 			# COLLISIONS
 			self.collisions_manager.update(self.ball, self.court, [self.char1, self.char2])
