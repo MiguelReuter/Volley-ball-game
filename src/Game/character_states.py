@@ -145,7 +145,6 @@ class Throwing(State):
 			vel_eff = get_velocity_efficiency(time.get_ticks() - self.t0)
 			
 			direction = get_direction_requested(action_events)
-			# TODO : add other values to THROWEVENT ?
 			event.post(event.Event(THROW_EVENT, {"throwing_type": ThrowingType.THROW,
 			                                     "direction": direction,
 			                                     "position": self.character.position,
@@ -186,7 +185,6 @@ class Serving(State):
 		:return: None
 		"""
 		
-		# TODO : Character.getHandPosition()
 		if is_throwing_requested(action_events):
 			self.t0 = time.get_ticks()
 			self.has_served = True
