@@ -30,6 +30,7 @@ class CollisionsManager:
 			dxyz = dy_center * (ball.position - ball.previous_position).normalize()
 			centered_ball_collider = SphereCollider(ball.previous_position + dxyz, ball.radius)
 			ball.is_colliding_net |= are_sphere_and_aabb_colliding(centered_ball_collider, court.collider)
+			print("tunnel collision")
 		# TODO : get collision point to manage bound direction
 		if ball.is_colliding_net:
 			ball.velocity.y *= 0.8

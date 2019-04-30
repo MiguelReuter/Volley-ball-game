@@ -18,7 +18,7 @@ import pygame as pg
 
 INITIAL_POS = pg.Vector3(-2, 5, 1)
 TARGET_POS = pg.Vector3(-2, -3, 0.5)
-WANTED_H = 4
+WANTED_H = 3.5
 
 
 class GameEngine:

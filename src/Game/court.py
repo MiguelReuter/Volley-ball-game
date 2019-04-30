@@ -12,7 +12,7 @@ class Court:
 		self.net_z1 = net_z1
 		self.net_z2 = net_z2
 		self.collider = AABBCollider(Vector3(0, 0, (net_z1 + net_z2) / 2),
-		                             (h, 0.1, net_z2 - net_z1))
+		                             (h, 0, net_z2 - net_z1))
 
 	def draw(self, display_manager):
 		self.collider.draw(display_manager)
