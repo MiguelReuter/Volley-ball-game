@@ -10,7 +10,7 @@ from .character_states import *
 
 
 class Character:
-	def __init__(self, position, w=0.4, h=1, max_velocity=4):
+	def __init__(self, position, w=0.4, h=1, max_velocity=4, is_in_left_side=True):
 		self._position = Vector3(position)
 		self.w = w
 		self.h = h
@@ -21,6 +21,8 @@ class Character:
 		self.max_velocity = max_velocity  # m/s
 		self.velocity = Vector3()
 		self.direction = Vector3()
+		
+		self.is_in_left_side = is_in_left_side
 		
 		self.state = Idling(self)
 
@@ -55,8 +57,13 @@ class Character:
 
 		# eventually switch state
 		self.state = self.state.next(action_events, dt=dt)
-			
-
+		
+	def get_hands_position(self):
+		dh = Vector3(0, 0, self.h)
+		dh.y = self.w / 2
+		if not self.is_in_left_side:
+			dh.y *= -1
+		return self.position + dh
 
 
 

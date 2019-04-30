@@ -52,10 +52,7 @@ class ThrowerManager:
 		:return: effective target position
 		:rtype pygame.Vector3:
 		"""
-		# TODO : refactor AMP
 		# TODO : use x direction to orient smash ?
-		AMP = 1.4
-		
 		# TODO : use character attribute "is_in_left_side" for instance
 		# center
 		center = Vector3(SMASH_CENTER)
@@ -70,6 +67,27 @@ class ThrowerManager:
 		
 		return center + amplified_direction
 	
+	@staticmethod
+	def get_effective_serve_target_position(direction, character_position, target_z=0):
+		"""
+		Process and get an effective target position for ball serving depending on character position and direction.
+
+		:param pygame.Vector3 direction: direction of throwing
+		:param pygame.Vector3 character_position: position of character on the court
+		:param float target_z: height wanted for target position, usually ball radius
+		:return: effective target position
+		:rtype pygame.Vector3:
+		"""
+		# direction
+		center = Vector3(SERVE_CENTER)
+		if character_position.y > 0:
+			center.y *= -1
+		
+		amplified_direction = Vector3(direction)  # [-1, 1]
+		for i in (0, 1):
+			amplified_direction[i] *= SERVE_AMP_DIR[i]
+		
+		return center + amplified_direction
 	
 	def draw(self, display_manager):
 		# draw target position
@@ -114,15 +132,23 @@ class ThrowerManager:
 		for ev in throw_events:
 			direction = ev.direction
 			char_position = ev.position
-			if ev.is_smashed:
-				target_position = self.get_effective_smash_target_position(direction, char_position,
-				                                                           target_z=ball.radius)
-				self.smash_ball(ball, ball.position, target_position)
-				
-			else:
+			
+			# simple throw
+			if ev.throwing_type == ThrowingType.THROW:
 				velocity_efficiency = ev.velocity_efficiency
 				target_position = self.get_effective_target_position(direction, char_position, target_z=ball.radius)
 				self.throw_ball(ball, ball.position, target_position, velocity_efficiency=velocity_efficiency)
+			# smash (during a jump)
+			elif ev.throwing_type == ThrowingType.SMASH:
+				target_position = self.get_effective_smash_target_position(direction, char_position,
+				                                                           target_z=ball.radius)
+				self.smash_ball(ball, ball.position, target_position)
+			# serve
+			elif ev.throwing_type == ThrowingType.SERVE:
+				ball.will_be_served = False
+				target_position = self.get_effective_serve_target_position(direction, char_position,
+				                                                           target_z=ball.radius)
+				self.throw_ball(ball, ball.position, target_position, velocity_efficiency=1.0)
 		
 	def throw_ball(self, ball, initial_pos, target_pos, wanted_height=4, **kwargs):
 		"""
@@ -162,11 +188,13 @@ class ThrowerManager:
 		"""
 		velocity = SMASH_VELOCITY * (target_pos - ball.position).normalize()
 		
-		self.target_position = Vector3(target_pos)
-		self.origin_position = Vector3(initial_pos)
-		
 		# process trajectory points for debug display
 		self.debug_trajectory_pts = get_n_points_in_trajectory(10, initial_pos, velocity, target_pos.z)
+		
+		# process target position
+		real_target_position = find_target_position(initial_pos, velocity, ball.radius)
+		self.target_position = Vector3(real_target_position)
+		self.origin_position = Vector3(initial_pos)
 		
 		# throw the ball
 		ball.position = Vector3(initial_pos)

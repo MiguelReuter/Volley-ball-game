@@ -20,6 +20,8 @@ class Ball(sprite.Sprite):
 		self.is_colliding_ground = False
 		self.is_colliding_net = False
 		self.is_colliding_character = False
+		
+		self.will_be_served = False
 	
 	@property
 	def position(self):
@@ -49,5 +51,8 @@ class Ball(sprite.Sprite):
 	def update_physics(self, dt):
 		self.previous_position = Vector3(self.position)
 		
-		self.add_velocity(Vector3(0, 0, -0.001 * dt * G))
-		self.move_rel(0.001 * dt * self.velocity)
+		if not self.will_be_served:
+			self.add_velocity(Vector3(0, 0, -0.001 * dt * G))
+			self.move_rel(0.001 * dt * self.velocity)
+		else:
+			self.velocity = Vector3()

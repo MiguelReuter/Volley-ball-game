@@ -7,6 +7,7 @@ from Settings import *
 from Game.ball import Ball
 from Game.court import Court
 from Game.character import Character
+from Game.character_states import *
 
 from Engine.Collisions import *
 from .TrajectorySolver import ThrowerManager
@@ -40,7 +41,7 @@ class GameEngine:
 		# allowed pygame events
 		pg.event.set_blocked([i for i in range(pg.NUMEVENTS)])
 		pg.event.set_allowed([pg.KEYDOWN, pg.KEYUP, pg.QUIT, pg.VIDEORESIZE,
-		                      ACTIONEVENT, THROWEVENT, TRAJECTORY_CHANGED_EVENT])
+		                      ACTIONEVENT, THROW_EVENT, TRAJECTORY_CHANGED_EVENT])
 
 	def request_quit(self):
 		"""
@@ -49,7 +50,13 @@ class GameEngine:
 		:return: None
 		"""
 		self.running = False
-		
+	
+	def serve(self):
+		self.char1.position = Vector3(2, -5, 0)
+		self.ball.will_be_served = True
+		self.ball.position = self.char1.get_hands_position()
+		self.char1.state = Serving(self.char1)
+	
 	def update_actions(self, action_events, dt):
 		for event in action_events:
 			action = event.action
@@ -58,6 +65,7 @@ class GameEngine:
 			elif action == "PAUSE":
 				print(action, "not implemented yet")
 			elif action == "SPACE_TEST":
+				#self.serve()
 				self.thrower_manager.throw_ball(self.ball, INITIAL_POS, TARGET_POS, WANTED_H)
 				#self.thrower_manager.throw_at_random_target_position(self.ball, INITIAL_POS, WANTED_H)
 		
@@ -96,7 +104,7 @@ class GameEngine:
 			self.update_actions(actions_events_queue, t2 - t1)
 			
 			# throw event
-			self.thrower_manager.update(pg.event.get(THROWEVENT), pg.event.get(TRAJECTORY_CHANGED_EVENT), self.ball)
+			self.thrower_manager.update(pg.event.get(THROW_EVENT), pg.event.get(TRAJECTORY_CHANGED_EVENT), self.ball)
 			
 			# DISPLAY
 			self.display_manager.update([*self.objects, self.thrower_manager])
