@@ -22,20 +22,34 @@ class CollisionsManager:
 			b_refresh_target_ball_position = True
 		
 		# ball / net collision
-		ball.is_colliding_net = are_sphere_and_aabb_colliding(ball.collider, court.collider)
+		ball.is_colliding_net, collision_point = are_sphere_and_finite_plane_colliding(ball.collider, court.collider,
+		                                                                               ball.previous_position)
 		# for tunnel collision
 		if ball.previous_position.y * ball.position.y < 0 and not ball.is_colliding_net:
 			dy = ball.position.y - ball.previous_position.y
 			dy_center = ball.previous_position[1] / dy
 			dxyz = dy_center * (ball.position - ball.previous_position).normalize()
 			centered_ball_collider = SphereCollider(ball.previous_position + dxyz, ball.radius)
-			ball.is_colliding_net |= are_sphere_and_aabb_colliding(centered_ball_collider, court.collider)
-			print("tunnel collision")
+			
+			b, collision_point = are_sphere_and_finite_plane_colliding(centered_ball_collider, court.collider,
+			                                                           ball.previous_position)
+			ball.is_colliding_net |= b
+			
+			if ball.is_colliding_net:
+				print("tunnel collision")
 		# TODO : get collision point to manage bound direction
 		if ball.is_colliding_net:
+			print(collision_point)
 			ball.velocity.y *= 0.8
 			ball.velocity.y *= -1
-			ball.position.y = ball.previous_position.y
+			
+			pr_pos = Vector3(ball.position)
+			pr_pos.y = ball.previous_position.y
+			# print(ball.previous_position)
+			# print(ball.position)
+			
+			ball.position = pr_pos
+			
 			b_refresh_target_ball_position = True
 		
 		# ball / character's collision
