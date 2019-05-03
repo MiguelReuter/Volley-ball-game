@@ -52,6 +52,7 @@ class GameEngine:
 		self.running = False
 	
 	def serve(self):
+		# request char1 to serve
 		self.char1.position = Vector3(2, -5, 0)
 		self.ball.will_be_served = True
 		self.ball.position = self.char1.get_hands_position()

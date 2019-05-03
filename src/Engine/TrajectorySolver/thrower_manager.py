@@ -11,6 +11,11 @@ random.seed(datetime.now())  # for random throwing
 
 
 class ThrowerManager:
+	"""
+	Class used to manage ball throwing.
+	"""
+	
+	# TODO : singleton
 	def __init__(self):
 		self.target_position = Vector3()
 		self.origin_position = Vector3()
@@ -87,6 +92,13 @@ class ThrowerManager:
 		return center + amplified_direction
 	
 	def draw(self, display_manager):
+		"""
+		Draw debug 3D objects (ball trajectory, target ball position).
+		
+		:param DisplayManager display_manager: Display manager who manages drawing
+		:return: None
+		"""
+		
 		# draw target position
 		ground_pos = Vector3(self.target_position)
 		ground_pos.z = 0

@@ -13,6 +13,15 @@ class CollisionsManager:
 		self.game_engine = game_engine
 	
 	def update(self, ball, court, characters_list):
+		"""
+		Detect and manage collision between given objects.
+		
+		:param Ball ball: ball object.
+		:param Court court: object used for net collision. Ball collision is checked.
+		:param list(Character) characters_list: list of characters. Ball and ground collision are checked for each
+		character
+		:return: None
+		"""
 		b_refresh_target_ball_position = False
 	
 		# ball / ground collision

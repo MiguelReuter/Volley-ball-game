@@ -87,6 +87,19 @@ def are_sphere_and_aabb_colliding(sphere, aabb):
 
 
 def are_sphere_and_finite_plane_colliding(sphere, aabb, previous_sphere_position):
+	"""
+	Return True if given sphere and plane are colliding.
+	
+	Given AABB collider is supposed to have y size equals to 0 (for finite plane).
+	If there is a collision, collision point and ball position at collision moment are returned too.
+	:param SphereCollider sphere: sphere collider
+	:param AABBCollider aabb: AABB collider, size along y axis is supposed to be 0
+	:param pygame.Vector3 previous_sphere_position: previous position of ball
+	:return: True if sphere and AABB are colliding, collision point and ball position at collision moment if there is a
+	collision
+	:rtype (True, Vector3, Vector3)
+	    or (False, None, None)          according to first bool:
+	"""
 	if are_sphere_and_aabb_colliding(sphere, aabb):
 		# TODO : return sphere position when collision occured (between 2 frames)
 		x_min = aabb.center.x - aabb.size3[0] / 2

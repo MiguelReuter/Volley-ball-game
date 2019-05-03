@@ -90,6 +90,16 @@ def find_target_position(origin_pos, initial_velocity, wanted_z=0):
 	
 
 def get_n_points_in_trajectory(n, origin_pos, initial_velocity, wanted_z=0):
+	"""
+	Return n points in ball trajectory defined by origin position and initial velocity.
+	
+	:param int n: points count
+	:param pygame.Vector3 origin_pos: initial ball position
+	:param pygame.Vector3 initial_velocity: initial ball velocity
+	:param float wanted_z: wanted height for final point (end of trajectory)
+	:return: n points in list
+	:rtype list(Vector3):
+	"""
 	# z_t
 	z_t = wanted_z - origin_pos.z
 	
@@ -107,9 +117,10 @@ def get_n_points_in_trajectory(n, origin_pos, initial_velocity, wanted_z=0):
 	assert delta > 0
 	t_t = (-b + sqrt(delta)) / (2 * a)
 	
-	dt = t_t / n
+	assert n > 1
+	dt = t_t / (n - 1)
 	pts = []
-	for i in range(n+1):
+	for i in range(n):
 		t_i = i * dt
 		u_i = t_i * initial_velocity.dot(u)
 		z_i = -t_i**2 / 2 * G + t_i * initial_velocity.z
@@ -119,6 +130,7 @@ def get_n_points_in_trajectory(n, origin_pos, initial_velocity, wanted_z=0):
 
 
 def find_effective_target_position(origin_pos, target_pos, wanted_height):
+	# TODO : /!\ method not used yet /!\
 	# all targets and wanted heights are not physically possible for the player : huge velocity needed, skills...
 	
 	# TODO : add dependence on target and origin position
