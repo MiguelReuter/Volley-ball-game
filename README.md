@@ -14,10 +14,14 @@ The target ball position is **controllable** in these actions :
  - **serve**
 
 ## Controls
- - **ZQSD** : move or choose target bal position
- - **i** : jump
- - **j** : smash
- - **Arrow keys** : move camera
+
+| Key       | Action                                  |
+|   ------- |      ---------------------------------- |
+| ZQSD      | **Move** or **aim** during ball throwing|
+| i         | Jump                                    |
+| j         | Smash                                   |
+| Arrow Keys| Move Camera                             |
+| Space Bar | Relaunch ball                           |
 
 
 ## Throw ball
