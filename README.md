@@ -8,9 +8,10 @@ Check [Projects](https://github.com/MiguelReuter/Volley-ball-game/projects) page
 Demo with debug display (simple shapes, not sprites yet).
 
 The target ball position is **controllable** in these actions :
-    - **throw**
-    - **smash** (depth only)
-    - **serve**
+
+ - **throw**
+ - **smash** (depth only)
+ - **serve**
 
 ## Controls
  - **ZQSD** : move or choose target bal position
