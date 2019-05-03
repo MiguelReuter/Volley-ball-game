@@ -89,7 +89,6 @@ def are_sphere_and_aabb_colliding(sphere, aabb):
 def are_sphere_and_finite_plane_colliding(sphere, aabb, previous_sphere_position):
 	if are_sphere_and_aabb_colliding(sphere, aabb):
 		# TODO : return sphere position when collision occured (between 2 frames)
-		
 		x_min = aabb.center.x - aabb.size3[0] / 2
 		x_max = aabb.center.x + aabb.size3[0] / 2
 		y = aabb.center.y
@@ -97,37 +96,41 @@ def are_sphere_and_finite_plane_colliding(sphere, aabb, previous_sphere_position
 		z_max = aabb.center.z + aabb.size3[2] / 2
 		
 		# find collision point
-		if (x_min <= sphere.center.x <= x_max) & (z_min <= sphere.center.z <= z_max):  # center of net
+		
+		# center of net
+		if (x_min <= sphere.center.x <= x_max) & (z_min <= sphere.center.z <= z_max):
 			collision_point = Vector3(sphere.center.x, y, sphere.center.z)
-			print("net center")
-		elif (x_min <= sphere.center.x <= x_max):  # top and bottom of net
+		elif (x_min <= sphere.center.x <= x_max):
+			# top
 			if (Vector3(0, sphere.center.y - y, sphere.center.z - z_max).length_squared() <= sphere.radius ** 2):
 				collision_point = Vector3(sphere.center.x, y, z_max)
-				print("+z edge")
+			# bottom
 			elif (Vector3(0, sphere.center.y - y, sphere.center.z - z_min).length_squared() <= sphere.radius ** 2):
 				collision_point = Vector3(sphere.center.x, y, z_min)
-				print("-z edge")
-		elif (z_min <= sphere.center.z <= z_max):  # left and right of net
+		elif (z_min <= sphere.center.z <= z_max):
+			# left
 			if (Vector3(sphere.center.x - x_max, sphere.center.y - y, 0).length_squared() <= sphere.radius ** 2):
 				collision_point = Vector3(x_max, y, sphere.center.z)
-				print("+x edge")
+			# right
 			elif (Vector3(sphere.center.x - x_min, sphere.center.y - y, 0).length_squared() <= sphere.radius ** 2):
 				collision_point = Vector3(x_min, y, sphere.center.z)
-				print("-x edge")
+		# corners of net
 		elif (Vector3(x_min, y, z_min) - sphere.center).length_squared() <= sphere.radius ** 2:
 			collision_point = Vector3(x_min, y, z_min)
-			print("(x min, 0, z_min)")
 		elif (Vector3(x_min, y, z_max) - sphere.center).length_squared() <= sphere.radius ** 2:
 			collision_point = Vector3(x_min, y, z_max)
-			print("(x min, 0, z_max)")
 		elif (Vector3(x_max, y, z_min) - sphere.center).length_squared() <= sphere.radius ** 2:
 			collision_point = Vector3(x_max, y, z_min)
-			print("(x max, 0, z_min)")
 		elif (Vector3(x_max, y, z_max) - sphere.center).length_squared() <= sphere.radius ** 2:
 			collision_point = Vector3(x_max, y, z_max)
-			print("(x max, 0, z_max)")
+		# there's a collision but collision point not found !
 		else:
 			assert -1
-		return True, collision_point
-	return False, None
+			
+		# u vect
+		u_vect = Vector3(collision_point - previous_sphere_position).normalize()
+		ball_pos_at_collision = -sphere.radius * u_vect + collision_point
+		
+		return True, collision_point, ball_pos_at_collision
+	return False, None, None
 	

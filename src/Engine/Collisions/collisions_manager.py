@@ -5,6 +5,8 @@ import pygame as pg
 from Settings import *
 from ..TrajectorySolver.TrajectorySolver import *
 
+from random import random
+
 
 class CollisionsManager:
 	def __init__(self, game_engine):
@@ -22,33 +24,18 @@ class CollisionsManager:
 			b_refresh_target_ball_position = True
 		
 		# ball / net collision
-		ball.is_colliding_net, collision_point = are_sphere_and_finite_plane_colliding(ball.collider, court.collider,
+		ball.is_colliding_net, collision_point, ball_pos_at_collision = are_sphere_and_finite_plane_colliding(ball.collider, court.collider,
 		                                                                               ball.previous_position)
-		# for tunnel collision
-		if ball.previous_position.y * ball.position.y < 0 and not ball.is_colliding_net:
-			dy = ball.position.y - ball.previous_position.y
-			dy_center = ball.previous_position[1] / dy
-			dxyz = dy_center * (ball.position - ball.previous_position).normalize()
-			centered_ball_collider = SphereCollider(ball.previous_position + dxyz, ball.radius)
-			
-			b, collision_point = are_sphere_and_finite_plane_colliding(centered_ball_collider, court.collider,
-			                                                           ball.previous_position)
-			ball.is_colliding_net |= b
-			
-			if ball.is_colliding_net:
-				print("tunnel collision")
-		# TODO : get collision point to manage bound direction
+		# TODO : manage tunnel collision ?
 		if ball.is_colliding_net:
-			print(collision_point)
-			ball.velocity.y *= 0.8
-			ball.velocity.y *= -1
+			# reflect velocity and set damping
+			random_vect = Vector3(0, 0.1 * random(), 0)  # to prevent unstable balance
+			normal_vect = Vector3(ball_pos_at_collision - collision_point + random_vect)
+			ball.velocity.reflect_ip(normal_vect)
+			ball.velocity *= 0.8
 			
-			pr_pos = Vector3(ball.position)
-			pr_pos.y = ball.previous_position.y
-			# print(ball.previous_position)
-			# print(ball.position)
-			
-			ball.position = pr_pos
+			# set ball position
+			ball.position = ball_pos_at_collision
 			
 			b_refresh_target_ball_position = True
 		
