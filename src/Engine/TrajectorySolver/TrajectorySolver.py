@@ -147,10 +147,47 @@ def find_effective_target_position(origin_pos, target_pos, wanted_height):
 
 
 def _are_points_in_same_y_side(p1, p2):
+	"""
+	Return True if the 2 given points are on same side (y axis).
+	
+	usage examples :
+		>>> p1 = Vector3(0, -5, 0)
+		>>> p2 = Vector3(0, 10, 0)
+		>>> _are_points_in_same_y_side(p1, p2)
+		True
+		>>> p3 = Vector3(20, -5, 0)
+		>>> _are_points_in_same_y_side(p1, p3)
+		False
+	
+	:param pygame.Vector3 p1: 1st point
+	:param pygame.Vector3 p2: 2nd point
+	:return: True if points are in same side
+	"""
 	return p1.y * p2.y < 0
 
 
 def _apply_signed_threshold(value, min_thr=None, max_thr=None):
+	"""
+	Apply threshold on signed value.
+	
+	usage examples :
+		>>> _apply_signed_threshold(0.678, min_thr=0.5)
+		0.5
+		>>> _apply_signed_threshold(-0.678, min_thr=0.5)
+		-0.5
+		>>> _apply_signed_threshold(0.678, max_thr=2.0)
+		0.678
+		>>> _apply_signed_threshold(20.678, max_thr=2.0)
+		2.0
+		>>> _apply_signed_threshold(-20, max_thr=2.0)
+		-2.0
+	
+	:param float value: value to threshold
+	:param float min_thr: nearest threshold from 0
+	:param float max_thr: farthest threshold from 0
+	:return: thresholded value
+	:rtype float:
+	"""
 	sat_val = value
 	
 	if min_thr is not None:
@@ -160,8 +197,8 @@ def _apply_signed_threshold(value, min_thr=None, max_thr=None):
 			sat_val = min(sat_val, min_thr)
 	if max_thr is not None:
 		if sat_val < 0:
-			sat_val = min(sat_val, -max_thr)
+			sat_val = max(sat_val, -max_thr)
 		else:
-			sat_val = max(sat_val, max_thr)
+			sat_val = min(sat_val, max_thr)
 			
 	return sat_val

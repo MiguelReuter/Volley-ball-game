@@ -6,7 +6,7 @@ from Engine.Collisions import AABBCollider
 from Settings import *
 
 
-from .character_states import *
+from Game.character_states import *
 
 
 class Character:

@@ -137,10 +137,9 @@ class DisplayManager:
 		"""
 		Get position to draw a centered surface onto another.
 		
-		example 1 :
+		usage examples:
 			>>> DisplayManager.get_position_to_blit_centered_surfaces((50, 100), (10, 10))
 			(20, 45)
-		example 2 :
 			>>> DisplayManager.get_position_to_blit_centered_surfaces((50, 100), (1000, 1000))
 			(0, 0)
 			

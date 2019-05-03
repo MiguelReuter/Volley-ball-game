@@ -101,7 +101,6 @@ def are_sphere_and_finite_plane_colliding(sphere, aabb, previous_sphere_position
 	    or (False, None, None)          according to first bool:
 	"""
 	if are_sphere_and_aabb_colliding(sphere, aabb):
-		# TODO : return sphere position when collision occured (between 2 frames)
 		x_min = aabb.center.x - aabb.size3[0] / 2
 		x_max = aabb.center.x + aabb.size3[0] / 2
 		y = aabb.center.y
