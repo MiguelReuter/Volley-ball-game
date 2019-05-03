@@ -18,7 +18,7 @@ import pygame as pg
 
 INITIAL_POS = pg.Vector3(-2, 5, 1)
 TARGET_POS = pg.Vector3(-2, -3, 0.5)
-WANTED_H = 4
+WANTED_H = 3.5
 
 
 class GameEngine:
@@ -32,7 +32,7 @@ class GameEngine:
 		self._create()
 	
 	def _create(self):
-		self.ball = Ball((-2, 1, 3), BALL_RADIUS)
+		self.ball = Ball(INITIAL_POS, BALL_RADIUS)
 		self.court = Court(COURT_DIM_Y, COURT_DIM_X, NET_HEIGHT_BTM, NET_HEIGHT_TOP)
 		self.char1 = Character((-2, -3.5, 0))
 		self.char2 = Character((0, 5, 0))

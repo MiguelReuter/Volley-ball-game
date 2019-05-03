@@ -72,7 +72,7 @@ def find_target_position(origin_pos, initial_velocity, wanted_z=0):
 	# u vector : unit vector in XY plane from origin to target position
 	u = Vector3(initial_velocity)
 	u.z = 0
-	u = u.normalize()
+	u = u.normalize() if u.length_squared() != 0 else Vector3()
 	
 	# find t_t : final time
 	a = G / 2
