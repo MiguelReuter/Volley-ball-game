@@ -3,9 +3,34 @@
 Check [Projects](https://github.com/MiguelReuter/Volley-ball-game/projects) page on Github to see progress !
 
 
-# Demo (only debug display)
+# Demo
 
-![](demo.gif)
+Demo with debug display (simple shapes, not sprites yet).
+
+The target ball position is **controllable** in these actions :
+    - **throw**
+    - **smash** (depth only)
+    - **serve**
+
+## Controls
+ - **ZQSD** : move or choose target bal position
+ - **i** : jump
+ - **j** : smash
+ - **Arrow keys** : move camera
+
+
+## Throw ball
+<img src="doc/throw.gif" height="300" />
+
+## Smash
+<img src="doc/smash.gif" height="300" />
+
+## Serve
+<img src="doc/serve.gif" height="300" />
+
+## Collisions with net
+<img src="doc/net_collision_1.gif" height="300" />
+<img src="doc/net_collision_2.gif" height="300" />
 
 
 # Dependencies
@@ -19,7 +44,6 @@ python3 src/main.py
 ```
 
 # Run tests (optional)
-To run tests :
 ```
 py.test .
 ```
