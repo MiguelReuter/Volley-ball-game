@@ -20,17 +20,16 @@ The target ball position is **controllable** in these actions :
 
 
 ## Throw ball
-<img src="doc/throw.gif" height="300" />
+<img src="doc/throw.gif" height="400" />
 
 ## Smash
-<img src="doc/smash.gif" height="300" />
+<img src="doc/smash.gif" height="400" />
 
 ## Serve
-<img src="doc/serve.gif" height="300" />
+<img src="doc/serve.gif" height="400" />
 
 ## Collisions with net
-<img src="doc/net_collision_1.gif" height="300" />
-<img src="doc/net_collision_2.gif" height="300" />
+<img src="doc/net_collision_1.gif" height="400" /> <img src="doc/net_collision_2.gif" height="400" />
 
 
 # Dependencies
@@ -51,3 +50,5 @@ py.test .
 # Licence
 
 The code is under the MIT license terms.
+
+<!-- Required extensions: pymdownx.betterem, pymdownx.tilde, pymdownx.emoji, pymdownx.tasklist, pymdownx.superfences -->
