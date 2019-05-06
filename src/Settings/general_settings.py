@@ -61,15 +61,6 @@ class KeyState(Enum):
 	PRESSED = 2
 	JUST_RELEASED = 3
 
-# keyboard keys used in game (other keys are ignored)
-KEYS = (K_z, K_s, K_q, K_d,
-        K_j,
-        K_i,
-        K_UP, K_DOWN, K_LEFT, K_RIGHT,
-        K_ESCAPE,
-        K_SPACE,
-        K_p)
-
 # PLAYER ACTIONS PARAMETERS
 THROW_DURATION = 500    # in ms
 SERVE_DURATION = 500    # in ms

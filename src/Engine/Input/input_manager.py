@@ -10,8 +10,10 @@ class InputManager:
 	def __init__(self, game_engine):
 		# TODO : remove reference of self.keys
 		self.game_engine = game_engine
-		self.keys = {k: KeyState.RELEASED for k in KEYS}
-		self.key_action_bind = self._bind_key_to_action()
+		self.keys = {}
+		self.key_action_bind = {}
+		
+		self._bind_key_to_action()
 		
 	def update(self):
 		"""
@@ -32,11 +34,11 @@ class InputManager:
 			if event.type == pg.QUIT:
 				self.game_engine.request_quit()
 			if event.type == pg.KEYDOWN:
-				if event.key in KEYS:
+				if event.key in self.keys.keys():
 					self.keys[event.key] = KeyState.JUST_PRESSED
 
 			if event.type == pg.KEYUP:
-				if event.key in KEYS:
+				if event.key in self.keys.keys():
 					self.keys[event.key] = KeyState.JUST_RELEASED
 					
 		# generate actions
@@ -66,10 +68,9 @@ class InputManager:
 		"""
 		
 		# TODO : bind action for each connected input device (keyboard, joysticks...)
-		key_action_bind = {}
 		# (key, key_state): action
 		for action in INPUT_PRESET_KEYBOARD:
 			key = INPUT_PRESET_KEYBOARD[action]
+			self.keys[key] = KeyState.RELEASED 
 			key_state = INPUT_ACTIONS[action]
-			key_action_bind[(key, key_state)] = action
-		return key_action_bind
+			self.key_action_bind[(key, key_state)] = action
