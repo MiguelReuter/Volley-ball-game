@@ -34,14 +34,14 @@ class GameEngine:
 	def _create(self):
 		self.ball = Ball(INITIAL_POS, BALL_RADIUS)
 		self.court = Court(COURT_DIM_Y, COURT_DIM_X, NET_HEIGHT_BTM, NET_HEIGHT_TOP)
-		self.char1 = Character((-2, -3.5, 0))
-		self.char2 = Character((0, 5, 0))
+		self.char1 = Character((-2, -3.5, 0), player_id=PlayerId.PLAYER_ID_1)
+		self.char2 = Character((0, 5, 0), player_id=PlayerId.PLAYER_ID_2)
 		self.objects = [self.court, self.ball, self.char1, self.char2]
 		
 		# allowed pygame events
 		pg.event.set_blocked([i for i in range(pg.NUMEVENTS)])
 		pg.event.set_allowed([pg.KEYDOWN, pg.KEYUP, pg.QUIT, pg.VIDEORESIZE,
-		                      ACTIONEVENT, THROW_EVENT, TRAJECTORY_CHANGED_EVENT])
+		                      ACTION_EVENT, THROW_EVENT, TRAJECTORY_CHANGED_EVENT])
 
 	def request_quit(self):
 		"""
@@ -88,6 +88,9 @@ class GameEngine:
 		t1 = t2
 		t0 = t2  # time of first frame of the game
 		while self.running:
+			if len(event.get(QUIT)) > 0:
+				self.request_quit()
+				
 			# PHYSICS
 			self.ball.update_physics(t2-t1)
 			for char in [self.char1, self.char2]:
@@ -99,7 +102,7 @@ class GameEngine:
 			# KB EVENTS
 			self.input_manager.update()
 			# TODO : take in account origin of action event (player index for ex.) ?
-			actions_events_queue = pg.event.get(ACTIONEVENT)
+			actions_events_queue = pg.event.get(ACTION_EVENT)
 			# UPDATE ACTIONS
 			# TODO : iterator for objects who have update_actions method
 			self.char1.update_actions(actions_events_queue, t2 - t1)
@@ -111,7 +114,7 @@ class GameEngine:
 			
 			# DISPLAY
 			self.display_manager.update([*self.objects, self.thrower_manager])
-
+			
 			# manage frame rate
 			t1 = t2
 			t2 = pg.time.get_ticks()

@@ -5,12 +5,15 @@ from Engine.Display import Debug3D
 from Engine.Collisions import AABBCollider
 from Settings import *
 
+from Engine.Actions import ActionObject
+
 
 from Game.character_states import *
 
 
-class Character:
-	def __init__(self, position, w=0.4, h=1, max_velocity=4, is_in_left_side=True):
+class Character(ActionObject):
+	def __init__(self, position, player_id=PlayerId.PLAYER_ID_1, w=0.4, h=1, max_velocity=4, is_in_left_side=True):
+		ActionObject.__init__(self, player_id)
 		self._position = Vector3(position)
 		self.w = w
 		self.h = h
@@ -49,7 +52,7 @@ class Character:
 		self.move_rel(dxyz)
 		
 	def update_actions(self, action_events, dt):
-		action_events = list(action_events)
+		action_events = self.filter_action_events_by_player_id(action_events)
 
 		# state machine :
 		# run current state
