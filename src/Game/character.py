@@ -52,14 +52,14 @@ class Character(ActionObject):
 		self.move_rel(dxyz)
 		
 	def update_actions(self, action_events, dt):
-		action_events = self.filter_action_events_by_player_id(action_events)
+		filtered_action_events = self.filter_action_events_by_player_id(action_events)
 
 		# state machine :
 		# run current state
-		self.state.run(action_events, dt=dt)
+		self.state.run(filtered_action_events, dt=dt)
 
 		# eventually switch state
-		self.state = self.state.next(action_events, dt=dt)
+		self.state = self.state.next(filtered_action_events, dt=dt)
 	
 	def update_physics(self, dt):
 		self.previous_position = Vector3(self.position)

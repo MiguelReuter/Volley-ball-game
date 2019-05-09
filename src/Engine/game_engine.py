@@ -12,6 +12,8 @@ from Game.character_states import *
 from Engine.Collisions import *
 from .TrajectorySolver import ThrowerManager
 
+from Engine.Actions import ActionObject
+
 
 import pygame as pg
 
@@ -21,9 +23,11 @@ TARGET_POS = pg.Vector3(-2, -3, 0.5)
 WANTED_H = 4
 
 
-class GameEngine:
+class GameEngine(ActionObject):
 	# TODO : singleton
 	def __init__(self):
+		ActionObject.__init__(self)
+
 		self.display_manager = DisplayManager(self)
 		self.input_manager = InputManager(self)
 		self.collisions_manager = CollisionsManager(self)
@@ -59,7 +63,8 @@ class GameEngine:
 		self.char1.state = Serving(self.char1)
 	
 	def update_actions(self, action_events, dt):
-		for event in action_events:
+		f = self.filter_action_events_by_player_id(action_events)
+		for event in f:
 			action = event.action
 			if action == "QUIT":
 				self.running = False

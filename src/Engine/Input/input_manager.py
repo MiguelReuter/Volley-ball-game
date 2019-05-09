@@ -9,10 +9,8 @@ class InputManager:
 	# TODO : singleton
 	def __init__(self, game_engine):
 		pg.joystick.init()
-		
-		# TODO : remove reference of self.keys
 		self.game_engine = game_engine
-		self.input_devices = [KeyboardInputDevice()]
+		self.input_devices = [KeyboardInputDevice(PlayerId.PLAYER_ID_1)]
 		
 	def update(self):
 		for input_device in self.input_devices:
@@ -30,13 +28,15 @@ class InputDevice:
 		self.up_input_event = None
 		self.down_input_event = None
 		
-	def load_keys_and_actions_binds(self, input_preset):
+	def load_keys_and_actions_binds(self):
 		self.keys = {}
 		self.key_action_binds = {}
 		
+		assert self.input_preset is not None
+		
 		# (key, key_state): action
-		for action in input_preset:
-			key = input_preset[action]
+		for action in self.input_preset:
+			key = self.input_preset[action]
 			self.keys[key] = KeyState.RELEASED
 			key_state = INPUT_ACTIONS[action]
 			self.key_action_binds[(key, key_state)] = action
@@ -82,15 +82,19 @@ class InputDevice:
 class KeyboardInputDevice(InputDevice):
 	def __init__(self, player_id=PlayerId.PLAYER_ID_1):
 		super().__init__(player_id)
-		self.load_keys_and_actions_binds(INPUT_PRESET_KEYBOARD)
+		self.input_preset = INPUT_PRESET_KEYBOARD
 		self.up_input_event = pg.KEYUP
 		self.down_input_event = pg.KEYDOWN
+		
+		self.load_keys_and_actions_binds()
 
 
 class JoystickInputDevice(InputDevice):
 	def __init__(self, player_id=PlayerId.PLAYER_ID_2, joystick_obj=None):
 		super().__init__(player_id)
 		self.joystick = joystick_obj
-		self.load_keys_and_actions_binds(INPUT_PRESET_JOYSTICK)
+		self.input_preset = INPUT_PRESET_KEYBOARD
 		self.up_input_event = pg.JOYBUTTONUP
 		self.down_input_event = pg.JOYBUTTONDOWN
+
+		self.load_keys_and_actions_binds(INPUT_PRESET_JOYSTICK)

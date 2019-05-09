@@ -2,9 +2,10 @@
 
 from math import tan, radians, floor
 from Settings.general_settings import *
+from Engine.Actions import ActionObject
 
 
-class Camera:
+class Camera(ActionObject):
 	"""
 	Class who represents a 3D camera with some locked degrees of freedom.
 	
@@ -31,6 +32,7 @@ class Camera:
 		:param pygame.Vector3 focus_point: 3D point in which camera focus on
 		:param float fov_angle: angle in degrees of camera FOV
 		"""
+		ActionObject.__init__(self)
 		self.display_manager = display_manager
 		self._position = Vector3(position)
 		self._focus_point = Vector3(focus_point)  # y component will be ignored
@@ -122,10 +124,9 @@ class Camera:
 		return u, v
 		
 	def update_actions(self, action_events, dt):
-		# TODO : derive current class from another with abstract update_actions method
-		action_events = list(action_events)
+		filtered_action_events = self.filter_action_events_by_player_id(action_events)
 		
-		for ev in action_events:
+		for ev in filtered_action_events:
 			action = ev.action
 			if action == "CAMERA_MOVE_UP":
 				self.position += (0, 0, 0.1)
