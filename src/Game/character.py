@@ -51,9 +51,10 @@ class Character(ActionObject):
 		dxyz = 0.001 * dt * direction * self.max_velocity
 		self.move_rel(dxyz)
 		
-	def update_actions(self, action_events, dt):
+	def update_actions(self, action_events, **kwargs):
+		dt = kwargs["dt"] if "dt" in kwargs.keys() else 0
 		filtered_action_events = self.filter_action_events_by_player_id(action_events)
-
+		
 		# state machine :
 		# run current state
 		self.state.run(filtered_action_events, dt=dt)

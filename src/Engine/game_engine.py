@@ -62,9 +62,9 @@ class GameEngine(ActionObject):
 		self.ball.position = self.char1.get_hands_position()
 		self.char1.state = Serving(self.char1)
 	
-	def update_actions(self, action_events, dt):
-		f = self.filter_action_events_by_player_id(action_events)
-		for event in f:
+	def update_actions(self, action_events, **kwargs):
+		filtered_action_events = self.filter_action_events_by_player_id(action_events)
+		for event in filtered_action_events:
 			action = event.action
 			if action == "QUIT":
 				self.running = False
@@ -82,8 +82,6 @@ class GameEngine(ActionObject):
 		:return: None
 		"""
 		frame_count = 0
-		
-		cam = self.display_manager.camera
 
 		# ball initial velocity
 		self.thrower_manager.throw_ball(self.ball, INITIAL_POS, TARGET_POS, WANTED_H)
@@ -106,13 +104,10 @@ class GameEngine(ActionObject):
 			
 			# KB EVENTS
 			self.input_manager.update()
-			# TODO : take in account origin of action event (player index for ex.) ?
-			actions_events_queue = pg.event.get(ACTION_EVENT)
+			actions_events = pg.event.get(ACTION_EVENT)
 			# UPDATE ACTIONS
-			# TODO : iterator for objects who have update_actions method
-			self.char1.update_actions(actions_events_queue, t2 - t1)
-			cam.update_actions(actions_events_queue, t2 - t1)
-			self.update_actions(actions_events_queue, t2 - t1)
+			for action_object in ActionObject.objects:
+				action_object.update_actions(actions_events, dt=t2-t1)
 			
 			# throw event
 			self.thrower_manager.update(pg.event.get(THROW_EVENT), pg.event.get(TRAJECTORY_CHANGED_EVENT), self.ball)
@@ -127,6 +122,3 @@ class GameEngine(ActionObject):
 			frame_count += 1
 
 		print("run with {} mean fps".format(int(1000 * frame_count / (t2 - t0))))
-
-
-		

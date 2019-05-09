@@ -123,7 +123,7 @@ class Camera(ActionObject):
 			v = int(floor((-h / (2 * self._fov) * pt_3c[1] / pt_3c[2]) / (h / max(w, h))) + h / 2)
 		return u, v
 		
-	def update_actions(self, action_events, dt):
+	def update_actions(self, action_events, **kwargs):
 		filtered_action_events = self.filter_action_events_by_player_id(action_events)
 		
 		for ev in filtered_action_events:

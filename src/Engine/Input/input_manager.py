@@ -10,7 +10,8 @@ class InputManager:
 	def __init__(self, game_engine):
 		pg.joystick.init()
 		self.game_engine = game_engine
-		self.input_devices = [KeyboardInputDevice(PlayerId.PLAYER_ID_1)]
+		self.input_devices = [KeyboardInputDevice(PlayerId.PLAYER_ID_1),
+		                      JoystickInputDevice(PlayerId.PLAYER_ID_1, )]
 		
 	def update(self):
 		for input_device in self.input_devices:
@@ -93,8 +94,9 @@ class JoystickInputDevice(InputDevice):
 	def __init__(self, player_id=PlayerId.PLAYER_ID_2, joystick_obj=None):
 		super().__init__(player_id)
 		self.joystick = joystick_obj
-		self.input_preset = INPUT_PRESET_KEYBOARD
+		
+		self.input_preset = INPUT_PRESET_JOYSTICK
 		self.up_input_event = pg.JOYBUTTONUP
 		self.down_input_event = pg.JOYBUTTONDOWN
 
-		self.load_keys_and_actions_binds(INPUT_PRESET_JOYSTICK)
+		self.load_keys_and_actions_binds()
