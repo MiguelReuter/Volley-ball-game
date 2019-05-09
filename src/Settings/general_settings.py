@@ -61,15 +61,6 @@ class KeyState(Enum):
 	PRESSED = 2
 	JUST_RELEASED = 3
 
-# keyboard keys used in game (other keys are ignored)
-KEYS = (K_z, K_s, K_q, K_d,
-        K_j,
-        K_i,
-        K_UP, K_DOWN, K_LEFT, K_RIGHT,
-        K_ESCAPE,
-        K_SPACE,
-        K_p)
-
 # PLAYER ACTIONS PARAMETERS
 THROW_DURATION = 500    # in ms
 SERVE_DURATION = 500    # in ms
@@ -87,7 +78,7 @@ SERVE_CENTER = Vector3(0, 3.5, BALL_RADIUS)
 SERVE_AMP_DIR = (2.4, 1.4)
 
 # events
-ACTIONEVENT = USEREVENT + 1
+ACTION_EVENT = USEREVENT + 1
 THROW_EVENT = USEREVENT + 2
 TRAJECTORY_CHANGED_EVENT = USEREVENT + 3
 
@@ -98,4 +89,11 @@ class ThrowingType(Enum):
 	SMASH = 1
 	SERVE = 2
 	TEST = 3
+	
+	
+# players id
+class PlayerId(Enum):
+	PLAYER_ID_ALL = 0
+	PLAYER_ID_1 = 1
+	PLAYER_ID_2 = 2
 
