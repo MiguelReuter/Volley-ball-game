@@ -44,7 +44,9 @@ class GameEngine(ActionObject):
 		
 		# allowed pygame events
 		pg.event.set_blocked([i for i in range(pg.NUMEVENTS)])
-		pg.event.set_allowed([pg.KEYDOWN, pg.KEYUP, pg.QUIT, pg.VIDEORESIZE,
+		pg.event.set_allowed([pg.KEYDOWN, pg.KEYUP,
+							  pg.JOYBUTTONDOWN, pg.JOYBUTTONUP,
+							  pg.QUIT, pg.VIDEORESIZE,
 		                      ACTION_EVENT, THROW_EVENT, TRAJECTORY_CHANGED_EVENT])
 
 	def request_quit(self):
