@@ -15,11 +15,11 @@ class Character(ActionObject):
 	def __init__(self, position, player_id=PlayerId.PLAYER_ID_1, w=0.4, h=1, max_velocity=4, is_in_left_side=True):
 		ActionObject.__init__(self, player_id)
 		self._position = Vector3(position)
+		self.previous_position = Vector3()
 		self.w = w
 		self.h = h
 		self.collider_relative_position = Vector3(0, 0, h/2)
-		self.collider = AABBCollider(self._position + self.collider_relative_position,
-		                             Vector3(w, w, h))
+		self.collider = AABBCollider(self._position + self.collider_relative_position, Vector3(w, w, h))
 		self.is_colliding_ball = False
 		self.max_velocity = max_velocity  # m/s
 		self.velocity = Vector3()
@@ -45,9 +45,27 @@ class Character(ActionObject):
 		self.collider.draw(display_manager)
 
 	def move_rel(self, dxyz):
+		"""
+		Move object with a certain displacement.
+
+		:param pygame.Vector3 dxyz: displacement
+		:return: None
+		"""
 		self.position += Vector3(dxyz)
 
 	def move(self, direction, dt):
+		"""
+		Move object along a specified direction and amount of time.
+
+		The amplitude of displacement is dependant from :
+			- :var direction: magnitude
+			- :var self.max_velocity:
+			- :var dt:
+
+		:param pygame.Vector3 direction: direction of displacement.
+		:param float dt: amount of time in ms. Usually, dt is the time between 2 frames.
+		:return: None
+		"""
 		dxyz = 0.001 * dt * direction * self.max_velocity
 		self.move_rel(dxyz)
 		
@@ -69,6 +87,12 @@ class Character(ActionObject):
 		self.move_rel(0.001 * dt * self.velocity)
 		
 	def get_hands_position(self):
+		"""
+		Return hands position of character in world coordinates.
+
+		:return: hands position
+		:rtype pygame.Vector3:
+		"""
 		dh = Vector3(0, 0, self.h)
 		dh.y = self.w / 2
 		if not self.is_in_left_side:
