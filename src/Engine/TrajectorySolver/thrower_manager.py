@@ -14,12 +14,18 @@ class ThrowerManager:
 	"""
 	Class used to manage ball throwing.
 	"""
-	
-	# TODO : singleton
+	s_instance = None
+
+	@staticmethod
+	def get_instance():
+		return ThrowerManager.s_instance
+
 	def __init__(self):
 		self.target_position = Vector3()
 		self.origin_position = Vector3()
 		self.debug_trajectory_pts = []
+
+		ThrowerManager.s_instance = self
 		
 	@staticmethod
 	def get_effective_target_position(direction, character_position):
@@ -91,24 +97,22 @@ class ThrowerManager:
 		
 		return center + amplified_direction
 	
-	def draw(self, display_manager):
+	def draw(self):
 		"""
 		Draw debug 3D objects (ball trajectory, target ball position).
 		
-		:param DisplayManager display_manager: Display manager who manages drawing
 		:return: None
 		"""
 		
 		# draw target position
 		ground_pos = Vector3(self.target_position)
 		ground_pos.z = 0
-		draw_sphere(display_manager, self.target_position, 0.1, col=(255, 255, 0))
-		draw_line(display_manager, self.target_position, ground_pos)
+		draw_sphere(self.target_position, 0.1, col=(255, 255, 0))
+		draw_line(self.target_position, ground_pos)
 		
 		# draw trajectory
 		for i in range(len(self.debug_trajectory_pts) - 1):
-			draw_line(display_manager, self.debug_trajectory_pts[i], self.debug_trajectory_pts[i + 1],
-			          col=(255, 0, 255))
+			draw_line(self.debug_trajectory_pts[i], self.debug_trajectory_pts[i + 1], col=(255, 0, 255))
 
 	def throw_at_random_target_position(self, ball, initial_pos, wanted_height, corner_1=None, corner_2=None):
 		"""

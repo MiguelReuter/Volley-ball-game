@@ -8,8 +8,13 @@ from math import log2, pow
 
 
 class DisplayManager:
-	# TODO : singleton
-	def __init__(self, game_engine):
+	s_instance = None
+
+	@staticmethod
+	def get_instance():
+		return DisplayManager.s_instance
+
+	def __init__(self):
 		# will be set in self.create_window()
 		self.screen = None
 		self.unscaled_surface = None
@@ -21,8 +26,9 @@ class DisplayManager:
 		self.screen_scale_factor_2n = None
 		self._create_window(NOMINAL_RESOLUTION, self.window_mode, self.window_resize_2n)
 		
-		self.game_engine = game_engine
-		self.camera = Camera(self, CAMERA_POS, FOCUS_POINT, FOV_ANGLE)
+		self.camera = Camera(CAMERA_POS, FOCUS_POINT, FOV_ANGLE)
+
+		DisplayManager.s_instance = self
 
 	def _create_window(self, nominal_resolution, window_mode=WindowMode.FIXED_SIZE, window_resize_2n=False):
 		"""
@@ -123,7 +129,7 @@ class DisplayManager:
 		self.unscaled_surface.fill((0, 0, 50))
 		self.debug_surface.fill((0, 0, 0))
 		for obj in objects:
-			obj.draw(self)
+			obj.draw()
 		
 		self._resize_display()
 		

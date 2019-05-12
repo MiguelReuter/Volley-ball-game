@@ -6,13 +6,19 @@ from Settings import *
 
 
 class InputManager:
-	# TODO : singleton
-	def __init__(self, game_engine):
+	s_instance = None
+
+	@staticmethod
+	def get_instance():
+		return InputManager.s_instance
+
+	def __init__(self):
 		pg.joystick.init()
-		self.game_engine = game_engine
 		self.input_devices = [KeyboardInputDevice(PlayerId.PLAYER_ID_1),
 							  *[JoystickInputDevice(joystick_obj=joystick.Joystick(i))
 								for i in range(joystick.get_count())]]
+
+		InputManager.s_instance = self
 		
 	def update(self):
 		for input_device in self.input_devices:

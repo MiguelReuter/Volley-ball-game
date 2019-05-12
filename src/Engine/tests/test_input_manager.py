@@ -13,8 +13,7 @@ def input_manager():
 	pg.display.init()
 	pg.display.set_mode([10, 10])  # dummy set mode
 	
-	input_manager = InputManager(None)
-	yield InputManager(None)
+	yield InputManager()
 	
 	pg.quit()
 

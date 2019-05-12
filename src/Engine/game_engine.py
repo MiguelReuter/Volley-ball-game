@@ -24,16 +24,23 @@ WANTED_H = 4
 
 
 class GameEngine(ActionObject):
-	# TODO : singleton
+	s_instance = None
+
+	@staticmethod
+	def get_instance():
+		return GameEngine.s_instance
+
 	def __init__(self):
 		ActionObject.__init__(self)
-
-		self.display_manager = DisplayManager(self)
-		self.input_manager = InputManager(self)
-		self.collisions_manager = CollisionsManager(self)
+		self.display_manager = DisplayManager()
+		self.input_manager = InputManager()
+		self.collisions_manager = CollisionsManager()
 		self.thrower_manager = ThrowerManager()
+
 		self.running = True
 		self._create()
+
+		GameEngine.s_instance = self
 	
 	def _create(self):
 		self.ball = Ball(INITIAL_POS, BALL_RADIUS)

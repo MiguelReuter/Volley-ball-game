@@ -23,7 +23,7 @@ class Camera(ActionObject):
 		- :var pygame.Surface self.surface: camera screen surface
 		
 	"""
-	def __init__(self, display_manager, position, focus_point, fov_angle=60):
+	def __init__(self, position, focus_point, fov_angle=60):
 		"""
 		Init object.
 		
@@ -33,7 +33,6 @@ class Camera(ActionObject):
 		:param float fov_angle: angle in degrees of camera FOV
 		"""
 		ActionObject.__init__(self)
-		self.display_manager = display_manager
 		self._position = Vector3(position)
 		self._focus_point = Vector3(focus_point)  # y component will be ignored
 		

@@ -8,15 +8,15 @@ from Engine.Display import Camera
 
 @pytest.fixture()
 def horizontal_camera():
-	return Camera(None, Vector3(5, 0, 0), Vector3(0, 0, 0), fov_angle=60)
+	return Camera(Vector3(5, 0, 0), Vector3(0, 0, 0), fov_angle=60)
 
 @pytest.fixture()
 def oblique_camera():
-	return Camera(None, Vector3(3, 0, 4), Vector3(0, 0, 0), fov_angle=60)  # for 3 4 5 tri (rect tri)
+	return Camera(Vector3(3, 0, 4), Vector3(0, 0, 0), fov_angle=60)  # for 3 4 5 tri (rect tri)
 
 @pytest.fixture()
 def not_centered_camera():
-	return Camera(None, Vector3(3+5, 0+5, 4+5), Vector3(0+5, 0+5, 0+5), fov_angle=60)
+	return Camera(Vector3(3+5, 0+5, 4+5), Vector3(0+5, 0+5, 0+5), fov_angle=60)
 
 
 def test_world_to_cam_3d_coords(horizontal_camera, oblique_camera, not_centered_camera):

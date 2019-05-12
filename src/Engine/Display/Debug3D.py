@@ -1,6 +1,8 @@
 # encoding : UTF-8
 
 from pygame import *
+from Engine.Display import *
+
 
 # flags
 SIZE_INDEPENDENT_FROM_Y_POS = True
@@ -15,16 +17,16 @@ DBG_COLOR_HOR_ELLIPSE = (20, 20, 20)
 DBG_COLOR_SHADOW_HOR_ELLIPSE_TRAPEZE = (255, 0, 255)
 
 
-def draw_sphere(display_manager, center, radius, col=None):
+def draw_sphere(center, radius, col=None):
 	"""
 	Draw a filled sphere on camera screen.
 	
-	:param DisplayManager display_manager: display manager used to draw
 	:param pygame.Vector3 center: center of sphere
 	:param float radius: radius (world scale, not in pixel) of sphere
 	:param tuple(int, int, int) col: drawing color. default is :var DBG_COLOR_SPHERE:
 	:return: None
 	"""
+	display_manager = DisplayManager.get_instance()
 	if col is None:
 		col = DBG_COLOR_SPHERE
 	
@@ -44,15 +46,15 @@ def draw_sphere(display_manager, center, radius, col=None):
 	            camera.world_to_pixel_coords(center, surface_size), r_px)
 
 
-def draw_horizontal_ellipse(display_manager, center, radius):
+def draw_horizontal_ellipse(center, radius):
 	"""
 	Draw a filled ellipse and a unfilled bound trapeze in XY 3D plane on camera screen.
 	
-	:param DisplayManager display_manager: display manager used to draw
 	:param pygame.Vector3 center: center of ellipse
 	:param float radius: radius (world scale, not in pixel) of ellipse
 	:return: None
 	"""
+	display_manager = DisplayManager.get_instance()
 	camera = display_manager.camera
 	surface_size = display_manager.debug_surface.get_size()
 	
@@ -76,17 +78,18 @@ def draw_horizontal_ellipse(display_manager, center, radius):
 	draw.polygon(display_manager.debug_surface, DBG_COLOR_SHADOW_HOR_ELLIPSE_TRAPEZE, [t_l, t_r, b_r, b_l], 1)
 
 
-def draw_polygon(display_manager, pts, col=None):
+def draw_polygon(pts, col=None):
 	"""
 	Draw a closed 3D polygon on camera screen.
 	
-	:param DisplayManager display_manager: display manager used to draw
 	:param list(pygame.Vector3) pts: 3D world points which define polygon
 	:param tuple(int, int, int) col: drawing color. default is :var DBG_COLOR_POLYGON:
 	:return: None
 	"""
 	if col is None:
 		col = DBG_COLOR_POLYGON
+
+	display_manager = DisplayManager.get_instance()
 	camera = display_manager.camera
 	surface_size = display_manager.debug_surface.get_size()
 	
@@ -94,11 +97,10 @@ def draw_polygon(display_manager, pts, col=None):
 	             [(camera.world_to_pixel_coords(pt, surface_size)) for pt in pts])
 
 
-def draw_line(display_manager, pt_a, pt_b, col=None):
+def draw_line(pt_a, pt_b, col=None):
 	"""
 	Draw a 3D line on camera screen.
 	
-	:param DisplayManager display_manager: display manager used to draw
 	:param pygame.Vector3 pt_a: 3D point of line start
 	:param pygame.Vector3 pt_b: 3D point of line end
 	:param tuple(int, int, int) col: drawing color. default is :var DBG_COLOR_LINE:
@@ -106,7 +108,8 @@ def draw_line(display_manager, pt_a, pt_b, col=None):
 	"""
 	if col is None:
 		col = DBG_COLOR_LINE
-	
+
+	display_manager = DisplayManager.get_instance()
 	camera = display_manager.camera
 	surface_size = display_manager.debug_surface.get_size()
 	
@@ -115,13 +118,12 @@ def draw_line(display_manager, pt_a, pt_b, col=None):
 	          camera.world_to_pixel_coords(pt_b, surface_size))
 
 
-def draw_aligned_axis_box(display_manager, center, length_x, length_y, length_z, col=None):
+def draw_aligned_axis_box(center, length_x, length_y, length_z, col=None):
 	"""
 	Draw an 3D aligned-axis box on camera screen.
 	
 	Drawn box will be aligned to (X, Y, Z) world directions.
 	
-	:param DisplayManager display_manager: display manager used to draw
 	:param pygame.Vector3 center: center of box
 	:param float length_x: box length along x axis
 	:param float length_y: box length along y axis
@@ -131,7 +133,8 @@ def draw_aligned_axis_box(display_manager, center, length_x, length_y, length_z,
 	"""
 	if col is None:
 		col = DBG_COLOR_AAB
-	
+
+	display_manager = DisplayManager.get_instance()
 	camera = display_manager.camera
 	surface_size = display_manager.debug_surface.get_size()
 	

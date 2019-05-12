@@ -9,8 +9,14 @@ from random import random
 
 
 class CollisionsManager:
-	def __init__(self, game_engine):
-		self.game_engine = game_engine
+	s_instance = None
+
+	@staticmethod
+	def get_instance():
+		return CollisionsManager.s_instance
+
+	def __init__(self):
+		CollisionsManager.s_instance = self
 	
 	def update(self, ball, court, characters_list):
 		"""

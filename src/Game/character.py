@@ -41,11 +41,11 @@ class Character(ActionObject):
 		self._position = value
 		self.collider.center = self._position + self.collider_relative_position
 
-	def draw(self, display_manager):
+	def draw(self):
 		ground_pos = Vector3(self.position)
 		ground_pos.z = 0
-		Debug3D.draw_horizontal_ellipse(display_manager, ground_pos, self.w / 2)
-		self.collider.draw(display_manager)
+		Debug3D.draw_horizontal_ellipse(ground_pos, self.w / 2)
+		self.collider.draw()
 
 	def move_rel(self, dxyz):
 		"""
