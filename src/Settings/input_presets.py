@@ -22,16 +22,16 @@ INPUT_PRESET_KEYBOARD = \
 
 
 INPUT_PRESET_JOYSTICK = \
-	{"MOVE_LEFT": JoyHat(0, (-1, 0)),
-	 "MOVE_RIGHT": JoyHat(0, (1, 0)),
-	 "MOVE_UP": JoyHat(0, (0, 1)),
-	 "MOVE_DOWN": JoyHat(0, (0, -1)),
+	{"MOVE_LEFT": Pov.LEFT,
+	 "MOVE_RIGHT": Pov.RIGHT,
+	 "MOVE_UP": Pov.UP,
+	 "MOVE_DOWN": Pov.DOWN,
 	 "THROW_BALL": 0,
 	 "JUMP": 1,
-	 "CAMERA_MOVE_LEFT": JoyAxis(2, -0.5),
-	 "CAMERA_MOVE_RIGHT": JoyAxis(2, 0.5),
-	 "CAMERA_MOVE_UP": JoyAxis(3, -0.5),
-	 "CAMERA_MOVE_DOWN": JoyAxis(3, 0.5),
+	 "CAMERA_MOVE_LEFT": JoyAxis.LEFT,
+	 "CAMERA_MOVE_RIGHT": JoyAxis.RIGHT,
+	 "CAMERA_MOVE_UP": JoyAxis.UP,
+	 "CAMERA_MOVE_DOWN": JoyAxis.DOWN,
 	 "QUIT": 8,
 	 "PAUSE": 9,
 	 "SPACE_TEST": 3}

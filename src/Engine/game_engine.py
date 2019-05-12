@@ -46,6 +46,7 @@ class GameEngine(ActionObject):
 		pg.event.set_blocked([i for i in range(pg.NUMEVENTS)])
 		pg.event.set_allowed([pg.KEYDOWN, pg.KEYUP,
 							  pg.JOYBUTTONDOWN, pg.JOYBUTTONUP,
+							  pg.JOYHATMOTION,
 							  pg.QUIT, pg.VIDEORESIZE,
 		                      ACTION_EVENT, THROW_EVENT, TRAJECTORY_CHANGED_EVENT])
 

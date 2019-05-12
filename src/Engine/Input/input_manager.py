@@ -76,8 +76,7 @@ class InputDevice:
 		for (key, key_state) in self.key_action_binds:
 			if self.keys[key] == key_state:
 				action = self.key_action_binds[(key, key_state)]
-				event = pg.event.Event(ACTION_EVENT, {'player_id': self.player_id,
-				                                     'action': action})
+				event = pg.event.Event(ACTION_EVENT, {"player_id": self.player_id, "action": action})
 				pg.event.post(event)
 		
 
@@ -119,42 +118,52 @@ class JoystickInputDevice(InputDevice):
 				self.keys[k] = KeyState.RELEASED
 
 		# detect a state modification (with pygame event)
-		# only catch KEYUP, KEYDOWN and QUIT events
-		for ev in pg.event.get((JOYBUTTONUP, JOYBUTTONDOWN)):
-			if ev.type == JOYBUTTONDOWN:
-				if ev.button in self.keys.keys():
-					self.keys[ev.button] = KeyState.JUST_PRESSED
+		for ev in pg.event.get((JOYBUTTONUP, JOYBUTTONDOWN, JOYHATMOTION)):
+			if ev.joy == self.joystick.get_id():
+				if ev.type == JOYBUTTONDOWN:
+					if ev.button in self.keys.keys():
+						self.keys[ev.button] = KeyState.JUST_PRESSED
 
-			if ev.type == JOYBUTTONUP:
-				if ev.button in self.keys.keys():
-					self.keys[ev.button] = KeyState.JUST_RELEASED
+				elif ev.type == JOYBUTTONUP:
+					if ev.button in self.keys.keys():
+						self.keys[ev.button] = KeyState.JUST_RELEASED
 
-	def generate_actions(self):
-		super().generate_actions()
+				elif ev.type == JOYHATMOTION:
+					hat_id = ev.hat
+					hat_value = ev.value
 
-		for input_id, input_state in self.key_action_binds:
-			# hat
-			if isinstance(input_id, JoyHat):
-				hat_id = input_id.hat_id
-				value = input_id.value
+					for pov_i in Pov.__iter__():
+						if pov_i not in self.keys.keys():
+							continue
 
-				if hat_id < self.joystick.get_numhats():
-					hat_x, hat_y = self.joystick.get_hat(hat_id)
-					if (hat_x != 0 and hat_x == value[0]) or (hat_y != 0 and hat_y == value[1]):
-						action = self.key_action_binds[(input_id, input_state)]
-						ev = pg.event.Event(ACTION_EVENT, {'player_id': self.player_id,
-															  'action': action})
-						pg.event.post(ev)
-			# axis
-			if isinstance(input_id, JoyAxis):
-				axis = input_id.axis
-				value = input_id.value
+						i = 0 if pov_i.value.value[0] != 0 else 1
+						b_val = pov_i.value.value[i] == hat_value[i]  # True if pov_i pressed
+						b_val &= hat_id == pov_i.value.hat_id
 
-				if axis < self.joystick.get_numaxes():
-					axis_val = self.joystick.get_axis(axis)
-					if abs(axis_val) > abs(value) and axis_val * value > 0:
-						action = self.key_action_binds[(input_id, input_state)]
-						ev = pg.event.Event(ACTION_EVENT, {'player_id': self.player_id,
-														   'action': action})
-						pg.event.post(ev)
+						prev_val = self.keys[pov_i]
 
+						if prev_val == KeyState.RELEASED and b_val:
+							self.keys[pov_i] = KeyState.JUST_PRESSED
+						elif prev_val == KeyState.PRESSED and not b_val:
+							self.keys[pov_i] = KeyState.JUST_RELEASED
+
+		# update joy axis states (wo pygame event)
+		for axe_i in JoyAxis.__iter__():
+			if axe_i not in self.keys.keys():  # check if current input_presets has an axis_i key
+				continue
+
+			axe_id = axe_i.value.axis  # axis id (usually in [0, 3] for a pad with 2 sticks)
+			if axe_id < self.joystick.get_numaxes():
+				needed_axe_val = axe_i.value.value
+				real_axe_val = self.joystick.get_axis(axe_i.value.axis)
+
+				b_val = axe_id == axe_i.value.axis \
+						and abs(real_axe_val) > abs(needed_axe_val) \
+						and real_axe_val * needed_axe_val > 0  # True if joystick axis value will send action event
+
+				prev_val = self.keys[axe_i]
+
+				if prev_val == KeyState.RELEASED and b_val:
+					self.keys[axe_i] = KeyState.JUST_PRESSED
+				elif prev_val == KeyState.PRESSED and not b_val:
+					self.keys[axe_i] = KeyState.JUST_RELEASED

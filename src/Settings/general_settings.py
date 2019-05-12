@@ -3,14 +3,17 @@
 from enum import Enum
 from pygame import *
 
+
 # MAIN WINDOW
 NOMINAL_RESOLUTION = (400, 320)
-CAPTION_TITLE= "Volley-ball game"
+CAPTION_TITLE = "Volley-ball game"
+
 
 class WindowMode(Enum):
 	FIXED_SIZE = 0
 	RESIZABLE = 1
 	FULL_SCREEN = 2
+
 
 WINDOW_MODE = WindowMode.RESIZABLE
 WINDOW_RESIZE_2N = True  # ignored in full screen mode
@@ -54,12 +57,14 @@ NET_HEIGHT_TOP = 3
 # ball
 BALL_RADIUS = 0.5
 
+
 # INPUTS
 class KeyState(Enum):
 	RELEASED = 0
 	JUST_PRESSED = 1
 	PRESSED = 2
 	JUST_RELEASED = 3
+
 
 # PLAYER ACTIONS PARAMETERS
 THROW_DURATION = 500    # in ms
@@ -88,7 +93,6 @@ class ThrowingType(Enum):
 	THROW = 0
 	SMASH = 1
 	SERVE = 2
-	TEST = 3
 	
 	
 # players id
