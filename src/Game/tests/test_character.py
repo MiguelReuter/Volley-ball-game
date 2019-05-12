@@ -7,7 +7,7 @@ import pytest
 
 @pytest.fixture()
 def character():
-	return Character(Vector3(), w=0.4, h=1, max_velocity=4)
+	return Character(Vector3(), max_velocity=4)
 
 
 def test_move_rel(character):

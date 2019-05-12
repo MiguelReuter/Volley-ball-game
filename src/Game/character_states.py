@@ -68,9 +68,10 @@ class Idling(State):
 			return Throwing(self.character, action_events)
 		elif is_jumping_requested(action_events):
 			return Jumping(self.character, action_events, dt=dt)
+		elif is_diving_requested(action_events):
+			return Diving(self.character, action_events)
 		elif is_running_requested(action_events):
 			return Running(self.character, action_events, dt=dt)
-		
 		return self
 
 
@@ -117,6 +118,8 @@ class Running(State):
 			return Throwing(self.character, action_events, **kwargs)
 		elif is_jumping_requested(action_events):
 			return Jumping(self.character, action_events, dt=dt)
+		elif is_diving_requested(action_events):
+			return Diving(self.character, action_events)
 		elif not is_running_requested(action_events):
 			return Idling(self.character)
 		
@@ -255,6 +258,54 @@ class Jumping(State):
 		return self
 
 
+class Diving(State):
+	"""
+	Character state for diving
+	"""
+
+	def __init__(self, character, action_events=[], **kwargs):
+		State.__init__(self, character)
+
+		self.t0 = time.get_ticks()
+
+		direction = get_normalized_direction_requested(action_events)
+
+		if direction.x == 0 and direction.y == 0:
+			direction.y = 1 if self.character.is_in_left_side else -1
+
+		self.character.velocity = DIVE_SPEED * direction
+		self.character.set_diving_collider(direction)
+
+	def run(self, action_events, **kwargs):
+		if time.get_ticks() - self.t0 > DIVE_SLIDE_DURATION:
+			self.character.velocity = Vector3()
+
+		if self.character.is_colliding_ball:
+			TOTAL_DURATION = DIVE_SLIDE_DURATION + DIVE_DURATION_FOR_STANDING_UP
+
+			x = (time.get_ticks() - self.t0) / TOTAL_DURATION
+
+			thr = DIVE_SLIDE_DURATION / TOTAL_DURATION
+			alpha = TOTAL_DURATION / DIVE_DURATION_FOR_STANDING_UP
+			vel_eff = 1.0 if x < thr else 1.0 - alpha * (x - thr)
+
+			event.post(event.Event(THROW_EVENT, {"throwing_type": ThrowingType.DRAFT,
+												 "direction": get_normalized_direction_requested(action_events),
+			                                     "position": self.character.position,
+												 "velocity_efficiency": vel_eff}))
+
+	def next(self, action_events, **kwargs):
+		if time.get_ticks() - self.t0 > DIVE_SLIDE_DURATION + DIVE_DURATION_FOR_STANDING_UP:
+			self.character.set_default_collider()
+
+			# change state
+			if is_running_requested(action_events):
+				return Running(self.character, action_events, **kwargs)
+			else:
+				return Idling(self.character)
+		return self
+
+
 def is_running_requested(action_events):
 	"""
 	Return true if running action is requested.
@@ -295,6 +346,20 @@ def is_jumping_requested(action_events):
 	for act_event in action_events:
 		b_jumping |= act_event.action == "JUMP"
 	return b_jumping
+
+
+def is_diving_requested(action_events):
+	"""
+	Return true if diving action is requested.
+
+	:param list[pygame.event.Event(ACTION_EVENT)] action_events: list of action events
+	:return: True if diving action is requested
+	:rtype bool:
+	"""
+	b_diving = False
+	for act_event in action_events:
+		b_diving |= act_event.action == "DIVE"
+	return b_diving
 
 
 def get_direction_requested(action_events):

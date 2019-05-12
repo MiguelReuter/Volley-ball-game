@@ -57,6 +57,10 @@ NET_HEIGHT_TOP = 3
 # ball
 BALL_RADIUS = 0.5
 
+# character
+CHARACTER_W = 0.4
+CHARACTER_H = 1
+
 
 # INPUTS
 class KeyState(Enum):
@@ -67,10 +71,13 @@ class KeyState(Enum):
 
 
 # PLAYER ACTIONS PARAMETERS
-THROW_DURATION = 500    # in ms
-SERVE_DURATION = 500    # in ms
-JUMP_VELOCITY = 8       # in m/s
-SMASH_VELOCITY = 15     # in m/s
+THROW_DURATION = 500    				# in ms
+SERVE_DURATION = 500    				# in ms
+JUMP_VELOCITY = 8       				# in m/s
+SMASH_VELOCITY = 15     				# in m/s
+DIVE_SPEED = 4							# in m/s
+DIVE_SLIDE_DURATION = 250				# in ms
+DIVE_DURATION_FOR_STANDING_UP = 500		# in ms
 
 # THROW PARAMETERS
 THROW_CENTER = Vector3(0, 3, BALL_RADIUS)
@@ -81,6 +88,8 @@ SMASH_AMP_DIR = (0, 1.4)
 
 SERVE_CENTER = Vector3(0, 3.5, BALL_RADIUS)
 SERVE_AMP_DIR = (2.4, 1.4)
+
+DRAFT_THROW_HEIGHT = 4
 
 # events
 ACTION_EVENT = USEREVENT + 1
@@ -93,6 +102,7 @@ class ThrowingType(Enum):
 	THROW = 0
 	SMASH = 1
 	SERVE = 2
+	DRAFT = 3
 	
 	
 # players id

@@ -12,22 +12,25 @@ from Game.character_states import *
 
 
 class Character(ActionObject):
-	def __init__(self, position, player_id=PlayerId.PLAYER_ID_1, w=0.4, h=1, max_velocity=4, is_in_left_side=True):
+	def __init__(self, position, player_id=PlayerId.PLAYER_ID_1, max_velocity=4, is_in_left_side=True):
 		ActionObject.__init__(self, player_id)
 		self._position = Vector3(position)
 		self.previous_position = Vector3()
-		self.w = w
-		self.h = h
-		self.collider_relative_position = Vector3(0, 0, h/2)
-		self.collider = AABBCollider(self._position + self.collider_relative_position, Vector3(w, w, h))
+		self.w = CHARACTER_W
+		self.h = CHARACTER_H
+		self.collider_relative_position = Vector3()
+		self.collider = None
 		self.is_colliding_ball = False
 		self.max_velocity = max_velocity  # m/s
 		self.velocity = Vector3()
 		self.direction = Vector3()
 		
 		self.is_in_left_side = is_in_left_side
-		
+
 		self.state = Idling(self)
+
+		self.set_default_collider()
+
 
 	@property
 	def position(self):
@@ -98,3 +101,43 @@ class Character(ActionObject):
 		if not self.is_in_left_side:
 			dh.y *= -1
 		return self.position + dh
+
+	def set_default_collider(self):
+		"""
+		Set default AABB Collider.
+
+		:return: None
+		"""
+		self.collider_relative_position = Vector3(0, 0, self.h / 2)
+		collider_size3 = Vector3(self.w, self.w, self.h)
+
+		self.collider = AABBCollider(self._position + self.collider_relative_position, collider_size3)
+
+	def set_diving_collider(self, direction):
+		"""
+		Set AABB Collider during diving.
+
+		:param pygame.Vector3 direction: direction of diving
+		:return: None
+		"""
+		dive_direction = Vector3(direction)
+
+		collider_size3 = Vector3()
+		collider_size3.x = max(self.w, self.h * abs(dive_direction.x))
+		collider_size3.y = max(self.w, self.h * abs(dive_direction.y))
+		collider_size3.z = self.w
+		collider_rel_center = Vector3(self.h / 2 * dive_direction.x,
+									  self.h / 2 * dive_direction.y,
+									  self.w / 2)
+		if dive_direction.x < 0:
+			collider_rel_center.x += self.w / 2
+		else:
+			collider_rel_center.x -= self.w / 2
+
+		if dive_direction.y < 0:
+			collider_rel_center.y += self.w / 2
+		else:
+			collider_rel_center.y -= self.w / 2
+
+		self.collider_relative_position	= collider_rel_center
+		self.collider = AABBCollider(self._position + self.collider_relative_position, collider_size3)

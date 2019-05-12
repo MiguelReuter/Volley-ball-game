@@ -156,7 +156,15 @@ class ThrowerManager:
 				ball.will_be_served = False
 				target_position = self.get_effective_serve_target_position(direction, char_position)
 				self.throw_ball(ball, ball.position, target_position, velocity_efficiency=1.0)
-		
+			# draft (after diving)
+			elif ev.throwing_type == ThrowingType.DRAFT:
+				velocity_efficiency = ev.velocity_efficiency
+				# TODO : fix ball throwing when origin pos == target pos <-- Vector3(0, 0.01, 0)
+				target_position = Vector3(ball.position) + 1 * direction + Vector3(0, 0.01, 0)
+				target_position.z = BALL_RADIUS
+				self.throw_ball(ball, ball.position, target_position, velocity_efficiency=velocity_efficiency,
+								wanted_height=DRAFT_THROW_HEIGHT)
+
 	def throw_ball(self, ball, initial_pos, target_pos, wanted_height=4, **kwargs):
 		"""
 		Throw ball from an initial position to a specified target position.
