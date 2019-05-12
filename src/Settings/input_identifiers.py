@@ -20,9 +20,16 @@ JOY_AXIS_THRESHOLD = 0.4
 
 
 class JoyAxis(Enum):
-	LEFT = JoyAxisRaw(2, -JOY_AXIS_THRESHOLD)
-	RIGHT = JoyAxisRaw(2, JOY_AXIS_THRESHOLD)
-	UP = JoyAxisRaw(3, -JOY_AXIS_THRESHOLD)
-	DOWN = JoyAxisRaw(3, JOY_AXIS_THRESHOLD)
+	# for left joystick
+	LEFT_1 = JoyAxisRaw(0, -JOY_AXIS_THRESHOLD)
+	RIGHT_1 = JoyAxisRaw(0, JOY_AXIS_THRESHOLD)
+	UP_1 = JoyAxisRaw(1, -JOY_AXIS_THRESHOLD)
+	DOWN_1 = JoyAxisRaw(1, JOY_AXIS_THRESHOLD)
+
+	# for right joystick
+	LEFT_2 = JoyAxisRaw(2, -JOY_AXIS_THRESHOLD)
+	RIGHT_2 = JoyAxisRaw(2, JOY_AXIS_THRESHOLD)
+	UP_2 = JoyAxisRaw(3, -JOY_AXIS_THRESHOLD)
+	DOWN_2 = JoyAxisRaw(3, JOY_AXIS_THRESHOLD)
 
 
