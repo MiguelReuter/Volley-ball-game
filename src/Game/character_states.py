@@ -15,6 +15,7 @@ class State:
 		:param Character character: character which state is attached to
 		"""
 		self.character = character
+		self.character.velocity = Vector3()
 		
 	def run(self, action_events, **kwargs):
 		"""
