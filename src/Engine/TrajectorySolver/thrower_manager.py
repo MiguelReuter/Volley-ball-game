@@ -143,12 +143,12 @@ class ThrowerManager:
 			char_position = ev.position
 			
 			# simple throw
-			if ev.throwing_type == ThrowingType.THROW:
+			if ev.throwing_type == ThrowingType.THROW and not ball.will_be_served:
 				velocity_efficiency = ev.velocity_efficiency
 				target_position = self.get_effective_target_position(direction, char_position)
 				self.throw_ball(ball, ball.position, target_position, velocity_efficiency=velocity_efficiency)
 			# smash (during a jump)
-			elif ev.throwing_type == ThrowingType.SMASH:
+			elif ev.throwing_type == ThrowingType.SMASH and not ball.will_be_served:
 				target_position = self.get_effective_smash_target_position(direction, char_position)
 				self.smash_ball(ball, ball.position, target_position)
 			# serve
