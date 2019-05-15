@@ -15,13 +15,18 @@ The target ball position is **controllable** in these actions :
 
 ## Controls
 
-| Key       | Action                                  |
-|   ------- |      ---------------------------------- |
-| ZQSD      | **Move** or **aim** during ball throwing|
-| i         | Jump                                    |
-| j         | Smash                                   |
-| Arrow Keys| Move Camera                             |
-| Space Bar | Relaunch ball                           |
+Keyboard and Gamepad are supported. For gamepad, button binds could be different depending on your device button layout.
+
+| Key *(keyboard)*| Button *(Gamepad)*| Action                                    |
+|---------------- |------------------ |------------------------------------------ |
+| ZQSD            | POV, D-PAD        | **Move** or **Aim** during ball throwing  |
+| I               | 2                 | **Jump**                                  |
+| J               | 1                 | **Throw** ball or **Smash**               |
+| L               | 3                 | **Dive** to catch up ball (after smash...)|
+| Arrow Keys      | Right joystick    | **Move** camera                           |
+| Space bar       | 4                 | **Re-throw** ball                         |
+| Esc.            | 9                 | **Quit** game                             |
+| P               | 10                | **Pause** game (not implemented yet)      |
 
 
 ## Throw ball
@@ -29,6 +34,9 @@ The target ball position is **controllable** in these actions :
 
 ## Smash
 <img src="doc/smash.gif" height="400" />
+
+## Dive
+<img src="doc/dive.gif" height="400" />
 
 ## Serve
 <img src="doc/serve.gif" height="400" />
