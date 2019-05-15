@@ -1,6 +1,7 @@
 # encoding : UTF-8
 
 from Game.character import *
+import Engine.game_engine
 from pygame import time, event
 
 from Settings import *
@@ -133,7 +134,7 @@ class Throwing(State):
 	"""
 	def __init__(self, character, action_events=[], **kwargs):
 		super().__init__(character)
-		self.t0 = time.get_ticks()
+		self.t0 = Engine.game_engine.GameEngine.get_instance().get_ticks_since_init()
 		self.run(action_events, **kwargs)
 	
 	def run(self, action_events, **kwargs):
@@ -146,7 +147,7 @@ class Throwing(State):
 		"""
 		if self.character.is_colliding_ball:
 			# throwing velocity efficiency
-			vel_eff = get_velocity_efficiency(time.get_ticks() - self.t0)
+			vel_eff = get_velocity_efficiency(Engine.game_engine.GameEngine.get_instance().get_ticks_since_init() - self.t0)
 			
 			direction = get_direction_requested(action_events)
 			event.post(event.Event(THROW_EVENT, {"throwing_type": ThrowingType.THROW,
@@ -163,7 +164,7 @@ class Throwing(State):
 		:return a state
 		:rtype State:
 		"""
-		if time.get_ticks() - self.t0 > THROW_DURATION:
+		if Engine.game_engine.GameEngine.get_instance().get_ticks_since_init() - self.t0 > THROW_DURATION:
 			if is_running_requested(action_events):
 				return Running(self.character, action_events, **kwargs)
 			else:
@@ -190,7 +191,7 @@ class Serving(State):
 		"""
 		
 		if is_throwing_requested(action_events):
-			self.t0 = time.get_ticks()
+			self.t0 = Engine.game_engine.GameEngine.get_instance().get_ticks_since_init()
 			self.has_served = True
 			direction = get_direction_requested(action_events)
 			event.post(event.Event(THROW_EVENT, {"throwing_type": ThrowingType.SERVE,
@@ -207,7 +208,7 @@ class Serving(State):
 		:return a state
 		:rtype State:
 		"""
-		if self.has_served and time.get_ticks() - self.t0 > SERVE_DURATION:
+		if self.has_served and Engine.game_engine.GameEngine.get_instance().get_ticks_since_init() - self.t0 > SERVE_DURATION:
 			if is_running_requested(action_events):
 				return Running(self.character, action_events, **kwargs)
 			else:
@@ -267,7 +268,7 @@ class Diving(State):
 	def __init__(self, character, action_events=[], **kwargs):
 		State.__init__(self, character)
 
-		self.t0 = time.get_ticks()
+		self.t0 = Engine.game_engine.GameEngine.get_instance().get_ticks_since_init()
 
 		direction = get_normalized_direction_requested(action_events)
 
@@ -278,13 +279,13 @@ class Diving(State):
 		self.character.set_diving_collider(direction)
 
 	def run(self, action_events, **kwargs):
-		if time.get_ticks() - self.t0 > DIVE_SLIDE_DURATION:
+		if Engine.game_engine.GameEngine.get_instance().get_ticks_since_init() - self.t0 > DIVE_SLIDE_DURATION:
 			self.character.velocity = Vector3()
 
 		if self.character.is_colliding_ball:
 			TOTAL_DURATION = DIVE_SLIDE_DURATION + DIVE_DURATION_FOR_STANDING_UP
 
-			x = (time.get_ticks() - self.t0) / TOTAL_DURATION
+			x = (Engine.game_engine.GameEngine.get_instance().get_ticks_since_init() - self.t0) / TOTAL_DURATION
 
 			thr = DIVE_SLIDE_DURATION / TOTAL_DURATION
 			alpha = TOTAL_DURATION / DIVE_DURATION_FOR_STANDING_UP
@@ -296,7 +297,8 @@ class Diving(State):
 												 "velocity_efficiency": vel_eff}))
 
 	def next(self, action_events, **kwargs):
-		if time.get_ticks() - self.t0 > DIVE_SLIDE_DURATION + DIVE_DURATION_FOR_STANDING_UP:
+		if Engine.game_engine.GameEngine.get_instance().get_ticks_since_init() - self.t0 \
+				> DIVE_SLIDE_DURATION + DIVE_DURATION_FOR_STANDING_UP:
 			self.character.set_default_collider()
 
 			# change state

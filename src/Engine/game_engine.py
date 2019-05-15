@@ -38,6 +38,14 @@ class GameEngine(ActionObject):
 		self.thrower_manager = ThrowerManager()
 
 		self.running = True
+		
+		self.initial_ticks = time.get_ticks()
+		self.clock = time.Clock()
+		self.dt = 0
+		self.previous_ticks = self.initial_ticks
+		self._ticks_since_init = 0
+		self.frame_count = 0
+		
 		self._create()
 
 		GameEngine.s_instance = self
@@ -94,23 +102,17 @@ class GameEngine(ActionObject):
 		
 		:return: None
 		"""
-		frame_count = 0
-
 		# ball initial velocity
 		self.thrower_manager.throw_ball(self.ball, INITIAL_POS, TARGET_POS, WANTED_H)
 		
-		# for frame rate
-		t2 = pg.time.get_ticks()
-		t1 = t2
-		t0 = t2  # time of first frame of the game
 		while self.running:
 			if len(event.get(QUIT)) > 0:
 				self.request_quit()
 				
 			# PHYSICS
-			self.ball.update_physics(t2-t1)
+			self.ball.update_physics(self.dt)
 			for char in [self.char1, self.char2]:
-				char.update_physics(t2-t1)
+				char.update_physics(self.dt)
 			
 			# COLLISIONS
 			self.collisions_manager.update(self.ball, self.court, [self.char1, self.char2])
@@ -120,7 +122,7 @@ class GameEngine(ActionObject):
 			actions_events = pg.event.get(ACTION_EVENT)
 			# UPDATE ACTIONS
 			for action_object in ActionObject.objects:
-				action_object.update_actions(actions_events, dt=t2-t1)
+				action_object.update_actions(actions_events, dt=self.dt)
 			
 			# throw event
 			self.thrower_manager.update(pg.event.get(THROW_EVENT), pg.event.get(TRAJECTORY_CHANGED_EVENT), self.ball)
@@ -129,14 +131,31 @@ class GameEngine(ActionObject):
 			self.display_manager.update([*self.objects, self.thrower_manager])
 			
 			# manage frame rate
-			t1 = t2
-			t2 = pg.time.get_ticks()
-			pg.time.wait(int(1000 / NOMINAL_FRAME_RATE - (t2 - t1)))
-			frame_count += 1
-
-		print("run with {} mean fps".format(int(1000 * frame_count / (t2 - t0))))
+			self.manage_framerate_and_time()
+			
+		print("run with {} fps".format(self.get_average_fps()))
 
 	def get_character_by_player_id(self, player_id):
 		for char in (self.char1, self.char2):
 			if char.player_id == player_id:
 				return char
+			
+	def get_ticks_since_init(self):
+		return self._ticks_since_init
+	
+	def add_ticks(self, val):
+		self._ticks_since_init += val
+		
+	def manage_framerate_and_time(self):
+		t1 = self.previous_ticks
+		self.clock.tick(NOMINAL_FRAME_RATE)
+		t2 = pg.time.get_ticks()
+		
+		self.dt = TIME_SPEED * (t2 - t1)
+		self.add_ticks(self.dt)
+		self.frame_count += 1
+		self.previous_ticks = t2
+		
+	def get_average_fps(self, ndigits=1):
+		return round(1000 * self.frame_count / (time.get_ticks() - self.initial_ticks), ndigits)
+		
