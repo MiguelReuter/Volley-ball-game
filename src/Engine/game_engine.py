@@ -14,6 +14,7 @@ from .TrajectorySolver import ThrowerManager
 
 from Engine.Actions import ActionObject
 
+import Engine.game_engine_states as GEStates
 
 import pygame as pg
 
@@ -45,6 +46,13 @@ class GameEngine(ActionObject):
 		self.previous_ticks = self.initial_ticks
 		self._ticks_since_init = 0
 		self.frame_count = 0
+		
+		# states
+		self.paused = False
+		
+		self.running_state = GEStates.Running()
+		self.pausing_state = GEStates.Pausing()
+		self.current_state = self.running_state
 		
 		self._create()
 
@@ -85,13 +93,18 @@ class GameEngine(ActionObject):
 	
 	def update_actions(self, action_events, **kwargs):
 		filtered_action_events = self.filter_action_events_by_player_id(action_events)
+		# TODO: add an update_actions method in each GameEngine States ?
 		for ev in filtered_action_events:
 			action = ev.action
 			if action == "QUIT":
 				self.running = False
 			elif action == "PAUSE":
-				print(action, "not implemented yet")
+				if self.current_state == self.pausing_state:
+					self.current_state = self.running_state
+				elif self.current_state == self.running_state:
+					self.current_state = self.pausing_state
 			elif action == "SPACE_TEST":
+				# TODO : bugfix - we can request a service on a paused game
 				self.serve(self.get_character_by_player_id(ev.player_id))
 				#self.thrower_manager.throw_ball(self.ball, INITIAL_POS, TARGET_POS, WANTED_H)
 				#self.thrower_manager.throw_at_random_target_position(self.ball, INITIAL_POS, WANTED_H)
@@ -106,32 +119,8 @@ class GameEngine(ActionObject):
 		self.thrower_manager.throw_ball(self.ball, INITIAL_POS, TARGET_POS, WANTED_H)
 		
 		while self.running:
-			if len(event.get(QUIT)) > 0:
-				self.request_quit()
-				
-			# PHYSICS
-			self.ball.update_physics(self.dt)
-			for char in [self.char1, self.char2]:
-				char.update_physics(self.dt)
-			
-			# COLLISIONS
-			self.collisions_manager.update(self.ball, self.court, [self.char1, self.char2])
-			
-			# KB EVENTS
-			self.input_manager.update()
-			actions_events = pg.event.get(ACTION_EVENT)
-			# UPDATE ACTIONS
-			for action_object in ActionObject.objects:
-				action_object.update_actions(actions_events, dt=self.dt)
-			
-			# throw event
-			self.thrower_manager.update(pg.event.get(THROW_EVENT), pg.event.get(TRAJECTORY_CHANGED_EVENT), self.ball)
-			
-			# DISPLAY
-			self.display_manager.update([*self.objects, self.thrower_manager])
-			
-			# manage frame rate
-			self.manage_framerate_and_time()
+			self.current_state.run(dt=self.dt)
+			self.current_state.next()
 			
 		print("run with {} fps".format(self.get_average_fps()))
 
@@ -158,4 +147,4 @@ class GameEngine(ActionObject):
 		
 	def get_average_fps(self, ndigits=1):
 		return round(1000 * self.frame_count / (time.get_ticks() - self.initial_ticks), ndigits)
-		
+	
