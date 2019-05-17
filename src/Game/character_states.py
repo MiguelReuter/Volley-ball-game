@@ -7,7 +7,7 @@ from pygame import time, event
 from Settings import *
 
 
-class State:
+class CharacterState:
 	"""
 	Virtual class for character's state.
 	"""
@@ -22,7 +22,7 @@ class State:
 		"""
 		Main function for this state, usually called at each frame.
 
-		:param list[pygame.event.Event(ACTIONEVENT)] action_events: list of action events
+		:param list[pygame.event.Event(ACTION_EVENT)] action_events: list of action events
 		:param kwargs: some other parameters
 		:return: None
 		"""
@@ -32,7 +32,7 @@ class State:
 		"""
 		Function called to change (or stay same) state, usually called at each frame.
 
-		:param list[pygame.event.Event(ACTIONEVENT)] action_events: list of action events
+		:param list[pygame.event.Event(ACTION_EVENT)] action_events: list of action events
 		:param kwargs: some other parameters
 		:return a state
 		:rtype State:
@@ -40,7 +40,7 @@ class State:
 		assert 0, "next not implemented"
 
 
-class Idling(State):
+class Idling(CharacterState):
 	"""
 	Character state for idling.
 	"""
@@ -48,7 +48,7 @@ class Idling(State):
 		"""
 		Main function for this state, usually called at each frame.
 
-		:param list[pygame.event.Event(ACTIONEVENT)] action_events: list of action events
+		:param list[pygame.event.Event(ACTION_EVENT)] action_events: list of action events
 		:param kwargs: some other parameters
 		:return: None
 		"""
@@ -58,7 +58,7 @@ class Idling(State):
 		"""
 		Function called to change (or stay at same) state, usually called at each frame.
 
-		:param list[pygame.event.Event(ACTIONEVENT)] action_events: list of action events
+		:param list[pygame.event.Event(ACTION_EVENT)] action_events: list of action events
 		:param kwargs: some other parameters :
 			- :var float dt: time between 2 function calls
 		:return a state
@@ -77,14 +77,14 @@ class Idling(State):
 		return self
 
 
-class Running(State):
+class Running(CharacterState):
 	"""
 	Character state for running.
 	"""
 	def __init__(self, character, action_events=[], **kwargs):
 		"""
 		:param Character character: character which state is attached to
-		:param list[pygame.event.Event(ACTIONEVENT)] action_events: list of action events
+		:param list[pygame.event.Event(ACTION_EVENT)] action_events: list of action events
 		:param kwargs: some other parameters :
 			- :var float dt: time between 2 function calls
 		"""
@@ -97,7 +97,7 @@ class Running(State):
 		"""
 		Main function for this state, usually called at each frame.
 
-		:param list[pygame.event.Event(ACTIONEVENT)] action_events: list of action events
+		:param list[pygame.event.Event(ACTION_EVENT)] action_events: list of action events
 		:param kwargs: some other parameters :
 			- :var float dt: time between 2 function calls
 		"""
@@ -109,7 +109,7 @@ class Running(State):
 		"""
 		Function called to change (or stay same) state, usually called at each frame.
 
-		:param list[pygame.event.Event(ACTIONEVENT)] action_events: list of action events
+		:param list[pygame.event.Event(ACTION_EVENT)] action_events: list of action events
 		:param kwargs: some other parameters
 		:return a state
 		:rtype State:
@@ -128,7 +128,7 @@ class Running(State):
 		return self
 	
 	
-class Throwing(State):
+class Throwing(CharacterState):
 	"""
 	Character state for throwing a ball
 	"""
@@ -141,7 +141,7 @@ class Throwing(State):
 		"""
 		Main function for this state, usually called at each frame.
 
-		:param list[pygame.event.Event(ACTIONEVENT)] action_events: list of action events
+		:param list[pygame.event.Event(ACTION_EVENT)] action_events: list of action events
 		:param kwargs: some other parameters
 		:return: None
 		"""
@@ -159,7 +159,7 @@ class Throwing(State):
 		"""
 		Function called to change (or stay same) state, usually called at each frame.
 
-		:param list[pygame.event.Event(ACTIONEVENT)] action_events: list of action events
+		:param list[pygame.event.Event(ACTION_EVENT)] action_events: list of action events
 		:param kwargs: some other parameters
 		:return a state
 		:rtype State:
@@ -172,7 +172,7 @@ class Throwing(State):
 		return self
 
 
-class Serving(State):
+class Serving(CharacterState):
 	"""
 	Character state for serving a ball
 	"""
@@ -185,7 +185,7 @@ class Serving(State):
 		"""
 		Main function for this state, usually called at each frame.
 
-		:param list[pygame.event.Event(ACTIONEVENT)] action_events: list of action events
+		:param list[pygame.event.Event(ACTION_EVENT)] action_events: list of action events
 		:param kwargs: some other parameters
 		:return: None
 		"""
@@ -203,7 +203,7 @@ class Serving(State):
 		"""
 		Function called to change (or stay same) state, usually called at each frame.
 
-		:param list[pygame.event.Event(ACTIONEVENT)] action_events: list of action events
+		:param list[pygame.event.Event(ACTION_EVENT)] action_events: list of action events
 		:param kwargs: some other parameters
 		:return a state
 		:rtype State:
@@ -216,7 +216,7 @@ class Serving(State):
 		return self
 
 
-class Jumping(State):
+class Jumping(CharacterState):
 	"""
 	Character state for jumping
 	"""
@@ -229,7 +229,7 @@ class Jumping(State):
 		"""
 		Main function for this state, usually called at each frame.
 
-		:param list[pygame.event.Event(ACTIONEVENT)] action_events: list of action events
+		:param list[pygame.event.Event(ACTION_EVENT)] action_events: list of action events
 		:param kwargs: some other parameters
 		:return: None
 		"""
@@ -245,7 +245,7 @@ class Jumping(State):
 		"""
 		Function called to change (or stay same) state, usually called at each frame.
 
-		:param list[pygame.event.Event(ACTIONEVENT)] action_events: list of action events
+		:param list[pygame.event.Event(ACTION_EVENT)] action_events: list of action events
 		:param kwargs: some other parameters
 		:return a state
 		:rtype State:
@@ -260,13 +260,13 @@ class Jumping(State):
 		return self
 
 
-class Diving(State):
+class Diving(CharacterState):
 	"""
 	Character state for diving
 	"""
 
 	def __init__(self, character, action_events=[], **kwargs):
-		State.__init__(self, character)
+		CharacterState.__init__(self, character)
 
 		self.t0 = Engine.game_engine.GameEngine.get_instance().get_ticks_since_init()
 
@@ -313,7 +313,7 @@ def is_running_requested(action_events):
 	"""
 	Return true if running action is requested.
 
-	:param list[pygame.event.Event(ACTIONEVENT)] action_events: list of action events
+	:param list[pygame.event.Event(ACTION_EVENT)] action_events: list of action events
 	:return: True if running action is requested
 	:rtype bool:
 	"""
@@ -327,7 +327,7 @@ def is_throwing_requested(action_events):
 	"""
 	Return true if throwing action is requested.
 
-	:param list[pygame.event.Event(ACTIONEVENT)] action_events: list of action events
+	:param list[pygame.event.Event(ACTION_EVENT)] action_events: list of action events
 	:return: True if throwing action is requested
 	:rtype bool:
 	"""
@@ -341,7 +341,7 @@ def is_jumping_requested(action_events):
 	"""
 	Return true if jumping action is requested.
 
-	:param list[pygame.event.Event(ACTIONEVENT)] action_events: list of action events
+	:param list[pygame.event.Event(ACTION_EVENT)] action_events: list of action events
 	:return: True if jumping action is requested
 	:rtype bool:
 	"""
