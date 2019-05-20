@@ -1,6 +1,7 @@
 # encoding : UTF-8
 
-from Game.character import *
+from Game.character import Character
+from pygame import Vector3
 
 import pytest
 

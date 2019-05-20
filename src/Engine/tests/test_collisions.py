@@ -1,4 +1,4 @@
-from pygame import *
+# encoding : UTF-8
 
 from Engine.Collisions import *
 

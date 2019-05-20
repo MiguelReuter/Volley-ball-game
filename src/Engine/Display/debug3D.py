@@ -1,7 +1,7 @@
 # encoding : UTF-8
 
-from pygame import *
-from Engine.Display import *
+from pygame import Vector2, Vector3, draw, Rect
+from Engine.Display import DisplayManager
 
 
 # flags

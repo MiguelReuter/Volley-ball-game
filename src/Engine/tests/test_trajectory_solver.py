@@ -1,6 +1,5 @@
 # encoding : UTF-8
 
-from pygame import *
 from Engine.Trajectory import *
 
 

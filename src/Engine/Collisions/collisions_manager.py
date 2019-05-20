@@ -1,11 +1,11 @@
 # encoding : UTF-8
 
-from Engine.Collisions.collider import *
 import pygame as pg
-from Settings import *
-from ..Trajectory.trajectory_solver import *
-
 from random import random
+
+from Engine.Collisions.collider import *
+from Engine.Trajectory.trajectory_solver import *
+from Settings import *
 
 
 class CollisionsManager:

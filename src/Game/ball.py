@@ -1,13 +1,13 @@
 # encoding : UTF-8
 
-from pygame import *
+from pygame import Vector3
 
 from Engine.Display import debug3D
 from Engine.Collisions import SphereCollider
 from Settings import G
 
 
-class Ball(sprite.Sprite):
+class Ball:
 	def __init__(self, position, radius=0.5):
 		super(Ball, self).__init__()
 		self.radius = radius

@@ -1,7 +1,6 @@
 # encoding : UTF-8
 
-from pygame import *
-
+from pygame import Vector3
 from Engine.Display import debug3D
 
 

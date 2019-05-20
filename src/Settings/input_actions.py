@@ -1,6 +1,6 @@
 # encoding : UTF-8
 
-from .general_settings import *
+from Settings.general_settings import *
 
 
 # an unique dict for several input devices

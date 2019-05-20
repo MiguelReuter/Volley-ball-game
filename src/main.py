@@ -4,7 +4,7 @@ from os import environ
 environ['PYGAME_HIDE_SUPPORT_PROMPT'] = '1'  # disable welcome message from pygame
 import pygame
 
-from Engine import *
+from Engine import GameEngine
 
 
 if __name__ == "__main__":

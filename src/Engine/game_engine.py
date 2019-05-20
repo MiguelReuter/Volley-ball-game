@@ -1,22 +1,16 @@
 # encoding : UTF-8
 
-from .Display import *
-from .Input import *
+import pygame as pg
 
 from Settings import *
-from Game.ball import Ball
-from Game.court import Court
-from Game.character import Character
-from Game.character_states import *
-
-from Engine.Collisions import *
-from .Trajectory import ThrowerManager
+from Game import Ball, Character, Court, CharacterStates
 
 from Engine.Actions import ActionObject
-
+from Engine.Collisions import CollisionsManager
+from Engine.Display import DisplayManager
+from Engine.Input import InputManager
+from Engine.Trajectory import ThrowerManager
 import Engine.game_engine_states as GEStates
-
-import pygame as pg
 
 
 INITIAL_POS = pg.Vector3(-2, 5, 1)
@@ -93,7 +87,7 @@ class GameEngine(ActionObject):
 		character.position = pos
 		self.ball.will_be_served = True
 		self.ball.position = character.get_hands_position()
-		character.state = Serving(character)
+		character.state = CharacterStates.Serving(character)
 	
 	def run(self):
 		"""

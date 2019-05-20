@@ -1,8 +1,9 @@
 # encoding : UTF-8
 
+from pygame import Vector3
+
 from Engine.Display import debug3D
 from Engine.Collisions import AABBCollider
-from pygame import *
 
 
 class Court:

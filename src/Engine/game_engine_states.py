@@ -1,8 +1,8 @@
 # encoding : UTF-8
 
-import Engine.game_engine
 import pygame as pg
 
+import Engine.game_engine
 from Engine.Actions import ActionObject
 from Settings import *
 

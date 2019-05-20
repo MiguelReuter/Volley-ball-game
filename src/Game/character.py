@@ -1,13 +1,10 @@
 # encoding : UTF-8
 
-from pygame import *
 from Engine.Display import debug3D
 from Engine.Collisions import AABBCollider
 from Settings import *
 
 from Engine.Actions import ActionObject
-
-
 from Game.character_states import *
 
 

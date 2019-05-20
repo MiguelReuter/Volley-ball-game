@@ -1,6 +1,6 @@
 # encoding : UTF-8
 
-from pygame import *
+from pygame import Vector3
 import pytest
 
 from Engine.Display import Camera

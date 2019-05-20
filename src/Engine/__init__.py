@@ -1,5 +1,10 @@
 # encoding : UTF-8
 
-from .game_engine import GameEngine
-from .game_engine_states import *
-from .Trajectory.thrower_manager import ThrowerManager
+from Engine.game_engine import GameEngine
+import Engine.game_engine_states as GEStates
+
+import Engine.Actions as Actions
+import Engine.Collisions as Collisions
+import Engine.Display as Display
+import Engine.Input as Input
+import Engine.Trajectory as Trajectory

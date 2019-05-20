@@ -15,8 +15,8 @@ class InputManager:
 	def __init__(self):
 		pg.joystick.init()
 		self.input_devices = [KeyboardInputDevice(PlayerId.PLAYER_ID_1),
-							  *[JoystickInputDevice(joystick_obj=joystick.Joystick(i))
-								for i in range(joystick.get_count())]]
+							  *[JoystickInputDevice(joystick_obj=pg.joystick.Joystick(i))
+								for i in range(pg.joystick.get_count())]]
 
 		InputManager.s_instance = self
 		

@@ -1,6 +1,6 @@
 # encoding : UTF-8
 
-from pygame import *
+from pygame.locals import *
 from Settings.input_identifiers import *
 
 # a dict for each input device (keyboard, joystick...)

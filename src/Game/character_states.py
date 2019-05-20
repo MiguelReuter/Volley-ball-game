@@ -1,9 +1,6 @@
 # encoding : UTF-8
 
-from Game.character import *
 import Engine.game_engine
-from pygame import time, event
-
 from Settings import *
 
 
@@ -44,7 +41,7 @@ class Idling(CharacterState):
 	"""
 	Character state for idling.
 	"""
-	def run(self, action_events=[], **kwargs):
+	def run(self, action_events=None, **kwargs):
 		"""
 		Main function for this state, usually called at each frame.
 
@@ -81,13 +78,15 @@ class Running(CharacterState):
 	"""
 	Character state for running.
 	"""
-	def __init__(self, character, action_events=[], **kwargs):
+	def __init__(self, character, action_events=None, **kwargs):
 		"""
 		:param Character character: character which state is attached to
 		:param list[pygame.event.Event(ACTION_EVENT)] action_events: list of action events
 		:param kwargs: some other parameters :
 			- :var float dt: time between 2 function calls
 		"""
+		if action_events is None:
+			action_events = []
 		dt = kwargs["dt"] if "dt" in kwargs.keys() else 0
 
 		super().__init__(character)
@@ -132,9 +131,11 @@ class Throwing(CharacterState):
 	"""
 	Character state for throwing a ball
 	"""
-	def __init__(self, character, action_events=[], **kwargs):
+	def __init__(self, character, action_events=None, **kwargs):
 		super().__init__(character)
 		self.t0 = Engine.game_engine.GameEngine.get_instance().get_running_ticks()
+		if action_events is None:
+			action_events = []
 		self.run(action_events, **kwargs)
 	
 	def run(self, action_events, **kwargs):
@@ -176,9 +177,11 @@ class Serving(CharacterState):
 	"""
 	Character state for serving a ball
 	"""
-	def __init__(self, character, action_events=[], **kwargs):
+	def __init__(self, character, action_events=None, **kwargs):
 		super().__init__(character)
 		self.has_served = False
+		if action_events is None:
+			action_events = []
 		self.run(action_events, **kwargs)
 		
 	def run(self, action_events, **kwargs):
@@ -197,8 +200,7 @@ class Serving(CharacterState):
 			event.post(event.Event(THROW_EVENT, {"throwing_type": ThrowingType.SERVE,
 			                                     "direction": direction,
 			                                     "position": self.character.position}))
-			
-	
+
 	def next(self, action_events, **kwargs):
 		"""
 		Function called to change (or stay same) state, usually called at each frame.
@@ -221,7 +223,7 @@ class Jumping(CharacterState):
 	Character state for jumping
 	"""
 	
-	def __init__(self, character, action_events=[], **kwargs):
+	def __init__(self, character, action_events=None, **kwargs):
 		super().__init__(character)
 		self.character.velocity = Vector3(0, 0, JUMP_VELOCITY)
 	
@@ -233,8 +235,6 @@ class Jumping(CharacterState):
 		:param kwargs: some other parameters
 		:return: None
 		"""
-		dt = kwargs["dt"] if "dt" in kwargs.keys() else 0
-		
 		if self.character.is_colliding_ball and is_throwing_requested(action_events):
 			direction = get_direction_requested(action_events)
 			event.post(event.Event(THROW_EVENT, {"throwing_type": ThrowingType.SMASH,
@@ -265,13 +265,13 @@ class Diving(CharacterState):
 	Character state for diving
 	"""
 
-	def __init__(self, character, action_events=[], **kwargs):
+	def __init__(self, character, action_events=None, **kwargs):
 		CharacterState.__init__(self, character)
-
 		self.t0 = Engine.game_engine.GameEngine.get_instance().get_running_ticks()
+		if action_events is None:
+			action_events = []
 
 		direction = get_normalized_direction_requested(action_events)
-
 		if direction.x == 0 and direction.y == 0:
 			direction.y = 1 if self.character.is_in_left_side else -1
 

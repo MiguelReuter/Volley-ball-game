@@ -1,11 +1,8 @@
 # encoding : UTF-8
 
-from pygame import *
+from pygame import Vector3
 from math import sqrt
 from Settings import G
-
-
-THR_NEAR_ZONE = 2
 
 
 def find_initial_velocity(origin_pos, target_pos, wanted_height):
@@ -129,8 +126,11 @@ def get_n_points_in_trajectory(n, origin_pos, initial_velocity, wanted_z=0):
 	return pts
 
 
+# TODO : /!\ method not used yet /!\
+"""
+THR_NEAR_ZONE = 2
+
 def find_effective_target_position(origin_pos, target_pos, wanted_height):
-	# TODO : /!\ method not used yet /!\
 	# all targets and wanted heights are not physically possible for the player : huge velocity needed, skills...
 	
 	# TODO : add dependence on target and origin position
@@ -144,6 +144,7 @@ def find_effective_target_position(origin_pos, target_pos, wanted_height):
 
 	
 	return eff_target_pos, eff_wanted_height
+"""
 
 
 def _are_points_in_same_y_side(p1, p2):
