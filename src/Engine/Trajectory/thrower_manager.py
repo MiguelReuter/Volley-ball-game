@@ -1,8 +1,8 @@
 # encoding : UTF-8
 
 from pygame import *
-from Engine.Display.Debug3D import *
-from Engine.TrajectorySolver import *
+from Engine.Display.debug3D import *
+from Engine.Trajectory import *
 from Settings import *
 
 import random

@@ -1,4 +1,4 @@
 # encoding : UTF-8
 
-from .TrajectorySolver import *
+from .trajectory_solver import *
 from .thrower_manager import ThrowerManager

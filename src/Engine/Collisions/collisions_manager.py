@@ -3,7 +3,7 @@
 from Engine.Collisions.collider import *
 import pygame as pg
 from Settings import *
-from ..TrajectorySolver.TrajectorySolver import *
+from ..Trajectory.trajectory_solver import *
 
 from random import random
 

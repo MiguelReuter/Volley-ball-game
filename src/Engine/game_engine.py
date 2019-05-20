@@ -10,7 +10,7 @@ from Game.character import Character
 from Game.character_states import *
 
 from Engine.Collisions import *
-from .TrajectorySolver import ThrowerManager
+from .Trajectory import ThrowerManager
 
 from Engine.Actions import ActionObject
 

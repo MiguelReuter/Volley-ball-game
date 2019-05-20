@@ -2,7 +2,7 @@
 
 from pygame import *
 
-from Engine.Display import Debug3D
+from Engine.Display import debug3D
 
 
 class Collider:
@@ -20,7 +20,7 @@ class SphereCollider(Collider):
 		self.radius = radius
 		
 	def draw(self):
-		Debug3D.draw_sphere(self.center, self.radius)
+		debug3D.draw_sphere(self.center, self.radius)
 		
 		
 class AABBCollider(Collider):
@@ -30,7 +30,7 @@ class AABBCollider(Collider):
 		self.size3 = size3
 		
 	def draw(self):
-		Debug3D.draw_aligned_axis_box(self.center, *self.size3)
+		debug3D.draw_aligned_axis_box(self.center, *self.size3)
 	
 
 def are_spheres_colliding(sphere_a, sphere_b):

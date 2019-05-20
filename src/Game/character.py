@@ -1,7 +1,7 @@
 # encoding : UTF-8
 
 from pygame import *
-from Engine.Display import Debug3D
+from Engine.Display import debug3D
 from Engine.Collisions import AABBCollider
 from Settings import *
 
@@ -44,7 +44,7 @@ class Character(ActionObject):
 	def draw(self):
 		ground_pos = Vector3(self.position)
 		ground_pos.z = 0
-		Debug3D.draw_horizontal_ellipse(ground_pos, self.w / 2)
+		debug3D.draw_horizontal_ellipse(ground_pos, self.w / 2)
 		self.collider.draw()
 
 	def move_rel(self, dxyz):

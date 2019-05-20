@@ -2,7 +2,7 @@
 
 from pygame import *
 
-from Engine.Display import Debug3D
+from Engine.Display import debug3D
 from Engine.Collisions import SphereCollider
 from Settings import G
 
@@ -33,7 +33,7 @@ class Ball(sprite.Sprite):
 		self.collider.center = self._position
 	
 	def draw(self):
-		Debug3D.draw_horizontal_ellipse(Vector3(self.position[0], self.position[1], 0), self.radius)
+		debug3D.draw_horizontal_ellipse(Vector3(self.position[0], self.position[1], 0), self.radius)
 		self.collider.draw()
 	
 	def move_rel(self, dxyz):

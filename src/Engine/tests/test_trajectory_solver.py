@@ -1,7 +1,7 @@
 # encoding : UTF-8
 
 from pygame import *
-from Engine.TrajectorySolver import *
+from Engine.Trajectory import *
 
 
 def test_find_target_position():
