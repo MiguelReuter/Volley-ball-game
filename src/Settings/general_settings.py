@@ -38,6 +38,7 @@ elif FULL_SCREEN
 
 # TIME
 NOMINAL_FRAME_RATE = 30
+TIME_SPEED = 1  # < 1 to slow down, > 1 to speed up
 
 # PHYSICS
 G = 10

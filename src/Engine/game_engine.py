@@ -14,6 +14,7 @@ from .TrajectorySolver import ThrowerManager
 
 from Engine.Actions import ActionObject
 
+import Engine.game_engine_states as GEStates
 
 import pygame as pg
 
@@ -37,7 +38,21 @@ class GameEngine(ActionObject):
 		self.collisions_manager = CollisionsManager()
 		self.thrower_manager = ThrowerManager()
 
-		self.running = True
+		self.done = False
+		
+		self.clock = time.Clock()
+		self.dt = 0
+		
+		self._initial_ticks = time.get_ticks()
+		self._previous_ticks = self._initial_ticks
+		
+		self._total_ticks = 0
+		self._running_ticks = 0
+		self.frame_count = 0
+		
+		# state
+		self.current_state = GEStates.Running()
+		
 		self._create()
 
 		GameEngine.s_instance = self
@@ -57,13 +72,18 @@ class GameEngine(ActionObject):
 							  pg.QUIT, pg.VIDEORESIZE,
 		                      ACTION_EVENT, THROW_EVENT, TRAJECTORY_CHANGED_EVENT])
 
+	def update_actions(self, action_events, **kwargs):
+		for ev in action_events + pg.event.get(pg.QUIT):
+			if ev.action == "QUIT":
+				self.request_quit()
+
 	def request_quit(self):
 		"""
 		Call this method to quit main loop and game.
 		
 		:return: None
 		"""
-		self.running = False
+		self.done = True
 	
 	def serve(self, character):
 		# serving position
@@ -75,68 +95,47 @@ class GameEngine(ActionObject):
 		self.ball.position = character.get_hands_position()
 		character.state = Serving(character)
 	
-	def update_actions(self, action_events, **kwargs):
-		filtered_action_events = self.filter_action_events_by_player_id(action_events)
-		for ev in filtered_action_events:
-			action = ev.action
-			if action == "QUIT":
-				self.running = False
-			elif action == "PAUSE":
-				print(action, "not implemented yet")
-			elif action == "SPACE_TEST":
-				self.serve(self.get_character_by_player_id(ev.player_id))
-				#self.thrower_manager.throw_ball(self.ball, INITIAL_POS, TARGET_POS, WANTED_H)
-				#self.thrower_manager.throw_at_random_target_position(self.ball, INITIAL_POS, WANTED_H)
-		
 	def run(self):
 		"""
 		Main loop, call different managers (input, display...) etc.
 		
 		:return: None
 		"""
-		frame_count = 0
-
 		# ball initial velocity
 		self.thrower_manager.throw_ball(self.ball, INITIAL_POS, TARGET_POS, WANTED_H)
 		
-		# for frame rate
-		t2 = pg.time.get_ticks()
-		t1 = t2
-		t0 = t2  # time of first frame of the game
-		while self.running:
-			if len(event.get(QUIT)) > 0:
-				self.request_quit()
-				
-			# PHYSICS
-			self.ball.update_physics(t2-t1)
-			for char in [self.char1, self.char2]:
-				char.update_physics(t2-t1)
+		while not self.done:
+			self.current_state.run(dt=self.dt)
+			self.current_state.next()
 			
-			# COLLISIONS
-			self.collisions_manager.update(self.ball, self.court, [self.char1, self.char2])
-			
-			# KB EVENTS
-			self.input_manager.update()
-			actions_events = pg.event.get(ACTION_EVENT)
-			# UPDATE ACTIONS
-			for action_object in ActionObject.objects:
-				action_object.update_actions(actions_events, dt=t2-t1)
-			
-			# throw event
-			self.thrower_manager.update(pg.event.get(THROW_EVENT), pg.event.get(TRAJECTORY_CHANGED_EVENT), self.ball)
-			
-			# DISPLAY
-			self.display_manager.update([*self.objects, self.thrower_manager])
-			
-			# manage frame rate
-			t1 = t2
-			t2 = pg.time.get_ticks()
-			pg.time.wait(int(1000 / NOMINAL_FRAME_RATE - (t2 - t1)))
-			frame_count += 1
-
-		print("run with {} mean fps".format(int(1000 * frame_count / (t2 - t0))))
+		print("run with {} fps".format(self.get_average_fps()))
 
 	def get_character_by_player_id(self, player_id):
 		for char in (self.char1, self.char2):
 			if char.player_id == player_id:
 				return char
+			
+	def get_running_ticks(self):
+		return self._running_ticks
+	
+	def get_total_ticks(self):
+		return self._total_ticks
+	
+	def add_ticks(self, val, is_running_state):
+		self._total_ticks += val
+		if is_running_state:
+			self._running_ticks += val
+		
+	def manage_framerate_and_time(self, is_running_state=True):
+		t1 = self._previous_ticks
+		self.clock.tick(NOMINAL_FRAME_RATE)
+		t2 = pg.time.get_ticks()
+		
+		self.dt = TIME_SPEED * (t2 - t1)
+		self.add_ticks(self.dt, is_running_state)
+		self.frame_count += 1
+		self._previous_ticks = t2
+		
+	def get_average_fps(self, ndigits=1):
+		return round(1000 * self.frame_count / (time.get_ticks() - self._initial_ticks), ndigits)
+	

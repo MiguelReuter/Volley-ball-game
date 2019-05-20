@@ -1,12 +1,13 @@
 # encoding : UTF-8
 
 from Game.character import *
+import Engine.game_engine
 from pygame import time, event
 
 from Settings import *
 
 
-class State:
+class CharacterState:
 	"""
 	Virtual class for character's state.
 	"""
@@ -21,7 +22,7 @@ class State:
 		"""
 		Main function for this state, usually called at each frame.
 
-		:param list[pygame.event.Event(ACTIONEVENT)] action_events: list of action events
+		:param list[pygame.event.Event(ACTION_EVENT)] action_events: list of action events
 		:param kwargs: some other parameters
 		:return: None
 		"""
@@ -31,7 +32,7 @@ class State:
 		"""
 		Function called to change (or stay same) state, usually called at each frame.
 
-		:param list[pygame.event.Event(ACTIONEVENT)] action_events: list of action events
+		:param list[pygame.event.Event(ACTION_EVENT)] action_events: list of action events
 		:param kwargs: some other parameters
 		:return a state
 		:rtype State:
@@ -39,7 +40,7 @@ class State:
 		assert 0, "next not implemented"
 
 
-class Idling(State):
+class Idling(CharacterState):
 	"""
 	Character state for idling.
 	"""
@@ -47,7 +48,7 @@ class Idling(State):
 		"""
 		Main function for this state, usually called at each frame.
 
-		:param list[pygame.event.Event(ACTIONEVENT)] action_events: list of action events
+		:param list[pygame.event.Event(ACTION_EVENT)] action_events: list of action events
 		:param kwargs: some other parameters
 		:return: None
 		"""
@@ -57,7 +58,7 @@ class Idling(State):
 		"""
 		Function called to change (or stay at same) state, usually called at each frame.
 
-		:param list[pygame.event.Event(ACTIONEVENT)] action_events: list of action events
+		:param list[pygame.event.Event(ACTION_EVENT)] action_events: list of action events
 		:param kwargs: some other parameters :
 			- :var float dt: time between 2 function calls
 		:return a state
@@ -76,14 +77,14 @@ class Idling(State):
 		return self
 
 
-class Running(State):
+class Running(CharacterState):
 	"""
 	Character state for running.
 	"""
 	def __init__(self, character, action_events=[], **kwargs):
 		"""
 		:param Character character: character which state is attached to
-		:param list[pygame.event.Event(ACTIONEVENT)] action_events: list of action events
+		:param list[pygame.event.Event(ACTION_EVENT)] action_events: list of action events
 		:param kwargs: some other parameters :
 			- :var float dt: time between 2 function calls
 		"""
@@ -96,7 +97,7 @@ class Running(State):
 		"""
 		Main function for this state, usually called at each frame.
 
-		:param list[pygame.event.Event(ACTIONEVENT)] action_events: list of action events
+		:param list[pygame.event.Event(ACTION_EVENT)] action_events: list of action events
 		:param kwargs: some other parameters :
 			- :var float dt: time between 2 function calls
 		"""
@@ -108,7 +109,7 @@ class Running(State):
 		"""
 		Function called to change (or stay same) state, usually called at each frame.
 
-		:param list[pygame.event.Event(ACTIONEVENT)] action_events: list of action events
+		:param list[pygame.event.Event(ACTION_EVENT)] action_events: list of action events
 		:param kwargs: some other parameters
 		:return a state
 		:rtype State:
@@ -127,26 +128,26 @@ class Running(State):
 		return self
 	
 	
-class Throwing(State):
+class Throwing(CharacterState):
 	"""
 	Character state for throwing a ball
 	"""
 	def __init__(self, character, action_events=[], **kwargs):
 		super().__init__(character)
-		self.t0 = time.get_ticks()
+		self.t0 = Engine.game_engine.GameEngine.get_instance().get_running_ticks()
 		self.run(action_events, **kwargs)
 	
 	def run(self, action_events, **kwargs):
 		"""
 		Main function for this state, usually called at each frame.
 
-		:param list[pygame.event.Event(ACTIONEVENT)] action_events: list of action events
+		:param list[pygame.event.Event(ACTION_EVENT)] action_events: list of action events
 		:param kwargs: some other parameters
 		:return: None
 		"""
 		if self.character.is_colliding_ball:
 			# throwing velocity efficiency
-			vel_eff = get_velocity_efficiency(time.get_ticks() - self.t0)
+			vel_eff = get_velocity_efficiency(Engine.game_engine.GameEngine.get_instance().get_running_ticks() - self.t0)
 			
 			direction = get_direction_requested(action_events)
 			event.post(event.Event(THROW_EVENT, {"throwing_type": ThrowingType.THROW,
@@ -158,12 +159,12 @@ class Throwing(State):
 		"""
 		Function called to change (or stay same) state, usually called at each frame.
 
-		:param list[pygame.event.Event(ACTIONEVENT)] action_events: list of action events
+		:param list[pygame.event.Event(ACTION_EVENT)] action_events: list of action events
 		:param kwargs: some other parameters
 		:return a state
 		:rtype State:
 		"""
-		if time.get_ticks() - self.t0 > THROW_DURATION:
+		if Engine.game_engine.GameEngine.get_instance().get_running_ticks() - self.t0 > THROW_DURATION:
 			if is_running_requested(action_events):
 				return Running(self.character, action_events, **kwargs)
 			else:
@@ -171,7 +172,7 @@ class Throwing(State):
 		return self
 
 
-class Serving(State):
+class Serving(CharacterState):
 	"""
 	Character state for serving a ball
 	"""
@@ -184,13 +185,13 @@ class Serving(State):
 		"""
 		Main function for this state, usually called at each frame.
 
-		:param list[pygame.event.Event(ACTIONEVENT)] action_events: list of action events
+		:param list[pygame.event.Event(ACTION_EVENT)] action_events: list of action events
 		:param kwargs: some other parameters
 		:return: None
 		"""
 		
 		if is_throwing_requested(action_events):
-			self.t0 = time.get_ticks()
+			self.t0 = Engine.game_engine.GameEngine.get_instance().get_running_ticks()
 			self.has_served = True
 			direction = get_direction_requested(action_events)
 			event.post(event.Event(THROW_EVENT, {"throwing_type": ThrowingType.SERVE,
@@ -202,12 +203,12 @@ class Serving(State):
 		"""
 		Function called to change (or stay same) state, usually called at each frame.
 
-		:param list[pygame.event.Event(ACTIONEVENT)] action_events: list of action events
+		:param list[pygame.event.Event(ACTION_EVENT)] action_events: list of action events
 		:param kwargs: some other parameters
 		:return a state
 		:rtype State:
 		"""
-		if self.has_served and time.get_ticks() - self.t0 > SERVE_DURATION:
+		if self.has_served and Engine.game_engine.GameEngine.get_instance().get_running_ticks() - self.t0 > SERVE_DURATION:
 			if is_running_requested(action_events):
 				return Running(self.character, action_events, **kwargs)
 			else:
@@ -215,7 +216,7 @@ class Serving(State):
 		return self
 
 
-class Jumping(State):
+class Jumping(CharacterState):
 	"""
 	Character state for jumping
 	"""
@@ -228,7 +229,7 @@ class Jumping(State):
 		"""
 		Main function for this state, usually called at each frame.
 
-		:param list[pygame.event.Event(ACTIONEVENT)] action_events: list of action events
+		:param list[pygame.event.Event(ACTION_EVENT)] action_events: list of action events
 		:param kwargs: some other parameters
 		:return: None
 		"""
@@ -244,7 +245,7 @@ class Jumping(State):
 		"""
 		Function called to change (or stay same) state, usually called at each frame.
 
-		:param list[pygame.event.Event(ACTIONEVENT)] action_events: list of action events
+		:param list[pygame.event.Event(ACTION_EVENT)] action_events: list of action events
 		:param kwargs: some other parameters
 		:return a state
 		:rtype State:
@@ -259,15 +260,15 @@ class Jumping(State):
 		return self
 
 
-class Diving(State):
+class Diving(CharacterState):
 	"""
 	Character state for diving
 	"""
 
 	def __init__(self, character, action_events=[], **kwargs):
-		State.__init__(self, character)
+		CharacterState.__init__(self, character)
 
-		self.t0 = time.get_ticks()
+		self.t0 = Engine.game_engine.GameEngine.get_instance().get_running_ticks()
 
 		direction = get_normalized_direction_requested(action_events)
 
@@ -278,13 +279,13 @@ class Diving(State):
 		self.character.set_diving_collider(direction)
 
 	def run(self, action_events, **kwargs):
-		if time.get_ticks() - self.t0 > DIVE_SLIDE_DURATION:
+		if Engine.game_engine.GameEngine.get_instance().get_running_ticks() - self.t0 > DIVE_SLIDE_DURATION:
 			self.character.velocity = Vector3()
 
 		if self.character.is_colliding_ball:
 			TOTAL_DURATION = DIVE_SLIDE_DURATION + DIVE_DURATION_FOR_STANDING_UP
 
-			x = (time.get_ticks() - self.t0) / TOTAL_DURATION
+			x = (Engine.game_engine.GameEngine.get_instance().get_running_ticks() - self.t0) / TOTAL_DURATION
 
 			thr = DIVE_SLIDE_DURATION / TOTAL_DURATION
 			alpha = TOTAL_DURATION / DIVE_DURATION_FOR_STANDING_UP
@@ -296,7 +297,8 @@ class Diving(State):
 												 "velocity_efficiency": vel_eff}))
 
 	def next(self, action_events, **kwargs):
-		if time.get_ticks() - self.t0 > DIVE_SLIDE_DURATION + DIVE_DURATION_FOR_STANDING_UP:
+		if Engine.game_engine.GameEngine.get_instance().get_running_ticks() - self.t0 \
+				> DIVE_SLIDE_DURATION + DIVE_DURATION_FOR_STANDING_UP:
 			self.character.set_default_collider()
 
 			# change state
@@ -311,7 +313,7 @@ def is_running_requested(action_events):
 	"""
 	Return true if running action is requested.
 
-	:param list[pygame.event.Event(ACTIONEVENT)] action_events: list of action events
+	:param list[pygame.event.Event(ACTION_EVENT)] action_events: list of action events
 	:return: True if running action is requested
 	:rtype bool:
 	"""
@@ -325,7 +327,7 @@ def is_throwing_requested(action_events):
 	"""
 	Return true if throwing action is requested.
 
-	:param list[pygame.event.Event(ACTIONEVENT)] action_events: list of action events
+	:param list[pygame.event.Event(ACTION_EVENT)] action_events: list of action events
 	:return: True if throwing action is requested
 	:rtype bool:
 	"""
@@ -339,7 +341,7 @@ def is_jumping_requested(action_events):
 	"""
 	Return true if jumping action is requested.
 
-	:param list[pygame.event.Event(ACTIONEVENT)] action_events: list of action events
+	:param list[pygame.event.Event(ACTION_EVENT)] action_events: list of action events
 	:return: True if jumping action is requested
 	:rtype bool:
 	"""
