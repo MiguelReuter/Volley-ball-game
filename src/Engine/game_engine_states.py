@@ -39,16 +39,14 @@ class OnCreation(GameEngineState):
 	pass
 
 
-class Running(GameEngineState):
+class Running(GameEngineState, ActionObject):
 	def __init__(self):
-		pass
+		ActionObject.__init__(self, add_to_objects_list=False)
+		self._pause_requested = False
 	
 	def run(self, **kwargs):
 		dt = kwargs["dt"] if "dt" in kwargs.keys() else 0
 		game_engine = Engine.game_engine.GameEngine.get_instance()
-		
-		if len(pg.event.get(pg.QUIT)) > 0:
-			game_engine.request_quit()
 		
 		# PHYSICS
 		game_engine.ball.update_physics(dt)
@@ -63,11 +61,12 @@ class Running(GameEngineState):
 		game_engine.input_manager.update()
 		actions_events = pg.event.get(ACTION_EVENT)
 		# UPDATE ACTIONS
-		for action_object in ActionObject.objects:
+		for action_object in ActionObject.objects + [self]:
 			action_object.update_actions(actions_events, dt=dt)
 		
 		# throw event
-		game_engine.thrower_manager.update(pg.event.get(THROW_EVENT), pg.event.get(TRAJECTORY_CHANGED_EVENT), game_engine.ball)
+		game_engine.thrower_manager.update(pg.event.get(THROW_EVENT), pg.event.get(TRAJECTORY_CHANGED_EVENT),
+		                                   game_engine.ball)
 		
 		# DISPLAY
 		game_engine.display_manager.update([*game_engine.objects, game_engine.thrower_manager])
@@ -76,42 +75,59 @@ class Running(GameEngineState):
 		game_engine.manage_framerate_and_time()
 		
 	def next(self, **kwargs):
-		# game_engine = Engine.game_engine.GameEngine.get_instance()
-		# game_engine.current_state = self
-		pass
+		if self._pause_requested:
+			game_engine = Engine.game_engine.GameEngine.get_instance()
+			game_engine.current_state = Pausing()
+			print("game paused")
+	
+	def update_actions(self, action_events, **kwargs):
+		filtered_action_events = self.filter_action_events_by_player_id(action_events)
 		
-		
-class Pausing(GameEngineState):
+		for ev in filtered_action_events:
+			if ev.action == "PAUSE":
+				self._pause_requested = True
+			elif ev.action == "SPACE_TEST":
+				game_engine = Engine.game_engine.GameEngine.get_instance()
+				
+				game_engine.serve(game_engine.get_character_by_player_id(ev.player_id))
+				# game_engine.thrower_manager.throw_ball(game_engine.ball, INITIAL_POS, TARGET_POS, WANTED_H)
+				# game_engine.thrower_manager.throw_at_random_target_position(game_engine.ball, INITIAL_POS, WANTED_H)
+	
+	
+class Pausing(GameEngineState, ActionObject):
 	def __init__(self):
-		pass
+		ActionObject.__init__(self, add_to_objects_list=False)
+		self._resume_requested = False
 	
 	def run(self, **kwargs):
 		game_engine = Engine.game_engine.GameEngine.get_instance()
-		
-		if len(pg.event.get(pg.QUIT)) > 0:
-			game_engine.request_quit()
 		
 		# KB EVENTS
 		game_engine.input_manager.update()
 		actions_events = pg.event.get(ACTION_EVENT)
 		# UPDATE ACTIONS
+		self.update_actions(action_events=actions_events)
 		game_engine.update_actions(action_events=actions_events)
 		
 		# DISPLAY
 		game_engine.display_manager.update([*game_engine.objects, game_engine.thrower_manager])
 		
 		# manage frame rate
-		game_engine.manage_framerate_and_time()
+		game_engine.manage_framerate_and_time(is_running_state=False)
 	
 	def next(self, **kwargs):
-		#game_engine = Engine.game_engine.GameEngine.get_instance()
-		#game_engine.current_state = self
-		pass
-
+		if self._resume_requested:
+			game_engine = Engine.game_engine.GameEngine.get_instance()
+			game_engine.current_state = Running()
+			print("game resumed")
+	
+	def update_actions(self, action_events, **kwargs):
+		filtered_action_events = self.filter_action_events_by_player_id(action_events)
+		
+		for ev in filtered_action_events:
+			if ev.action == "PAUSE":
+				self._resume_requested = True
+				
 
 class OnMenu(GameEngineState):
-	pass
-
-
-def is_paused_requested():
 	pass

@@ -7,9 +7,10 @@ class ActionObject:
 	
 	objects = []
 	
-	def __init__(self, player_id=PlayerId.PLAYER_ID_ALL):
+	def __init__(self, player_id=PlayerId.PLAYER_ID_ALL, add_to_objects_list=True):
 		self.player_id = player_id
-		ActionObject.objects.append(self)
+		if add_to_objects_list:
+			ActionObject.objects.append(self)
 		
 	def update_actions(self, action_events, **kwargs):
 		assert -1, "method to implement"
