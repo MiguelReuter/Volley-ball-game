@@ -50,15 +50,17 @@ class Running(GameEngineState, ActionObject):
 		
 		# PHYSICS
 		game_engine.ball.update_physics(dt)
-		for char in [game_engine.char1, game_engine.char2]:
+		for char in game_engine.characters:
 			char.update_physics(dt)
 		
 		# COLLISIONS
-		game_engine.collisions_manager.update(game_engine.ball, game_engine.court,
-		                                      [game_engine.char1, game_engine.char2])
+		game_engine.collisions_manager.update(game_engine.ball, game_engine.court, game_engine.characters)
 		
 		# KB EVENTS
 		game_engine.input_manager.update()
+		# IA
+		game_engine.ai_manager.update()
+
 		actions_events = pg.event.get(ACTION_EVENT)
 		# UPDATE ACTIONS
 		for action_object in ActionObject.objects + [self]:

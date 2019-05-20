@@ -8,6 +8,7 @@ from Game import Ball, Character, Court, CharacterStates
 from Engine.Actions import ActionObject
 from Engine.Collisions import CollisionsManager
 from Engine.Display import DisplayManager
+from Engine.AI import AIManager
 from Engine.Input import InputManager
 from Engine.Trajectory import ThrowerManager
 import Engine.game_engine_states as GEStates
@@ -27,10 +28,10 @@ class GameEngine(ActionObject):
 
 	def __init__(self):
 		ActionObject.__init__(self)
-
+		self.ai_manager = AIManager()
+		self.collisions_manager = CollisionsManager()
 		self.display_manager = DisplayManager()
 		self.input_manager = InputManager()
-		self.collisions_manager = CollisionsManager()
 		self.thrower_manager = ThrowerManager()
 
 		self.done = False
@@ -40,7 +41,7 @@ class GameEngine(ActionObject):
 		
 		self._initial_ticks = time.get_ticks()
 		self._previous_ticks = self._initial_ticks
-
+		
 		self._total_ticks = 0
 		self._running_ticks = 0
 		self.frame_count = 0
@@ -48,16 +49,19 @@ class GameEngine(ActionObject):
 		# state
 		self.current_state = GEStates.Running()
 
-		self._create()
-
 		GameEngine.s_instance = self
 
+		self._create()
+
+	
 	def _create(self):
 		self.ball = Ball(INITIAL_POS, BALL_RADIUS)
 		self.court = Court(COURT_DIM_Y, COURT_DIM_X, NET_HEIGHT_BTM, NET_HEIGHT_TOP)
-		self.char1 = Character((-2, -3.5, 0), player_id=PlayerId.PLAYER_ID_1)
-		self.char2 = Character((0, 5, 0), player_id=PlayerId.PLAYER_ID_2, is_in_left_side=False)
-		self.objects = [self.court, self.ball, self.char1, self.char2]
+		char1 = Character((-2, -3.5, 0), player_id=PlayerId.PLAYER_ID_1)
+		#char2 = Character((0, 5, 0), player_id=PlayerId.PLAYER_ID_2, is_in_left_side=False)
+		char2 = Character((0, 5, 0), player_id=PlayerId.IA_ID_1, is_in_left_side=False)
+		self.characters = [char1, char2]
+		self.objects = [self.court, self.ball, char1, char2]
 		
 		# allowed pygame events
 		pg.event.set_blocked([i for i in range(pg.NUMEVENTS)])
@@ -66,6 +70,9 @@ class GameEngine(ActionObject):
 							  pg.JOYHATMOTION,
 							  pg.QUIT, pg.VIDEORESIZE,
 		                      ACTION_EVENT, THROW_EVENT])
+
+		# create
+		self.ai_manager.create()
 
 	def update_actions(self, action_events, **kwargs):
 		for ev in action_events:
@@ -108,7 +115,7 @@ class GameEngine(ActionObject):
 		print("run with {} fps".format(self.get_average_fps()))
 
 	def get_character_by_player_id(self, player_id):
-		for char in (self.char1, self.char2):
+		for char in self.characters:
 			if char.player_id == player_id:
 				return char
 			
