@@ -65,7 +65,7 @@ class GameEngine(ActionObject):
 							  pg.JOYBUTTONDOWN, pg.JOYBUTTONUP,
 							  pg.JOYHATMOTION,
 							  pg.QUIT, pg.VIDEORESIZE,
-		                      ACTION_EVENT, THROW_EVENT, TRAJECTORY_CHANGED_EVENT])
+		                      ACTION_EVENT, THROW_EVENT])
 
 	def update_actions(self, action_events, **kwargs):
 		for ev in action_events + pg.event.get(pg.QUIT):

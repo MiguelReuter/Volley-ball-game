@@ -138,10 +138,7 @@ class ThrowerManager:
 		
 		self.throw_ball(ball, initial_pos, target_pos, wanted_height)
 	
-	def update(self, throw_events, trajectory_changes_events, ball):
-		for ev in trajectory_changes_events:
-			self.current_trajectory = ev.trajectory
-		
+	def update(self, throw_events, ball):
 		for ev in throw_events:
 			direction = ev.direction
 			char_position = ev.position
@@ -183,15 +180,11 @@ class ThrowerManager:
 		
 		# target position changed due to velocity_efficiency
 		eff_target_pos = find_target_position(initial_pos, velocity, target_pos.z)
-		#self.target_position = Vector3(eff_target_pos)
-		#self.origin_position = Vector3(initial_pos)
 		self.current_trajectory = Trajectory(initial_pos, eff_target_pos, velocity)
 		
 		# throw the ball
 		ball.position = Vector3(initial_pos)
 		ball.velocity = Vector3(velocity)
-		
-		event.clear(TRAJECTORY_CHANGED_EVENT)
 		
 	def smash_ball(self, ball, initial_pos, target_pos):
 		"""
@@ -204,7 +197,7 @@ class ThrowerManager:
 		"""
 		velocity = SMASH_VELOCITY * (target_pos - ball.position).normalize()
 		
-		# process target position
+		# process real target position, target_pos was only used to process velocity vector
 		real_target_position = find_target_position(initial_pos, velocity, ball.radius)
 		self.current_trajectory = Trajectory(initial_pos, real_target_position, velocity)
 		

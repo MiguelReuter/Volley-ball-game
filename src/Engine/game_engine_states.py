@@ -65,8 +65,7 @@ class Running(GameEngineState, ActionObject):
 			action_object.update_actions(actions_events, dt=dt)
 		
 		# throw event
-		game_engine.thrower_manager.update(pg.event.get(THROW_EVENT), pg.event.get(TRAJECTORY_CHANGED_EVENT),
-		                                   game_engine.ball)
+		game_engine.thrower_manager.update(pg.event.get(THROW_EVENT), game_engine.ball)
 		
 		# DISPLAY
 		game_engine.display_manager.update([*game_engine.objects, game_engine.thrower_manager])
