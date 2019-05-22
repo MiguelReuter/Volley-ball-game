@@ -21,8 +21,10 @@ class InputManager:
 		InputManager.s_instance = self
 		
 	def update(self):
+		joy_input_events = pg.event.get([JOYBUTTONUP, JOYBUTTONDOWN, JOYHATMOTION])
+		
 		for input_device in self.input_devices:
-			input_device.update()
+			input_device.update(joy_events=joy_input_events)
 			input_device.generate_actions()
 			
 
@@ -33,8 +35,6 @@ class InputDevice:
 		self.key_action_binds = {}
 
 		self.input_preset = None
-		self.up_input_event = None
-		self.down_input_event = None
 		
 	def load_keys_and_actions_binds(self):
 		self.keys = {}
@@ -49,7 +49,7 @@ class InputDevice:
 			key_state = INPUT_ACTIONS[action]
 			self.key_action_binds[(key, key_state)] = action
 	
-	def update(self):
+	def update(self, **kwargs):
 		"""
 		Update keys state.
 	
@@ -63,13 +63,13 @@ class InputDevice:
 				self.keys[k] = KeyState.RELEASED
 		
 		# detect a state modification (with pygame event)
-		# only catch KEYUP, KEYDOWN and QUIT events
-		for ev in pg.event.get((self.up_input_event, self.down_input_event)):
-			if ev.type == self.down_input_event:
+		# only catch KEYUP, KEYDOWN
+		for ev in pg.event.get([KEYUP, KEYDOWN]):
+			if ev.type == pg.KEYDOWN:
 				if ev.key in self.keys.keys():
 					self.keys[ev.key] = KeyState.JUST_PRESSED
 			
-			if ev.type == self.up_input_event:
+			if ev.type == pg.KEYUP:
 				if ev.key in self.keys.keys():
 					self.keys[ev.key] = KeyState.JUST_RELEASED
 	
@@ -90,8 +90,6 @@ class KeyboardInputDevice(InputDevice):
 	def __init__(self, player_id=PlayerId.PLAYER_ID_1):
 		super().__init__(player_id)
 		self.input_preset = INPUT_PRESET_KEYBOARD
-		self.up_input_event = pg.KEYUP
-		self.down_input_event = pg.KEYDOWN
 		
 		self.load_keys_and_actions_binds()
 
@@ -105,17 +103,17 @@ class JoystickInputDevice(InputDevice):
 			self.joystick.init()
 		
 		self.input_preset = INPUT_PRESET_JOYSTICK
-		self.up_input_event = pg.JOYBUTTONUP
-		self.down_input_event = pg.JOYBUTTONDOWN
 
 		self.load_keys_and_actions_binds()
 
-	def update(self):
+	def update(self, **kwargs):
 		"""
 		Update keys state.
 
 		:return: None
 		"""
+		joy_events = kwargs["joy_events"] if "joy_events" in kwargs.keys() else []
+		
 		# update state
 		for k in self.keys:
 			if self.keys[k] == KeyState.JUST_PRESSED:
@@ -124,7 +122,7 @@ class JoystickInputDevice(InputDevice):
 				self.keys[k] = KeyState.RELEASED
 
 		# detect a state modification (with pygame event)
-		for ev in pg.event.get((JOYBUTTONUP, JOYBUTTONDOWN, JOYHATMOTION)):
+		for ev in joy_events:
 			if ev.joy == self.joystick.get_id():
 				if ev.type == JOYBUTTONDOWN:
 					if ev.button in self.keys.keys():
