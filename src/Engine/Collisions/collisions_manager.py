@@ -5,6 +5,7 @@ from random import random
 
 from Engine.Collisions.collider import *
 from Engine.Trajectory.trajectory_solver import *
+from Engine.Trajectory import Trajectory
 from Settings import *
 
 
@@ -72,4 +73,5 @@ class CollisionsManager:
 		# ball velocity checked to prevent to fill event queue
 		if b_refresh_target_ball_position and ball.velocity.length_squared() > 0.1:
 			target_pos = find_target_position(ball.position, ball.velocity, ball.radius)
-			pg.event.post(pg.event.Event(TRAJECTORY_CHANGED_EVENT, {"target_pos": target_pos}))
+			new_trajectory = Trajectory(ball.position, target_pos, ball.velocity)
+			pg.event.post(pg.event.Event(TRAJECTORY_CHANGED_EVENT, {"trajectory": new_trajectory}))

@@ -5,6 +5,7 @@ from datetime import datetime
 
 from Engine.Display.debug3D import *
 from Engine.Trajectory import *
+from Engine.Trajectory.trajectory import Trajectory
 from Settings import *
 random.seed(datetime.now())  # for random throwing
 
@@ -20,8 +21,7 @@ class ThrowerManager:
 		return ThrowerManager.s_instance
 
 	def __init__(self):
-		self.target_position = Vector3()
-		self.origin_position = Vector3()
+		self.current_trajectory = Trajectory()
 		self.debug_trajectory_pts = []
 
 		ThrowerManager.s_instance = self
@@ -104,14 +104,16 @@ class ThrowerManager:
 		"""
 		
 		# draw target position
-		ground_pos = Vector3(self.target_position)
+		target_pos = self.current_trajectory.target_pos
+		ground_pos = Vector3(target_pos)
 		ground_pos.z = 0
-		draw_sphere(self.target_position, 0.1, col=(255, 255, 0))
-		draw_line(self.target_position, ground_pos)
+		draw_sphere(target_pos, 0.1, col=(255, 255, 0))
+		draw_line(target_pos, ground_pos)
 		
 		# draw trajectory
-		for i in range(len(self.debug_trajectory_pts) - 1):
-			draw_line(self.debug_trajectory_pts[i], self.debug_trajectory_pts[i + 1], col=(255, 0, 255))
+		debug_trajectory_pts = self.current_trajectory.debug_pts
+		for i in range(len(debug_trajectory_pts) - 1):
+			draw_line(debug_trajectory_pts[i], debug_trajectory_pts[i + 1], col=(255, 0, 255))
 
 	def throw_at_random_target_position(self, ball, initial_pos, wanted_height, corner_1=None, corner_2=None):
 		"""
@@ -139,7 +141,7 @@ class ThrowerManager:
 	
 	def update(self, throw_events, trajectory_changes_events, ball):
 		for ev in trajectory_changes_events:
-			self.target_position = ev.target_pos
+			self.current_trajectory = ev.trajectory
 		
 		for ev in throw_events:
 			direction = ev.direction
@@ -162,9 +164,7 @@ class ThrowerManager:
 			# draft (after diving)
 			elif ev.throwing_type == ThrowingType.DRAFT:
 				velocity_efficiency = ev.velocity_efficiency
-				# TODO : fix ball throwing when origin pos == target pos <-- Vector3(0, 0.01, 0)
-				#target_position = Vector3(ball.position) + 1 * direction + Vector3(0, 0.01, 0)
-				target_position = Vector3(ball.position)
+				target_position = Vector3(ball.position) + DRAFT_DIRECTION_COEFFICIENT * direction
 				target_position.z = BALL_RADIUS
 				self.throw_ball(ball, ball.position, target_position, velocity_efficiency=velocity_efficiency,
 								wanted_height=DRAFT_THROW_HEIGHT)
@@ -184,11 +184,9 @@ class ThrowerManager:
 		
 		# target position changed due to velocity_efficiency
 		eff_target_pos = find_target_position(initial_pos, velocity, target_pos.z)
-		self.target_position = Vector3(eff_target_pos)
-		self.origin_position = Vector3(initial_pos)
-		
-		# process trajectory points for debug display
-		self.debug_trajectory_pts = get_n_points_in_trajectory(10, initial_pos, velocity, target_pos.z)
+		#self.target_position = Vector3(eff_target_pos)
+		#self.origin_position = Vector3(initial_pos)
+		self.current_trajectory = Trajectory(initial_pos, eff_target_pos, velocity)
 		
 		# throw the ball
 		ball.position = Vector3(initial_pos)
@@ -207,13 +205,9 @@ class ThrowerManager:
 		"""
 		velocity = SMASH_VELOCITY * (target_pos - ball.position).normalize()
 		
-		# process trajectory points for debug display
-		self.debug_trajectory_pts = get_n_points_in_trajectory(10, initial_pos, velocity, target_pos.z)
-		
 		# process target position
 		real_target_position = find_target_position(initial_pos, velocity, ball.radius)
-		self.target_position = Vector3(real_target_position)
-		self.origin_position = Vector3(initial_pos)
+		self.current_trajectory = Trajectory(initial_pos, real_target_position, velocity)
 		
 		# throw the ball
 		ball.position = Vector3(initial_pos)

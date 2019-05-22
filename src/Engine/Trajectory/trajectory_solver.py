@@ -89,46 +89,6 @@ def find_target_position(origin_pos, initial_velocity, wanted_z=0):
 	u_t = t_t * initial_velocity.dot(u)
 	
 	return u_t * u + origin_pos + Vector3(0, 0, z_t)
-	
-
-def get_n_points_in_trajectory(n, origin_pos, initial_velocity, wanted_z=0):
-	"""
-	Return n points in ball trajectory defined by origin position and initial velocity.
-	
-	:param int n: points count
-	:param pygame.Vector3 origin_pos: initial ball position
-	:param pygame.Vector3 initial_velocity: initial ball velocity
-	:param float wanted_z: wanted height for final point (end of trajectory)
-	:return: n points in list
-	:rtype list(Vector3):
-	"""
-	# z_t
-	z_t = wanted_z - origin_pos.z
-	
-	# u vector : unit vector in XY plane from origin to target position
-	u = Vector3(initial_velocity)
-	u.z = 0
-	u = u.normalize() if u.length_squared() != 0 else Vector3(0, 0, 0)
-	
-	# find t_t : final time
-	a = G / 2
-	b = -initial_velocity.z
-	c = z_t
-	
-	delta = b ** 2 - 4 * a * c
-	assert delta > 0
-	t_t = (-b + sqrt(delta)) / (2 * a)
-	
-	assert n > 1
-	dt = t_t / (n - 1)
-	pts = []
-	for i in range(n):
-		t_i = i * dt
-		u_i = t_i * initial_velocity.dot(u)
-		z_i = -t_i**2 / 2 * G + t_i * initial_velocity.z
-		pts.append(Vector3(u_i * u + origin_pos + Vector3(0, 0, z_i)))
-		
-	return pts
 
 
 # TODO : /!\ method not used yet /!\
