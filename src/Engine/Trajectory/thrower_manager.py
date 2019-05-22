@@ -22,7 +22,6 @@ class ThrowerManager:
 
 	def __init__(self):
 		self.current_trajectory = Trajectory()
-		self.debug_trajectory_pts = []
 
 		ThrowerManager.s_instance = self
 		

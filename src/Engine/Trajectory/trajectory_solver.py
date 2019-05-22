@@ -76,19 +76,52 @@ def find_target_position(origin_pos, initial_velocity, wanted_z=0):
 	u.z = 0
 	u = u.normalize() if u.length_squared() != 0 else Vector3()
 	
-	# find t_t : final time
-	a = G / 2
-	b = -initial_velocity.z
-	c = z_t
-	
-	delta = b**2 - 4 * a * c
-	assert delta > 0
-	t_t = (-b + sqrt(delta)) / (2 * a)
-	
+	# get final time t_t
+	t_t = get_time_at_z(initial_velocity.z, origin_pos.z, wanted_z)
+
 	# u_t
 	u_t = t_t * initial_velocity.dot(u)
 	
 	return u_t * u + origin_pos + Vector3(0, 0, z_t)
+
+
+def get_time_polynomial_fun(vz_0, z_0, z_t):
+	"""
+	Get polynomial coefficients and delta value for time equation.
+
+	Form of polynomial function is :
+		a * t**2 + b * t + c = 0
+	with t = 0 --> initial position
+
+	:param float vz_0: initial vertical velocity ( > 0 for ascending)
+	:param float z_0: initial z value
+	:param float z_t: target z value
+	:return: a, b, c and delta
+	:rtype tuple(float):
+	"""
+	a = G / 2
+	b = -vz_0
+	c = z_t - z_0
+	delta = b ** 2 - 4 * a * c
+
+	return a, b, c, delta
+
+
+def get_time_at_z(vz_0, z_0, z):
+	"""
+	Get time at specific height for a trajectory descending phase.
+
+	:param float vz_0: initial vertical velocity ( > 0 for ascending)
+	:param float z_0: initial z value
+	:param float z: target z value
+	:return: time in sec which when z is reached
+	:rtype float:
+	"""
+	a, b, c, delta = get_time_polynomial_fun(vz_0, z_0, z)
+
+	assert delta > 0
+	return (-b + sqrt(delta)) / (2 * a)
+
 
 
 # TODO : /!\ method not used yet /!\

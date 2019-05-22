@@ -1,6 +1,7 @@
 # encoding : UTF-8
 
 from Engine.Trajectory import *
+from Engine.Trajectory import Trajectory
 
 
 def test_find_target_position():
@@ -56,13 +57,14 @@ def test_initial_velocity_and_target_position():
 	
 	
 def test_get_n_points_in_trajectory():
+	n = 10
 	origin_pos = Vector3(0, 1, 0)
 	initial_velocity = Vector3(2, 0, 2)
-	n = 10
-	
 	target_pos = find_target_position(origin_pos, initial_velocity, 0)
-	
-	points = get_n_points_in_trajectory(n, origin_pos, initial_velocity, wanted_z=0)
+
+	# set trajectory object
+	traj = Trajectory(origin_pos, target_pos, initial_velocity)
+	points = traj.debug_pts
 	
 	assert len(points) == n
 	assert points[0] == origin_pos

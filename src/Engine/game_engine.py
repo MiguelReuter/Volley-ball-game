@@ -27,6 +27,7 @@ class GameEngine(ActionObject):
 
 	def __init__(self):
 		ActionObject.__init__(self)
+
 		self.display_manager = DisplayManager()
 		self.input_manager = InputManager()
 		self.collisions_manager = CollisionsManager()
@@ -39,18 +40,18 @@ class GameEngine(ActionObject):
 		
 		self._initial_ticks = time.get_ticks()
 		self._previous_ticks = self._initial_ticks
-		
+
 		self._total_ticks = 0
 		self._running_ticks = 0
 		self.frame_count = 0
 		
 		# state
 		self.current_state = GEStates.Running()
-		
+
 		self._create()
 
 		GameEngine.s_instance = self
-	
+
 	def _create(self):
 		self.ball = Ball(INITIAL_POS, BALL_RADIUS)
 		self.court = Court(COURT_DIM_Y, COURT_DIM_X, NET_HEIGHT_BTM, NET_HEIGHT_TOP)
