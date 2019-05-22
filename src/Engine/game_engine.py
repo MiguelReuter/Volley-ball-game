@@ -68,9 +68,11 @@ class GameEngine(ActionObject):
 		                      ACTION_EVENT, THROW_EVENT])
 
 	def update_actions(self, action_events, **kwargs):
-		for ev in action_events + pg.event.get(pg.QUIT):
+		for ev in action_events:
 			if ev.action == "QUIT":
 				self.request_quit()
+		if len(pg.event.get(pg.QUIT)) > 0:
+			self.request_quit()
 
 	def request_quit(self):
 		"""
