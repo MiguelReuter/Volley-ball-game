@@ -11,46 +11,51 @@ def find_initial_velocity(origin_pos, target_pos, wanted_height):
 	
 	Process initial velocity in world coordinates to apply on a ball. The specified height is taken in account for the
 	ball trajectory. If target and origin y sign values are different, the wanted height will be on y = 0 (net
-	position). Else, the wanted height will be on the middle of trajectory.
+	position). Else, the wanted height will be on the middle of trajectory, or at apogee trajectory during a
+	vertical throw.
 	
 	:param pygame.Vector3 origin_pos: origin position, the point where the ball will be thrown from
 	:param pygame.Vector3 target_pos: the desired target position the ball will reach
-	:param float wanted_height: height desired on net place
+	:param float wanted_height: height desired on net place, middle of trajectory or at apogee
 	:return: velocity to apply to the ball
 	:rtype pygame.Vector3:
 	"""
-	assert target_pos != origin_pos
 	assert wanted_height > origin_pos.z
 	assert wanted_height > target_pos.z
 	
-	# u vector : unit vector in XY plane from origin to target position
-	u = Vector3(target_pos - origin_pos)
-	u.z = 0
-	u = u.normalize()
-	
-	# ut, zt : coordinates of target point in (u, z) ref
-	to_vect = (target_pos - origin_pos)
-	to_vect.z = 0
-	
-	ut = to_vect.length()
-	zt = target_pos.z - origin_pos.z
-	
-	# uh, zh : coordinates of point above the net in (u, z) ref
-	alpha = 0.5
-	if origin_pos.y * target_pos.y < 0:  # if target and origin points are not in the same court side
-		alpha = abs(origin_pos.y / (target_pos.y - origin_pos.y))
-	uh = alpha * ut
-	zh = wanted_height - origin_pos.z
-	
-	# process initial velocity to apply in (u, z) ref : vo_u, vo_z
-	# not trivial equations, from math and physics resolutions
-	a = (ut/uh * zh - zt)
-	c = G * ut / 2 * (uh - ut)
-	delta = -4 * a * c
-	vo_u = sqrt(delta) / (2 * a)
-	vo_z = zh * (vo_u / uh) + uh / vo_u * G / 2
-	
-	return Vector3(vo_u * u + Vector3(0, 0, vo_z))
+	if target_pos.x == origin_pos.x and target_pos.y == origin_pos.y:  # vertical throw
+		zh = wanted_height - origin_pos.z
+		vo_z = sqrt(2 * G * zh)
+		return Vector3(0, 0, vo_z)
+	else:
+		# u vector : unit vector in XY plane from origin to target position
+		u = Vector3(target_pos - origin_pos)
+		u.z = 0
+		u = u.normalize()
+		
+		# ut, zt : coordinates of target point in (u, z) ref
+		to_vect = (target_pos - origin_pos)
+		to_vect.z = 0
+		
+		ut = to_vect.length()
+		zt = target_pos.z - origin_pos.z
+		
+		# uh, zh : coordinates of point above the net in (u, z) ref
+		alpha = 0.5
+		if origin_pos.y * target_pos.y < 0:  # if target and origin points are not in the same court side
+			alpha = abs(origin_pos.y / (target_pos.y - origin_pos.y))
+		uh = alpha * ut
+		zh = wanted_height - origin_pos.z
+		
+		# process initial velocity to apply in (u, z) ref : vo_u, vo_z
+		# not trivial equations, from math and physics resolutions
+		a = (ut/uh * zh - zt)
+		c = G * ut / 2 * (uh - ut)
+		delta = -4 * a * c
+		vo_u = sqrt(delta) / (2 * a)
+		vo_z = zh * (vo_u / uh) + uh / vo_u * G / 2
+		
+		return Vector3(vo_u * u + Vector3(0, 0, vo_z))
 
 
 def find_target_position(origin_pos, initial_velocity, wanted_z=0):
@@ -103,7 +108,7 @@ def get_n_points_in_trajectory(n, origin_pos, initial_velocity, wanted_z=0):
 	# u vector : unit vector in XY plane from origin to target position
 	u = Vector3(initial_velocity)
 	u.z = 0
-	u = u.normalize()
+	u = u.normalize() if u.length_squared() != 0 else Vector3(0, 0, 0)
 	
 	# find t_t : final time
 	a = G / 2
