@@ -14,6 +14,7 @@ see https://www.gamasutra.com/blogs/ChrisSimpson/20140717/221339/Behavior_trees_
 						  Leaf
 """
 
+
 class TreeNodeState(Enum):
 	FAILURE = -1
 	SUCCESS = 0
@@ -23,53 +24,51 @@ class TreeNodeState(Enum):
 
 class TreeNode:
 	def __init__(self):
-		self.children = None
-		self.parent = None
+		self._children = None
+		self._parent = None
 		
-		self.initialized = False
-		
-	def init(self):
-		self.initialized = True
+	# TODO: property for parent and children
+	def set_parent(self, parent):
+		self._parent = parent
 	
-	def run(self):
+	def set_children(self, children):
+		self._children = iter(children)
+	
+	def run(self, task):
 		return TreeNodeState.TO_IMPLEMENT
 		
 
 # COMPOSITE
 class Composite(TreeNode):
-	def __init__(self, parent, children):
+	def __init__(self):
 		TreeNode.__init__(self)
-		self.parent = parent
-		self.children = iter(children)
-	
-	def init(self):
-		self.initialized = True
 
-	def run(self):
-		if not self.initialized:
-			self.init()
+	def run(self, task):
 		return TreeNodeState.TO_IMPLEMENT
 		
 
 class Sequence(Composite):
-	def __init__(self, parent, children):
-		Composite.__init__(self, parent, children)
+	def __init__(self):
+		Composite.__init__(self)
 		
 		self.current_running_child = None
 	
-	def init(self):
-		self.current_running_child = next(self.children)
-		self.initialized = True
+	def set_children(self, children):
+		Composite.set_children(self, iter(children))
+		# TODO: attribute relative to execution (like self.current_running_child) to remove
+		#  --> must work with several tasks
+		self.current_running_child = next(self._children)
 	
-	def run(self):
-		if not self.initialized:
-			self.init()
-		ret = self.current_running_child.run()
+	def run(self, task):
+		# TODO: put this method in an attribute, self.run_method = run
+		task.current_node = self
+
+		ret = self.current_running_child.run(task)
 		
 		if ret == TreeNodeState.FAILURE:
 			return ret
 		elif ret == TreeNodeState.SUCCESS:
-			self.current_running_child = next(self.children)
+			self.current_running_child = next(self._children)
 			if self.current_running_child == StopIteration:
 				return TreeNodeState.SUCCESS
 		elif ret == TreeNodeState.RUNNING:
@@ -80,17 +79,45 @@ class Sequence(Composite):
 
 # LEAF
 class Leaf(TreeNode):
-	def __init__(self, parent):
+	def __init__(self):
 		TreeNode.__init__(self)
-		self.parent = parent
 	
 	
 class DummyLeaf(Leaf):
-	def run(self):
-		print("dummy leaf run")
-		return TreeNodeState.RUNNING
+	def run(self, task):
+		task.current_node = self
+		print("dummy leaf {} run".format(id(self)))
+		return TreeNodeState.SUCCESS
 
 	
+# Task
+class Task:
+	def __init__(self, node):
+		self.current_node = node
+		
+	def run(self):
+		print("current node :", self.current_node)
+		self.current_node.run(task=self)
+		print("")
+
+
+class Context:
+	# TODO: use that in a list in Task ?
+	# TODO: remove a Context object from this list if node has been run and returning value != RUNNING ?
+	def __init__(self, node, result):
+		self.node = node
+		self.result = result  # value in TreeNodeState
+
+
 if __name__ == "__main__":
-	seq = Sequence(None, [DummyLeaf(None) for _ in range(5)])
-	seq.run()  # run 1 step
+	seq = Sequence()
+	leaves = [DummyLeaf() for _ in range(5)]
+	seq.set_children(leaves)
+	for leaf in leaves:
+		leaf.set_parent(seq)
+		
+	task = Task(seq)
+	
+	for _ in range(4):
+		task.run()
+		
