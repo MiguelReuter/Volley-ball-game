@@ -63,6 +63,9 @@ class Running(GameEngineState, ActionObject):
 		# UPDATE ACTIONS
 		for action_object in ActionObject.objects + [self]:
 			action_object.update_actions(actions_events, dt=dt)
+
+		# AI
+		game_engine.ai_manager.update()
 		
 		# throw event
 		game_engine.thrower_manager.update(pg.event.get(THROW_EVENT), game_engine.ball)

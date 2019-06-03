@@ -108,6 +108,7 @@ class ThrowingType(Enum):
 	
 # players id
 class PlayerId(Enum):
+	PLAYER_ID_NONE = -1
 	PLAYER_ID_ALL = 0
 	PLAYER_ID_1 = 1
 	PLAYER_ID_2 = 2

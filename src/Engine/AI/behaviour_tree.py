@@ -219,78 +219,48 @@ class RegulatorDecorator(TaskDecorator):
 	pass
 
 
-# custom classes
-class FindBallTargetPosition(LeafTask):
+class DummyTask1(LeafTask):
 	def __init__(self, blackboard):
 		LeafTask.__init__(self, blackboard)
-	
-	def do_action(self):
-		'''
-		target position in blackboard
 
-		:return:
-		'''
+	def check_conditions(self):
+		return True
+
+	def start(self):
+		# print(self, "start")
 		pass
-		
 
-class MoveToTargetPosition(LeafTask):
+	def end(self):
+		# print(self, "end")
+		pass
+
+	def do_action(self):
+		print("do action 1 !")
+		#  self.get_control().finish_with_success()
+		self.get_control().finish_with_failure()
+
+
+class DummyTask2(LeafTask):
 	def __init__(self, blackboard):
 		LeafTask.__init__(self, blackboard)
-		
+
+	def check_conditions(self):
+		return True
+
+	def start(self):
+		# print(self, "start")
+		pass
+
+	def end(self):
+		# print(self, "end")
+		pass
+
 	def do_action(self):
-		'''
-		target position in blackboard
-		
-		:return:
-		'''
-		key_name = "target_position"
-		target_pos = self._blackboard[key_name] if key_name in self._blackboard.keys() else Vector3(0, 0, 0)
-		
-		# call this if current pos == target_pos
+		print("do action 2 !")
 		self.get_control().finish_with_success()
 
 
 if __name__ == "__main__":
-	class DummyTask1(LeafTask):
-		def __init__(self, blackboard):
-			LeafTask.__init__(self, blackboard)
-		
-		def check_conditions(self):
-			return True
-		
-		def start(self):
-			# print(self, "start")
-			pass
-		
-		def end(self):
-			# print(self, "end")
-			pass
-		
-		def do_action(self):
-			print("do action 1 !")
-			self.get_control().finish_with_success()
-	
-	
-	class DummyTask2(LeafTask):
-		def __init__(self, blackboard):
-			LeafTask.__init__(self, blackboard)
-		
-		def check_conditions(self):
-			return True
-		
-		def start(self):
-			# print(self, "start")
-			pass
-		
-		def end(self):
-			# print(self, "end")
-			pass
-		
-		def do_action(self):
-			print("do action 2 !")
-			self.get_control().finish_with_success()
-	
-	
 	# dummy create behaviour tree
 	blackboard = None
 	

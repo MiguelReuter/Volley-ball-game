@@ -6,6 +6,7 @@ from Settings import *
 from Game import Ball, Character, Court, CharacterStates
 
 from Engine.Actions import ActionObject
+from Engine.AI.ai_manager import AIManager
 from Engine.Collisions import CollisionsManager
 from Engine.Display import DisplayManager
 from Engine.Input import InputManager
@@ -28,6 +29,7 @@ class GameEngine(ActionObject):
 	def __init__(self):
 		ActionObject.__init__(self)
 
+		self.ai_manager = AIManager()
 		self.display_manager = DisplayManager()
 		self.input_manager = InputManager()
 		self.collisions_manager = CollisionsManager()
@@ -56,7 +58,7 @@ class GameEngine(ActionObject):
 		self.ball = Ball(INITIAL_POS, BALL_RADIUS)
 		self.court = Court(COURT_DIM_Y, COURT_DIM_X, NET_HEIGHT_BTM, NET_HEIGHT_TOP)
 		self.char1 = Character((-2, -3.5, 0), player_id=PlayerId.PLAYER_ID_1)
-		self.char2 = Character((0, 5, 0), player_id=PlayerId.PLAYER_ID_2, is_in_left_side=False)
+		self.char2 = Character((0, 5, 0), player_id=PlayerId.PLAYER_ID_NONE, is_in_left_side=False)
 		self.objects = [self.court, self.ball, self.char1, self.char2]
 		
 		# allowed pygame events
@@ -66,6 +68,9 @@ class GameEngine(ActionObject):
 							  pg.JOYHATMOTION,
 							  pg.QUIT, pg.VIDEORESIZE,
 		                      ACTION_EVENT, THROW_EVENT])
+
+		# AI
+		self.ai_manager.add_entity(self.char2)
 
 	def update_actions(self, action_events, **kwargs):
 		for ev in action_events:

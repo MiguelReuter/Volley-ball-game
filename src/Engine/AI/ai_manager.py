@@ -1,6 +1,6 @@
 # encoding : UTF-8
 
-from Engine.AI.behaviour_tree import *
+from Engine.AI.ai_entity import AIEntity
 
 
 class AIManager:
@@ -12,20 +12,16 @@ class AIManager:
 
 	def __init__(self):
 		AIManager.s_instance = self
-		
+
 		self.entities = []
-		self.blackboard = {}  # TODO : a blackboard for each AI entity + common blackboard (common blackboard
-		# reference in blackboard)
-		
-		self.create_behaviour_tree_1v1()
-		
-	def create_behaviour_tree_1v1(self):
-		"""
-		Create Behaviour Tree for 1v1 mode.
-		
-		:return: None
-		"""
-		root = Sequence(self.blackboard)
-		root = ResetDecorator(self.blackboard, root)
-		root.add_task()
-		
+		self.blackboard = {}  # common blackboard
+
+	def add_entity(self, character):
+		new_entity = AIEntity(character)
+		new_entity.create()
+
+		self.entities += [new_entity]
+
+	def update(self):
+		for entity in self.entities:
+			entity.update()
