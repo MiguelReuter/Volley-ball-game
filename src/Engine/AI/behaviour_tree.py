@@ -22,20 +22,23 @@ class TaskController:
 		self.__started = False
 		
 	def safe_start(self):
+		self.__started = True
 		self.__task.start()
 		
 	def safe_end(self):
+		self.__done = False
+		self.__started = False
 		self.__task.end()
 		
-	def _finish_with_success(self):
+	def finish_with_success(self):
 		self.__success = True
 		self.__done = True
-		print(self.__task, "finished with success")
+		# print(self.__task, "finished with success")
 		
-	def _finish_with_failure(self):
+	def finish_with_failure(self):
 		self.__success = False
 		self.__done = True
-		print(self.__task, "finished with failure")
+		# print(self.__task, "finished with failure")
 		
 	def succeeded(self):
 		return self.__success
@@ -116,7 +119,7 @@ class ParentTask(Task):
 		return self.control
 	
 	def check_conditions(self):
-		print("checking conditions")
+		# print("checking conditions")
 		return len(self.control.subtasks) > 0
 	
 	def child_succeeded(self):
@@ -126,7 +129,7 @@ class ParentTask(Task):
 		assert -1, "to implement"
 		
 	def do_action(self):
-		print("doing action")
+		# print("doing action")
 		
 		if self.control.finished():
 			return
@@ -144,10 +147,11 @@ class ParentTask(Task):
 			self.control.cur_task.do_action()
 			
 	def end(self):
-		print("ending")
+		# print("ending")
+		pass
 		
 	def start(self):
-		print("starting")
+		# print("starting")
 		self.control.cur_task = self.control.subtasks[0] if len(self.control.subtasks) > 0 else None
 		if self.control.cur_task is None:
 			print("current task has a null action")
@@ -158,83 +162,114 @@ class Sequence(ParentTask):
 		ParentTask.__init__(self, blackboard)
 		
 	def child_failed(self):
-		self.control._finish_with_failure()
+		self.control.finish_with_failure()
 		
 	def child_succeeded(self):
 		cur_pos = self.control.subtasks.index(self.control.cur_task)
 		
 		if cur_pos == len(self.control.subtasks) - 1:
-			self.control._finish_with_success()
+			self.control.finish_with_success()
 		else:
 			self.control.cur_task = self.control.subtasks[cur_pos + 1]
 			if not self.control.cur_task.check_conditions():
-				self.control._finish_with_failure()
+				self.control.finish_with_failure()
 		
 				
 class Selector(ParentTask):
 	pass
 
 
-class Decorator:
-	pass
+class TaskDecorator(Task):
+	def __init__(self, blackboard, task):
+		Task.__init__(self, blackboard)
+		self.task = None
 
-
-class ResetDecorator(Decorator):
-	pass
-
-
-class RegulatorDecorator(Decorator):
-	pass
-
-
-##
-
-
-class DummyTask1(LeafTask):
-	def __init__(self, blackboard):
-		LeafTask.__init__(self, blackboard)
-	
+		self.__init_task(task)
+		
+	def __init_task(self, task):
+		self.task = task
+		self.task.get_control().set_task(self)
+		
 	def check_conditions(self):
-		return True
-	
-	def start(self):
-		print(self, "start")
+		return self.task.check_conditions()
 	
 	def end(self):
-		print(self, "end")
+		self.task.end()
 	
-	def do_action(self):
-		print("do action 1 !")
-
-
-class DummyTask2(LeafTask):
-	def __init__(self, blackboard):
-		LeafTask.__init__(self, blackboard)
-	
-	def check_conditions(self):
-		return True
+	def get_control(self):
+		return self.task.get_control()
 	
 	def start(self):
-		print(self, "start")
-	
-	def end(self):
-		print(self, "end")
-	
+		self.task.start()
+
+
+class ResetDecorator(TaskDecorator):
+	def __init__(self, blackboard, task):
+		TaskDecorator.__init__(self, blackboard, task)
+		
 	def do_action(self):
-		print("do action 2 !")
+		self.task.do_action()
+		if self.task.get_control().finished():
+			self.task.get_control().reset()
+
+
+class RegulatorDecorator(TaskDecorator):
+	pass
 
 
 if __name__ == "__main__":
-	# create behaviour tree
+	class DummyTask1(LeafTask):
+		def __init__(self, blackboard):
+			LeafTask.__init__(self, blackboard)
+		
+		def check_conditions(self):
+			return True
+		
+		def start(self):
+			# print(self, "start")
+			pass
+		
+		def end(self):
+			# print(self, "end")
+			pass
+		
+		def do_action(self):
+			print("do action 1 !")
+			self.get_control().finish_with_success()
+	
+	
+	class DummyTask2(LeafTask):
+		def __init__(self, blackboard):
+			LeafTask.__init__(self, blackboard)
+		
+		def check_conditions(self):
+			return True
+		
+		def start(self):
+			# print(self, "start")
+			pass
+		
+		def end(self):
+			# print(self, "end")
+			pass
+		
+		def do_action(self):
+			print("do action 2 !")
+			self.get_control().finish_with_success()
+	
+	
+	# dummy create behaviour tree
 	blackboard = None
 	
 	dummy_task_1 = DummyTask1(blackboard)
 	dummy_task_2 = DummyTask2(blackboard)
 	
-	planner = Sequence(blackboard)  # TODO : ResetDecorator
+	planner = Sequence(blackboard)
 	planner.get_control().add(dummy_task_1)
 	planner.get_control().add(dummy_task_2)
+	planner = ResetDecorator(blackboard, planner)
 	
-	for _ in range(5):
+	planner.start()
+	for _ in range(10):
 		planner.do_action()
 		
