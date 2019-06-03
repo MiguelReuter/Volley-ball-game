@@ -2,6 +2,8 @@
 
 # see http://magicscrollsofcode.blogspot.com/2010/12/behavior-trees-by-example-ai-in-android.html
 
+from pygame import Vector3
+
 
 class TaskController:
 	def __init__(self, task):
@@ -215,6 +217,37 @@ class ResetDecorator(TaskDecorator):
 
 class RegulatorDecorator(TaskDecorator):
 	pass
+
+
+# custom classes
+class FindBallTargetPosition(LeafTask):
+	def __init__(self, blackboard):
+		LeafTask.__init__(self, blackboard)
+	
+	def do_action(self):
+		'''
+		target position in blackboard
+
+		:return:
+		'''
+		pass
+		
+
+class MoveToTargetPosition(LeafTask):
+	def __init__(self, blackboard):
+		LeafTask.__init__(self, blackboard)
+		
+	def do_action(self):
+		'''
+		target position in blackboard
+		
+		:return:
+		'''
+		key_name = "target_position"
+		target_pos = self._blackboard[key_name] if key_name in self._blackboard.keys() else Vector3(0, 0, 0)
+		
+		# call this if current pos == target_pos
+		self.get_control().finish_with_success()
 
 
 if __name__ == "__main__":
