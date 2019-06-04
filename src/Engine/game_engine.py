@@ -57,9 +57,10 @@ class GameEngine(ActionObject):
 	def _create(self):
 		self.ball = Ball(INITIAL_POS, BALL_RADIUS)
 		self.court = Court(COURT_DIM_Y, COURT_DIM_X, NET_HEIGHT_BTM, NET_HEIGHT_TOP)
-		self.char1 = Character((-2, -3.5, 0), player_id=PlayerId.PLAYER_ID_1)
-		self.char2 = Character((0, 5, 0), player_id=PlayerId.PLAYER_ID_NONE, is_in_left_side=False)
-		self.objects = [self.court, self.ball, self.char1, self.char2]
+		char1 = Character((-2, -3.5, 0), player_id=PlayerId.PLAYER_ID_1)
+		char2 = Character((0, 5, 0), player_id=AIId.AI_ID_1, is_in_left_side=False)
+		self.characters = [char1, char2]
+		self.objects = [self.court, self.ball] + self.characters
 		
 		# allowed pygame events
 		pg.event.set_blocked([i for i in range(pg.NUMEVENTS)])
@@ -70,7 +71,9 @@ class GameEngine(ActionObject):
 		                      ACTION_EVENT, THROW_EVENT])
 
 		# AI
-		self.ai_manager.add_entity(self.char2)
+		for char in self.characters:
+			if char.player_id in AIId.__iter__():
+				self.ai_manager.add_entity(char)
 
 	def update_actions(self, action_events, **kwargs):
 		for ev in action_events:
@@ -113,7 +116,7 @@ class GameEngine(ActionObject):
 		print("run with {} fps".format(self.get_average_fps()))
 
 	def get_character_by_player_id(self, player_id):
-		for char in (self.char1, self.char2):
+		for char in self.characters:
 			if char.player_id == player_id:
 				return char
 			

@@ -2,7 +2,8 @@
 
 from Engine.AI.behaviour_tree import *
 from Engine.Trajectory.thrower_manager import ThrowerManager
-from Engine import game_engine
+from Settings.general_settings import *
+import pygame as pg
 
 
 class FindBallTargetPosition(LeafTask):
@@ -28,51 +29,42 @@ class ShouldIRunToTheBall(LeafTask):
 		"""
 		:return: None
 		"""
-
 		target_pos = self._blackboard["target_position"]
 		character = self._blackboard["character"]
 
 		if target_pos.y * character.position.y < 0:
 			# TODO : manage finish_with_failure
-			# self.get_control().finish_with_failure()
+			self.get_control().finish_with_failure()
 			print("not for me !")
 		else:
 			print("for me")
-
-		self.get_control().finish_with_success()
+			self.get_control().finish_with_success()
 
 
 class MoveToTargetPosition(LeafTask):
-	def __init__(self, blackboard):
-		LeafTask.__init__(self, blackboard)
-
 	def do_action(self):
 		target_pos = self._blackboard["target_position"]
 		character = self._blackboard["character"]
 
-		ge = game_engine.GameEngine.get_instance()
-
 		dxy = target_pos - character.position
-		direction = Vector3()
 
 		thr = 0.1
-		for i in (0, 1):
-			if dxy[i] < -thr:
-				direction[i] = -1
-			elif dxy[i] > thr:
-				direction[i] = 1
-
-		if abs(direction.x) + abs(direction.y) >= 2:
-			direction *= 0.7172
-
-		character.move(direction, ge.dt)
+		
+		events_map = {"MOVE_UP": dxy[0] < -thr, "MOVE_DOWN": dxy[0] > thr,
+		              "MOVE_RIGHT": dxy[1] > thr, "MOVE_LEFT": dxy[1] < -thr}
+		for action in events_map.keys():
+			if events_map[action]:
+				ev = pg.event.Event(ACTION_EVENT, {"player_id": character.player_id, "action": action})
+				pg.event.post(ev)
 
 		self._blackboard["frame_consumed"] = True
 
-		if direction == Vector3(0, 0, 0):
+		if abs(dxy[0]) < thr and abs(dxy[1]) < thr:
 			# if position reached
 			self.get_control().finish_with_success()
-
+			
+		if ThrowerManager.get_instance().trajectory_changed:
+			self.get_control().finish_with_failure()
 		'''
 		if character.is_colliding_ball:
 			# or if touch ball ?
@@ -81,4 +73,11 @@ class MoveToTargetPosition(LeafTask):
 		'''
 
 
+class IdleUntilTrajectoryChanged(LeafTask):
+	def do_action(self):
+		print("Still waiting")
+		if ThrowerManager.get_instance().trajectory_changed:
+			print("trajectory changed !")
+			self.get_control().finish_with_success()
+		self._blackboard["frame_consumed"] = True
 

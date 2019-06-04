@@ -18,14 +18,20 @@ class AIEntity:
 		:return: None
 		"""
 		bb = self.blackboard
-		b_tree = Sequence(bb)
+		find_and_run_to_ball_position = Sequence(bb)
 
 		# find target ball position and run to it
-		b_tree.get_control().add(FindBallTargetPosition(bb))
-		b_tree.get_control().add(ShouldIRunToTheBall(bb))
-		b_tree.get_control().add(MoveToTargetPosition(bb))
-
+		find_and_run_to_ball_position.get_control().add(FindBallTargetPosition(bb))
+		find_and_run_to_ball_position.get_control().add(ShouldIRunToTheBall(bb))
+		find_and_run_to_ball_position.get_control().add(MoveToTargetPosition(bb))
+		find_and_run_to_ball_position = ResetDecorator(bb, find_and_run_to_ball_position)
+		
+		# root
+		b_tree = Selector(bb)
+		b_tree.get_control().add(find_and_run_to_ball_position)
+		b_tree.get_control().add(IdleUntilTrajectoryChanged(bb))
 		b_tree = ResetDecorator(bb, b_tree)
+		
 		self.behaviour_tree = b_tree
 
 	def create(self):

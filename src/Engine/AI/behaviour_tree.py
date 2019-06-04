@@ -143,7 +143,7 @@ class ParentTask(Task):
 			self.control.cur_task.get_control().safe_end()
 			if self.control.cur_task.get_control().succeeded():
 				self.child_succeeded()
-			if self.control.cur_task.get_control().failed():
+			elif self.control.cur_task.get_control().failed():
 				self.child_failed()
 		else:
 			self.control.cur_task.do_action()
@@ -178,7 +178,33 @@ class Sequence(ParentTask):
 		
 				
 class Selector(ParentTask):
-	pass
+	def __init__(self, blackboard):
+		ParentTask.__init__(self, blackboard)
+		
+	def choose_new_task(self):
+		task = None
+		found = False
+		cur_pos = self.control.subtasks.index(self.control.cur_task)
+		
+		while not found:
+			if cur_pos == len(self.control.subtasks) - 1:
+				found = True
+				task = None
+				break
+			cur_pos += 1
+			
+			task = self.control.subtasks[cur_pos]
+			if task.check_conditions():
+				found = True
+		return task
+	
+	def child_failed(self):
+		self.control.cur_task = self.choose_new_task()
+		if self.control.cur_task is None:
+			self.control.finish_with_failure()
+	
+	def child_succeeded(self):
+		self.control.finish_with_success()
 
 
 class TaskDecorator(Task):
@@ -236,8 +262,7 @@ class DummyTask1(LeafTask):
 
 	def do_action(self):
 		print("do action 1 !")
-		#  self.get_control().finish_with_success()
-		self.get_control().finish_with_failure()
+		self.get_control().finish_with_success()
 
 
 class DummyTask2(LeafTask):
