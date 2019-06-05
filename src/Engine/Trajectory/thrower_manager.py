@@ -150,8 +150,6 @@ class ThrowerManager:
 		self.throw_ball(ball, initial_pos, target_pos, wanted_height)
 	
 	def update(self, throw_events, ball):
-		self.trajectory_changed = False
-
 		for ev in throw_events:
 			direction = ev.direction
 			char_position = ev.position

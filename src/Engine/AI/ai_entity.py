@@ -7,9 +7,18 @@ class AIEntity:
 	def __init__(self, character):
 		self.character = character
 
-		self.blackboard = {"character": character,
-						   "frame_consumed": False}
+		self.blackboard = {"ai_entity": self,
+						   "character": character,
+						   "frame_consumed": False,
+		                   "trajectory_changed": False}
 		self.behaviour_tree = None
+		
+	def get_and_reset_flag_value(self, flag):
+		if flag in self.blackboard.keys():
+			if self.blackboard[flag]:
+				self.blackboard[flag] = False
+				return True
+			return False
 
 	def _create_behaviour_tree_1v1(self):
 		"""
@@ -24,10 +33,11 @@ class AIEntity:
 		find_and_run_to_ball_position.get_control().add(FindBallTargetPosition(bb))
 		find_and_run_to_ball_position.get_control().add(ShouldIRunToTheBall(bb))
 		find_and_run_to_ball_position.get_control().add(MoveToTargetPosition(bb))
-		find_and_run_to_ball_position = ResetDecorator(bb, find_and_run_to_ball_position)
-		
+		find_and_run_to_ball_position.get_control().add(RandomThrow(bb))
+		#find_and_run_to_ball_position = ResetDecorator(bb, find_and_run_to_ball_position)
+
 		# root
-		b_tree = Selector(bb)
+		b_tree = RootSequence(bb)
 		b_tree.get_control().add(find_and_run_to_ball_position)
 		b_tree.get_control().add(IdleUntilTrajectoryChanged(bb))
 		b_tree = ResetDecorator(bb, b_tree)

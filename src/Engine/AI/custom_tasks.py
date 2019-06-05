@@ -3,7 +3,9 @@
 from Engine.AI.behaviour_tree import *
 from Engine.Trajectory.thrower_manager import ThrowerManager
 from Settings.general_settings import *
+
 import pygame as pg
+from random import random
 
 
 class FindBallTargetPosition(LeafTask):
@@ -13,6 +15,7 @@ class FindBallTargetPosition(LeafTask):
 
 		:return: None
 		"""
+		print("find ball target position")
 		thrower_manager = ThrowerManager.get_instance()
 
 		target_pos = Vector3(thrower_manager.current_trajectory.target_pos)
@@ -31,25 +34,26 @@ class ShouldIRunToTheBall(LeafTask):
 		"""
 		target_pos = self._blackboard["target_position"]
 		character = self._blackboard["character"]
-
-		if target_pos.y * character.position.y < 0:
-			# TODO : manage finish_with_failure
-			self.get_control().finish_with_failure()
+		
+		if (target_pos.y > 0 and character.is_in_left_side) or (target_pos.y < 0 and not character.is_in_left_side):
 			print("not for me !")
+			self.get_control().finish_with_failure()
 		else:
 			print("for me")
 			self.get_control().finish_with_success()
 
 
 class MoveToTargetPosition(LeafTask):
+	def start(self):
+		print("i'm moving")
+
 	def do_action(self):
 		target_pos = self._blackboard["target_position"]
 		character = self._blackboard["character"]
-
-		dxy = target_pos - character.position
-
-		thr = 0.1
+		ai_entity = self._blackboard["ai_entity"]
 		
+		dxy = target_pos - character.position
+		thr = 0.1
 		events_map = {"MOVE_UP": dxy[0] < -thr, "MOVE_DOWN": dxy[0] > thr,
 		              "MOVE_RIGHT": dxy[1] > thr, "MOVE_LEFT": dxy[1] < -thr}
 		for action in events_map.keys():
@@ -58,25 +62,43 @@ class MoveToTargetPosition(LeafTask):
 				pg.event.post(ev)
 
 		self._blackboard["frame_consumed"] = True
-
+		
+		# if position reached
 		if abs(dxy[0]) < thr and abs(dxy[1]) < thr:
-			# if position reached
+			print("position reached")
 			self.get_control().finish_with_success()
 			
-		if ThrowerManager.get_instance().trajectory_changed:
-			self.get_control().finish_with_failure()
-		'''
+		if ai_entity.get_and_reset_flag_value("trajectory_changed"):
+			print("trajectory changed")
+			self.get_control().finish_with_failure()  # TODO: change, need to reset and run sequence again instead
+			
 		if character.is_colliding_ball:
-			# or if touch ball ?
 			self.get_control().finish_with_success()
-		# or trajectory changed
-		'''
+
+
+class RandomThrow(LeafTask):
+	def start(self):
+		print("i'm throwing !")
+	
+	def do_action(self):
+		character = self._blackboard["character"]
+		ev = pg.event.Event(ACTION_EVENT, {"player_id": character.player_id, "action": "THROW_BALL"})
+		pg.event.post(ev)
+		
+		# TODO: manage random direction
+		
+		self._blackboard["frame_consumed"] = True
+		self.get_control().finish_with_success()
 
 
 class IdleUntilTrajectoryChanged(LeafTask):
+	def start(self):
+		print("idling")
+
 	def do_action(self):
-		print("Still waiting")
-		if ThrowerManager.get_instance().trajectory_changed:
+		ai_entity = self._blackboard["ai_entity"]
+
+		if ai_entity.get_and_reset_flag_value("trajectory_changed"):
 			print("trajectory changed !")
 			self.get_control().finish_with_success()
 		self._blackboard["frame_consumed"] = True

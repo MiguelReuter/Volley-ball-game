@@ -143,7 +143,7 @@ class ParentTask(Task):
 			self.control.cur_task.get_control().safe_end()
 			if self.control.cur_task.get_control().succeeded():
 				self.child_succeeded()
-			elif self.control.cur_task.get_control().failed():
+			else:
 				self.child_failed()
 		else:
 			self.control.cur_task.do_action()
@@ -160,9 +160,6 @@ class ParentTask(Task):
 
 
 class Sequence(ParentTask):
-	def __init__(self, blackboard):
-		ParentTask.__init__(self, blackboard)
-		
 	def child_failed(self):
 		self.control.finish_with_failure()
 		
@@ -176,11 +173,16 @@ class Sequence(ParentTask):
 			if not self.control.cur_task.check_conditions():
 				self.control.finish_with_failure()
 		
-				
+
+class RootSequence(Sequence):
+	"""
+	Sequence but a failure is considered as a success.
+	"""
+	def child_failed(self):
+		self.child_succeeded()
+
+
 class Selector(ParentTask):
-	def __init__(self, blackboard):
-		ParentTask.__init__(self, blackboard)
-		
 	def choose_new_task(self):
 		task = None
 		found = False

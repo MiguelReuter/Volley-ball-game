@@ -1,6 +1,7 @@
 # encoding : UTF-8
 
 from Engine.AI.ai_entity import AIEntity
+from Engine.Trajectory.thrower_manager import ThrowerManager
 
 
 class AIManager:
@@ -23,5 +24,12 @@ class AIManager:
 		self.entities += [new_entity]
 
 	def update(self):
+		# check if trajectory changed
+		if ThrowerManager.get_instance().trajectory_changed:
+			ThrowerManager.get_instance().trajectory_changed = False
+			for entity in self.entities:
+				entity.blackboard["trajectory_changed"] = True
+				
+		# update
 		for entity in self.entities:
 			entity.update()
