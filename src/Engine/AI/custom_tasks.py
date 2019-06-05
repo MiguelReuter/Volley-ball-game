@@ -8,6 +8,24 @@ import pygame as pg
 from random import random
 
 
+class MoveAndThrowDecorator(TaskDecorator):
+	def do_action(self):
+		self.task.do_action()
+
+	def check_conditions(self):
+		character = self._blackboard["character"]
+
+		thrower_manager = ThrowerManager.get_instance()
+		print("check")
+
+		if thrower_manager.current_trajectory.target_pos is not None:
+			target_pos = Vector3(thrower_manager.current_trajectory.target_pos)
+			if (target_pos.y > 0 and character.is_in_left_side) or (target_pos.y < 0 and not character.is_in_left_side):
+				return False
+			return True
+		return False
+
+
 class FindBallTargetPosition(LeafTask):
 	def do_action(self):
 		"""
@@ -93,9 +111,10 @@ class RandomThrow(LeafTask):
 
 class IdleUntilTrajectoryChanged(LeafTask):
 	def start(self):
-		print("idling")
+		print("idling...")
 
 	def do_action(self):
+		print("...")
 		ai_entity = self._blackboard["ai_entity"]
 
 		if ai_entity.get_and_reset_flag_value("trajectory_changed"):

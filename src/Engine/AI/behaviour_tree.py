@@ -70,7 +70,17 @@ class ParentTaskController(TaskController):
 		
 	def reset(self):
 		TaskController.reset(self)
-		self.cur_task = self.subtasks[0] if len(self.subtasks) > 0 else None
+		self.set_first_ready_task()
+
+	def set_first_ready_task(self):
+		for task in self.subtasks:
+			if task.check_conditions():
+				self.cur_task = task
+				if task is None:
+					print("current task has a null action")
+				break
+		else:
+			self.cur_task = None
 		
 		
 class Task:
@@ -154,9 +164,7 @@ class ParentTask(Task):
 		
 	def start(self):
 		# print("starting")
-		self.control.cur_task = self.control.subtasks[0] if len(self.control.subtasks) > 0 else None
-		if self.control.cur_task is None:
-			print("current task has a null action")
+		self.control.set_first_ready_task()
 
 
 class Sequence(ParentTask):
@@ -190,7 +198,6 @@ class Selector(ParentTask):
 		
 		while not found:
 			if cur_pos == len(self.control.subtasks) - 1:
-				found = True
 				task = None
 				break
 			cur_pos += 1
@@ -234,9 +241,6 @@ class TaskDecorator(Task):
 
 
 class ResetDecorator(TaskDecorator):
-	def __init__(self, blackboard, task):
-		TaskDecorator.__init__(self, blackboard, task)
-		
 	def do_action(self):
 		self.task.do_action()
 		if self.task.get_control().finished():
@@ -248,9 +252,6 @@ class RegulatorDecorator(TaskDecorator):
 
 
 class DummyTask1(LeafTask):
-	def __init__(self, blackboard):
-		LeafTask.__init__(self, blackboard)
-
 	def check_conditions(self):
 		return True
 
@@ -268,9 +269,6 @@ class DummyTask1(LeafTask):
 
 
 class DummyTask2(LeafTask):
-	def __init__(self, blackboard):
-		LeafTask.__init__(self, blackboard)
-
 	def check_conditions(self):
 		return True
 
