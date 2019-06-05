@@ -193,7 +193,7 @@ class Serving(CharacterState):
 		:return: None
 		"""
 		
-		if is_throwing_requested(action_events):
+		if is_throwing_requested(action_events) and not self.has_served:
 			self.t0 = Engine.game_engine.GameEngine.get_instance().get_running_ticks()
 			self.has_served = True
 			direction = get_direction_requested(action_events)
