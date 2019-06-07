@@ -93,7 +93,8 @@ class Running(GameEngineState, ActionObject):
 			elif ev.action == PlayerAction.SPACE_TEST:
 				game_engine = Engine.game_engine.GameEngine.get_instance()
 				
-				game_engine.serve(game_engine.get_character_by_player_id(ev.player_id))
+				# game_engine.serve(game_engine.get_character_by_player_id(ev.player_id))
+				game_engine.serve(game_engine.get_character_by_player_id(AIId.AI_ID_1))
 				# game_engine.thrower_manager.throw_ball(game_engine.ball, INITIAL_POS, TARGET_POS, WANTED_H)
 				# game_engine.thrower_manager.throw_at_random_target_position(game_engine.ball, INITIAL_POS, WANTED_H)
 	

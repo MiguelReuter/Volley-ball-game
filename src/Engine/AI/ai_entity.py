@@ -50,12 +50,20 @@ class AIEntity:
 		find_and_run_to_ball_position.get_control().add(MoveToTargetPosition(self))
 		find_and_run_to_ball_position.get_control().add(RandomThrow(self))
 		find_and_run_to_ball_position = MoveAndThrowDecorator(self, find_and_run_to_ball_position)
-
+		
+		# wait and serve
+		wait_and_serve = Sequence(self)
+		wait_and_serve.get_control().add(Wait(self, duration=1000))
+		wait_and_serve.get_control().add(RandomThrow(self))
+		wait_and_serve = WaitAndServe(self, wait_and_serve)
+		
 		# root
 		b_tree = Selector(self)
 		b_tree.get_control().add(find_and_run_to_ball_position)
+		b_tree.get_control().add(wait_and_serve)
 		b_tree.get_control().add(IdleUntilTrajectoryChanged(self))
 		b_tree = ResetDecorator(self, b_tree)
+		
 		
 		self.behaviour_tree = b_tree
 

@@ -3,12 +3,15 @@
 from Engine.AI.behaviour_tree import *
 from Engine.Trajectory.thrower_manager import ThrowerManager
 from Settings.general_settings import *
+from Game.character_states import Serving
+from Engine import game_engine
+
 
 import pygame as pg
 from random import randint
 
 
-def should_i_run_to_the_ball(ai_entity):
+def should_ai_run_to_the_ball(ai_entity):
 	"""
 	Check if specified AI entity should run to the ball to throw it.
 	
@@ -30,12 +33,21 @@ def should_i_run_to_the_ball(ai_entity):
 	return False
 
 
+def should_ai_serve(ai_entity):
+	character_state = ai_entity.character.state
+	if isinstance(character_state, Serving):
+		return not character_state.has_served
+	return False
+
+
 class MoveAndThrowDecorator(TaskDecorator):
 	def do_action(self):
 		self.task.do_action()
 
 	def check_conditions(self):
-		return should_i_run_to_the_ball(self.ai_entity)
+		b_do_action = should_ai_run_to_the_ball(self.ai_entity)
+		b_do_action &= should_ai_serve(self.ai_entity)
+		return b_do_action
 	
 
 class FindBallTargetPosition(LeafTask):
@@ -123,7 +135,10 @@ class RandomThrow(LeafTask):
 
 class IdleUntilTrajectoryChanged(LeafTask):
 	def check_conditions(self):
-		return not should_i_run_to_the_ball(self.ai_entity)
+		b_do_action = not should_ai_run_to_the_ball(self.ai_entity)
+		b_do_action &= not should_ai_serve(self.ai_entity)
+		
+		return b_do_action
 	
 	def do_action(self):
 		ai_entity = self.ai_entity
@@ -131,5 +146,33 @@ class IdleUntilTrajectoryChanged(LeafTask):
 		if ai_entity.trajectory_changed():
 			ai_entity.reset_change_trajectory()
 			self.get_control().finish_with_success()
+			
+		if should_ai_serve(ai_entity):
+			ai_entity.reset_change_trajectory()
+			self.get_control().finish_with_success()
+		
 		ai_entity.end_frame()
 
+
+class WaitAndServe(TaskDecorator):
+	def do_action(self):
+		self.ai_entity.blackboard["waiting_time"] = 500
+		self.task.do_action()
+
+	def check_conditions(self):
+		return should_ai_serve(self.ai_entity)
+	
+	
+class Wait(LeafTask):
+	def __init__(self, ai_entity, duration):
+		LeafTask.__init__(self, ai_entity)
+		self.duration = duration
+		ge = game_engine.GameEngine.get_instance()
+		self.t0 = ge.get_running_ticks() if ge is not None else 0
+	
+	def do_action(self):
+		if game_engine.GameEngine.get_instance().get_running_ticks() - self.t0 > self.duration:
+			self.get_control().finish_with_success()
+		
+		self.ai_entity.end_frame()
+		
