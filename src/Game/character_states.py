@@ -179,6 +179,8 @@ class Serving(CharacterState):
 	"""
 	def __init__(self, character, action_events=None, **kwargs):
 		super().__init__(character)
+		character.reset()
+		
 		self.has_served = False
 		if action_events is None:
 			action_events = []
