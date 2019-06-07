@@ -84,8 +84,8 @@ class ParentTaskController(TaskController):
 		
 		
 class Task:
-	def __init__(self, blackboard):
-		self._blackboard = blackboard
+	def __init__(self, ai_entity):
+		self.ai_entity = ai_entity
 		
 	def check_conditions(self):
 		assert -1, "to implement"
@@ -105,8 +105,8 @@ class Task:
 
 
 class LeafTask(Task):
-	def __init__(self, blackboard):
-		Task.__init__(self, blackboard)
+	def __init__(self, ai_entity):
+		Task.__init__(self, ai_entity)
 		self._control = None
 		
 		self.create_controller()
@@ -119,8 +119,8 @@ class LeafTask(Task):
 	
 
 class ParentTask(Task):
-	def __init__(self, blackboard):
-		Task.__init__(self, blackboard)
+	def __init__(self, ai_entity):
+		Task.__init__(self, ai_entity)
 		self.control = None  # TODO : protected ?
 		self.create_controller()
 		
@@ -180,14 +180,6 @@ class Sequence(ParentTask):
 			self.control.cur_task = self.control.subtasks[cur_pos + 1]
 			if not self.control.cur_task.check_conditions():
 				self.control.finish_with_failure()
-		
-
-class RootSequence(Sequence):
-	"""
-	Sequence but a failure is considered as a success.
-	"""
-	def child_failed(self):
-		self.child_succeeded()
 
 
 class Selector(ParentTask):
@@ -217,8 +209,8 @@ class Selector(ParentTask):
 
 
 class TaskDecorator(Task):
-	def __init__(self, blackboard, task):
-		Task.__init__(self, blackboard)
+	def __init__(self, ai_entity, task):
+		Task.__init__(self, ai_entity)
 		self.task = None
 
 		self.__init_task(task)
@@ -287,15 +279,15 @@ class DummyTask2(LeafTask):
 
 if __name__ == "__main__":
 	# dummy create behaviour tree
-	blackboard = None
+	ai_entity = None
 	
-	dummy_task_1 = DummyTask1(blackboard)
-	dummy_task_2 = DummyTask2(blackboard)
+	dummy_task_1 = DummyTask1(ai_entity)
+	dummy_task_2 = DummyTask2(ai_entity)
 	
-	planner = Sequence(blackboard)
+	planner = Sequence(ai_entity)
 	planner.get_control().add(dummy_task_1)
 	planner.get_control().add(dummy_task_2)
-	planner = ResetDecorator(blackboard, planner)
+	planner = ResetDecorator(ai_entity, planner)
 	
 	planner.start()
 	for _ in range(10):

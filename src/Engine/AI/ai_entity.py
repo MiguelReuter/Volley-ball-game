@@ -4,15 +4,16 @@ from Engine.AI.custom_tasks import *
 
 
 class AIEntity:
+	"""
+	Object that represent a character played by an Artificial Intelligence
+	"""
 	def __init__(self, character):
 		self.character = character
-
-		self.blackboard = {"ai_entity": self,
-						   "character": character,
-						   "frame_consumed": False,
-		                   "trajectory_changed": False}
+		self.blackboard = {}
 		self.behaviour_tree = None
 		self.is_behaviour_tree_initialized = False
+		self._trajectory_changed = False
+		self._is_frame_ended = False
 		
 	def get_and_reset_flag_value(self, flag):
 		if flag in self.blackboard.keys():
@@ -20,28 +21,41 @@ class AIEntity:
 				self.blackboard[flag] = False
 				return True
 			return False
-
+	
+	def trajectory_changed(self):
+		return self._trajectory_changed
+	
+	def change_trajectory(self):
+		self._trajectory_changed = True
+	
+	def reset_change_trajectory(self):
+		self._trajectory_changed = False
+	
+	def end_frame(self):
+		self._is_frame_ended = True
+	
+	def is_frame_ended(self):
+		return self._is_frame_ended
+		
 	def _create_behaviour_tree_1v1(self):
 		"""
 		Create Behaviour Tree for 1v1 mode.
 
 		:return: None
 		"""
-		bb = self.blackboard
-		find_and_run_to_ball_position = Sequence(bb)
+		find_and_run_to_ball_position = Sequence(self)
 
 		# find target ball position and run to it
-		find_and_run_to_ball_position.get_control().add(FindBallTargetPosition(bb))
-		# find_and_run_to_ball_position.get_control().add(ShouldIRunToTheBall(bb))
-		find_and_run_to_ball_position.get_control().add(MoveToTargetPosition(bb))
-		find_and_run_to_ball_position.get_control().add(RandomThrow(bb))
-		find_and_run_to_ball_position = MoveAndThrowDecorator(bb, find_and_run_to_ball_position)
+		find_and_run_to_ball_position.get_control().add(FindBallTargetPosition(self))
+		find_and_run_to_ball_position.get_control().add(MoveToTargetPosition(self))
+		find_and_run_to_ball_position.get_control().add(RandomThrow(self))
+		find_and_run_to_ball_position = MoveAndThrowDecorator(self, find_and_run_to_ball_position)
 
 		# root
-		b_tree = Selector(bb)
+		b_tree = Selector(self)
 		b_tree.get_control().add(find_and_run_to_ball_position)
-		b_tree.get_control().add(IdleUntilTrajectoryChanged(bb))
-		b_tree = ResetDecorator(bb, b_tree)
+		b_tree.get_control().add(IdleUntilTrajectoryChanged(self))
+		b_tree = ResetDecorator(self, b_tree)
 		
 		self.behaviour_tree = b_tree
 
@@ -55,7 +69,7 @@ class AIEntity:
 
 		n_max = 100
 		n = 0
-		while not self.blackboard["frame_consumed"] and n < n_max:
+		while not self.is_frame_ended() and n < n_max:
 			self.behaviour_tree.do_action()
 			n += 1
-		self.blackboard["frame_consumed"] = False
+		self._is_frame_ended = False

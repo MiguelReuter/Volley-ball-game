@@ -15,7 +15,6 @@ class AIManager:
 		AIManager.s_instance = self
 
 		self.entities = []
-		self.blackboard = {}  # common blackboard
 
 	def add_entity(self, character):
 		new_entity = AIEntity(character)
@@ -25,11 +24,10 @@ class AIManager:
 
 	def update(self):
 		# check if trajectory changed
-		print("-------------")
 		if ThrowerManager.get_instance().trajectory_changed:
 			ThrowerManager.get_instance().trajectory_changed = False
 			for entity in self.entities:
-				entity.blackboard["trajectory_changed"] = True
+				entity.change_trajectory()
 				
 		# update
 		for entity in self.entities:

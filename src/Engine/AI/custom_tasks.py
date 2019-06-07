@@ -16,7 +16,7 @@ def should_i_run_to_the_ball(ai_entity):
 	:return: True if AI entity should run
 	:rtype bool:
 	"""
-	character = ai_entity.blackboard["character"]
+	character = ai_entity.character
 	
 	thrower_manager = ThrowerManager.get_instance()
 	
@@ -25,9 +25,7 @@ def should_i_run_to_the_ball(ai_entity):
 		# if ball will not reached same court side than character
 		if (target_pos.y > 0 and character.is_in_left_side) or (target_pos.y < 0 and not character.is_in_left_side):
 			return False
-		
 		# TODO: implement other checks (game rules): if pass number < MAX_PASS_NUMBER...
-		
 		return True
 	return False
 
@@ -37,7 +35,7 @@ class MoveAndThrowDecorator(TaskDecorator):
 		self.task.do_action()
 
 	def check_conditions(self):
-		return should_i_run_to_the_ball(self._blackboard["ai_entity"])
+		return should_i_run_to_the_ball(self.ai_entity)
 	
 
 class FindBallTargetPosition(LeafTask):
@@ -47,11 +45,11 @@ class FindBallTargetPosition(LeafTask):
 
 		:return: None
 		"""
-		print("find ball target position")
+		 # print("find ball target position")
 		thrower_manager = ThrowerManager.get_instance()
 
 		target_pos = Vector3(thrower_manager.current_trajectory.target_pos)
-		self._blackboard["target_position"] = target_pos
+		self.ai_entity.blackboard["target_position"] = target_pos
 
 		if target_pos is None:
 			self.get_control().finish_with_failure()
@@ -59,30 +57,15 @@ class FindBallTargetPosition(LeafTask):
 			self.get_control().finish_with_success()
 
 
-class ShouldIRunToTheBall(LeafTask):
-	def do_action(self):
-		"""
-		:return: None
-		"""
-		target_pos = self._blackboard["target_position"]
-		character = self._blackboard["character"]
-		
-		if (target_pos.y > 0 and character.is_in_left_side) or (target_pos.y < 0 and not character.is_in_left_side):
-			print("not for me !")
-			self.get_control().finish_with_failure()
-		else:
-			print("for me")
-			self.get_control().finish_with_success()
-
-
 class MoveToTargetPosition(LeafTask):
 	def start(self):
-		print("i'm moving")
+		# print("i'm moving")
+		pass
 
 	def do_action(self):
-		target_pos = self._blackboard["target_position"]
-		character = self._blackboard["character"]
-		ai_entity = self._blackboard["ai_entity"]
+		ai_entity = self.ai_entity
+		character = ai_entity.character
+		target_pos = ai_entity.blackboard["target_position"]
 		
 		dxy = target_pos - character.position
 		thr = 0.1
@@ -93,16 +76,17 @@ class MoveToTargetPosition(LeafTask):
 				ev = pg.event.Event(ACTION_EVENT, {"player_id": character.player_id, "action": action})
 				pg.event.post(ev)
 
-		self._blackboard["frame_consumed"] = True
+		self.ai_entity.end_frame()
 		
 		# if position reached
 		if abs(dxy[0]) < thr and abs(dxy[1]) < thr:
-			print("position reached")
+			# print("position reached")
 			self.get_control().finish_with_success()
 			
-		if ai_entity.get_and_reset_flag_value("trajectory_changed"):
-			print("trajectory changed [moving]")
-			self.get_control().finish_with_failure()  # TODO: change, need to reset and run sequence again instead
+		if ai_entity.trajectory_changed():
+			ai_entity.reset_change_trajectory()
+			# print("trajectory changed [moving]")
+			self.get_control().finish_with_failure()
 			
 		if character.is_colliding_ball:
 			self.get_control().finish_with_success()
@@ -110,14 +94,16 @@ class MoveToTargetPosition(LeafTask):
 
 class RandomThrow(LeafTask):
 	def start(self):
-		print("i'm throwing !")
+		# print("i'm throwing !")
+		pass
 	
 	def do_action(self):
-		ai_entity = self._blackboard["ai_entity"]
-		character = self._blackboard["character"]
-		self._blackboard["frame_consumed"] = True
+		ai_entity = self.ai_entity
+		character = ai_entity.character
+		ai_entity.end_frame()
 		
-		if ai_entity.get_and_reset_flag_value("trajectory_changed"):
+		if ai_entity.trajectory_changed():
+			ai_entity.reset_change_trajectory()
 			self.get_control().finish_with_failure()
 
 		if character.is_colliding_ball:
@@ -137,17 +123,13 @@ class RandomThrow(LeafTask):
 
 class IdleUntilTrajectoryChanged(LeafTask):
 	def check_conditions(self):
-		return not should_i_run_to_the_ball(self._blackboard["ai_entity"])
+		return not should_i_run_to_the_ball(self.ai_entity)
 	
-	def start(self):
-		print("idling...")
-
 	def do_action(self):
-		print("...")
-		ai_entity = self._blackboard["ai_entity"]
+		ai_entity = self.ai_entity
 
-		if ai_entity.get_and_reset_flag_value("trajectory_changed"):
-			print("trajectory changed [idling]")
+		if ai_entity.trajectory_changed():
+			ai_entity.reset_change_trajectory()
 			self.get_control().finish_with_success()
-		self._blackboard["frame_consumed"] = True
+		ai_entity.end_frame()
 
