@@ -58,13 +58,16 @@ class Running(GameEngineState, ActionObject):
 		
 		# KB EVENTS
 		game_engine.input_manager.update()
+		# AI
+		game_engine.ai_manager.update()
+		
 		actions_events = pg.event.get(ACTION_EVENT)
+		
 		# UPDATE ACTIONS
 		for action_object in ActionObject.objects + [self]:
 			action_object.update_actions(actions_events, dt=dt)
 
-		# AI
-		game_engine.ai_manager.update()
+
 		
 		# throw event
 		game_engine.thrower_manager.update(pg.event.get(THROW_EVENT), game_engine.ball)

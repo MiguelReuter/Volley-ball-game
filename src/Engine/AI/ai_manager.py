@@ -25,6 +25,7 @@ class AIManager:
 
 	def update(self):
 		# check if trajectory changed
+		print("-------------")
 		if ThrowerManager.get_instance().trajectory_changed:
 			ThrowerManager.get_instance().trajectory_changed = False
 			for entity in self.entities:

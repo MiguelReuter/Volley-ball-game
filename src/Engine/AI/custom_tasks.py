@@ -5,7 +5,31 @@ from Engine.Trajectory.thrower_manager import ThrowerManager
 from Settings.general_settings import *
 
 import pygame as pg
-from random import random
+from random import randint
+
+
+def should_i_run_to_the_ball(ai_entity):
+	"""
+	Check if specified AI entity should run to the ball to throw it.
+	
+	:param AIEntity ai_entity: specified AI entity
+	:return: True if AI entity should run
+	:rtype bool:
+	"""
+	character = ai_entity.blackboard["character"]
+	
+	thrower_manager = ThrowerManager.get_instance()
+	
+	if thrower_manager.current_trajectory.target_pos is not None:
+		target_pos = Vector3(thrower_manager.current_trajectory.target_pos)
+		# if ball will not reached same court side than character
+		if (target_pos.y > 0 and character.is_in_left_side) or (target_pos.y < 0 and not character.is_in_left_side):
+			return False
+		
+		# TODO: implement other checks (game rules): if pass number < MAX_PASS_NUMBER...
+		
+		return True
+	return False
 
 
 class MoveAndThrowDecorator(TaskDecorator):
@@ -13,18 +37,8 @@ class MoveAndThrowDecorator(TaskDecorator):
 		self.task.do_action()
 
 	def check_conditions(self):
-		character = self._blackboard["character"]
-
-		thrower_manager = ThrowerManager.get_instance()
-		print("check")
-
-		if thrower_manager.current_trajectory.target_pos is not None:
-			target_pos = Vector3(thrower_manager.current_trajectory.target_pos)
-			if (target_pos.y > 0 and character.is_in_left_side) or (target_pos.y < 0 and not character.is_in_left_side):
-				return False
-			return True
-		return False
-
+		return should_i_run_to_the_ball(self._blackboard["ai_entity"])
+	
 
 class FindBallTargetPosition(LeafTask):
 	def do_action(self):
@@ -87,7 +101,7 @@ class MoveToTargetPosition(LeafTask):
 			self.get_control().finish_with_success()
 			
 		if ai_entity.get_and_reset_flag_value("trajectory_changed"):
-			print("trajectory changed")
+			print("trajectory changed [moving]")
 			self.get_control().finish_with_failure()  # TODO: change, need to reset and run sequence again instead
 			
 		if character.is_colliding_ball:
@@ -99,17 +113,32 @@ class RandomThrow(LeafTask):
 		print("i'm throwing !")
 	
 	def do_action(self):
+		ai_entity = self._blackboard["ai_entity"]
 		character = self._blackboard["character"]
-		ev = pg.event.Event(ACTION_EVENT, {"player_id": character.player_id, "action": "THROW_BALL"})
-		pg.event.post(ev)
-		
-		# TODO: manage random direction
-		
 		self._blackboard["frame_consumed"] = True
-		self.get_control().finish_with_success()
+		
+		if ai_entity.get_and_reset_flag_value("trajectory_changed"):
+			self.get_control().finish_with_failure()
+
+		if character.is_colliding_ball:
+			ev = pg.event.Event(ACTION_EVENT, {"player_id": character.player_id, "action": "THROW_BALL"})
+			pg.event.post(ev)
+
+			# random direction
+			left_right_action = ("MOVE_LEFT", "MOVE_RIGHT", None)[randint(0, 2)]
+			up_down_action = ("MOVE_UP", "MOVE_DOWN", None)[randint(0, 2)]
+			for action in (left_right_action, up_down_action):
+				if action is not None:
+					ev = pg.event.Event(ACTION_EVENT, {"player_id": character.player_id, "action": action})
+					pg.event.post(ev)
+			
+			self.get_control().finish_with_success()
 
 
 class IdleUntilTrajectoryChanged(LeafTask):
+	def check_conditions(self):
+		return not should_i_run_to_the_ball(self._blackboard["ai_entity"])
+	
 	def start(self):
 		print("idling...")
 
@@ -118,7 +147,7 @@ class IdleUntilTrajectoryChanged(LeafTask):
 		ai_entity = self._blackboard["ai_entity"]
 
 		if ai_entity.get_and_reset_flag_value("trajectory_changed"):
-			print("trajectory changed !")
+			print("trajectory changed [idling]")
 			self.get_control().finish_with_success()
 		self._blackboard["frame_consumed"] = True
 
