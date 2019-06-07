@@ -69,8 +69,8 @@ class MoveToTargetPosition(LeafTask):
 		
 		dxy = target_pos - character.position
 		thr = 0.1
-		events_map = {"MOVE_UP": dxy[0] < -thr, "MOVE_DOWN": dxy[0] > thr,
-		              "MOVE_RIGHT": dxy[1] > thr, "MOVE_LEFT": dxy[1] < -thr}
+		events_map = {PlayerAction.MOVE_UP: dxy[0] < -thr, PlayerAction.MOVE_DOWN: dxy[0] > thr,
+		              PlayerAction.MOVE_RIGHT: dxy[1] > thr, PlayerAction.MOVE_LEFT: dxy[1] < -thr}
 		for action in events_map.keys():
 			if events_map[action]:
 				ev = pg.event.Event(ACTION_EVENT, {"player_id": character.player_id, "action": action})
@@ -107,12 +107,12 @@ class RandomThrow(LeafTask):
 			self.get_control().finish_with_failure()
 
 		if character.is_colliding_ball:
-			ev = pg.event.Event(ACTION_EVENT, {"player_id": character.player_id, "action": "THROW_BALL"})
+			ev = pg.event.Event(ACTION_EVENT, {"player_id": character.player_id, "action": PlayerAction.THROW_BALL})
 			pg.event.post(ev)
 
 			# random direction
-			left_right_action = ("MOVE_LEFT", "MOVE_RIGHT", None)[randint(0, 2)]
-			up_down_action = ("MOVE_UP", "MOVE_DOWN", None)[randint(0, 2)]
+			left_right_action = (PlayerAction.MOVE_LEFT, PlayerAction.MOVE_RIGHT, None)[randint(0, 2)]
+			up_down_action = (PlayerAction.MOVE_UP, PlayerAction.MOVE_DOWN, None)[randint(0, 2)]
 			for action in (left_right_action, up_down_action):
 				if action is not None:
 					ev = pg.event.Event(ACTION_EVENT, {"player_id": character.player_id, "action": action})

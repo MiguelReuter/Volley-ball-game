@@ -93,6 +93,25 @@ SERVE_AMP_DIR = (2.4, 1.4)
 DRAFT_THROW_HEIGHT = 4
 DRAFT_DIRECTION_COEFFICIENT = 1.0
 
+
+# actions
+class PlayerAction(Enum):
+	MOVE_LEFT = 0
+	MOVE_RIGHT = 1
+	MOVE_UP = 2
+	MOVE_DOWN = 3
+	THROW_BALL = 4
+	JUMP = 5
+	DIVE = 6
+	CAMERA_MOVE_LEFT = 7
+	CAMERA_MOVE_RIGHT = 8
+	CAMERA_MOVE_UP = 9
+	CAMERA_MOVE_DOWN = 10
+	QUIT = 11
+	PAUSE = 12
+	SPACE_TEST = 13
+
+
 # events
 ACTION_EVENT = USEREVENT + 1
 THROW_EVENT = USEREVENT + 2
@@ -106,13 +125,14 @@ class ThrowingType(Enum):
 	DRAFT = 3
 	
 	
-# players id
+# human players id
 class PlayerId(Enum):
 	PLAYER_ID_ALL = 0
 	PLAYER_ID_1 = 1
 	PLAYER_ID_2 = 2
 	
 	
+# bot id
 class AIId(Enum):
 	AI_ID_1 = 1
 	AI_ID_2 = 2

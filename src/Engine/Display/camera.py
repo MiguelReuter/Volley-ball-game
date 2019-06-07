@@ -127,12 +127,12 @@ class Camera(ActionObject):
 		
 		for ev in filtered_action_events:
 			action = ev.action
-			if action == "CAMERA_MOVE_UP":
+			if action == PlayerAction.CAMERA_MOVE_UP:
 				self.position += (0, 0, 0.1)
-			elif action == "CAMERA_MOVE_DOWN":
+			elif action == PlayerAction.CAMERA_MOVE_DOWN:
 				self.position += (0, 0, -0.1)
-			elif action == "CAMERA_MOVE_LEFT":
+			elif action == PlayerAction.CAMERA_MOVE_LEFT:
 				self.position += (0, -0.1, 0)
-			elif action == "CAMERA_MOVE_RIGHT":
+			elif action == PlayerAction.CAMERA_MOVE_RIGHT:
 				self.position += (0, 0.1, 0)
 				

@@ -88,9 +88,9 @@ class Running(GameEngineState, ActionObject):
 		filtered_action_events = self.filter_action_events_by_player_id(action_events)
 		
 		for ev in filtered_action_events:
-			if ev.action == "PAUSE":
+			if ev.action == PlayerAction.PAUSE:
 				self._pause_requested = True
-			elif ev.action == "SPACE_TEST":
+			elif ev.action == PlayerAction.SPACE_TEST:
 				game_engine = Engine.game_engine.GameEngine.get_instance()
 				
 				game_engine.serve(game_engine.get_character_by_player_id(ev.player_id))
@@ -129,7 +129,7 @@ class Pausing(GameEngineState, ActionObject):
 		filtered_action_events = self.filter_action_events_by_player_id(action_events)
 		
 		for ev in filtered_action_events:
-			if ev.action == "PAUSE":
+			if ev.action == PlayerAction.PAUSE:
 				self._resume_requested = True
 				
 
