@@ -1,13 +1,16 @@
-**WIP** : Simple 2D retro Volley-ball game written from scratch with Pygame and Python3.
+**WIP** : Simple 3D/2D retro Volley-ball game written from scratch with Pygame and Python3.
 
 Check [Projects](https://github.com/MiguelReuter/Volley-ball-game/projects) page on Github to see progress !
 
+Inspiration: [Super Soccer SNES](https://en.wikipedia.org/wiki/Super_Soccer)
+
+<img src="https://upload.wikimedia.org/wikipedia/en/5/54/Super_formation_soccer_sfc.png" height="400" />
 
 # Demo
 
 Demo with debug display (simple shapes, not sprites yet).
 
-The target ball position is **controllable** in these actions :
+Ball trajectory is **controllable** in these actions :
 
  - **throw**
  - **smash** (depth only)
@@ -15,19 +18,20 @@ The target ball position is **controllable** in these actions :
 
 ## Controls
 
-Keyboard and Gamepad are supported. For gamepad, button binds could be different depending on your device button layout.
+Keyboard and Gamepad are supported. For gamepad, button binds could be different depending on your device button layout. You still must hardcode for joystick use.
 
-| Key *(keyboard)*| Button *(Gamepad)*| Action                                    |
-|---------------- |------------------ |------------------------------------------ |
-| ZQSD            | POV, D-PAD        | **Move** or **Aim** during ball throwing  |
-| I               | 2                 | **Jump**                                  |
-| J               | 1                 | **Throw** ball or **Smash**               |
-| L               | 3                 | **Dive** to catch up ball (after smash...)|
-| Arrow Keys      | Right joystick    | **Move** camera                           |
-| Space bar       | 4                 | **Re-throw** ball                         |
-| Esc.            | 9                 | **Quit** game                             |
-| P               | 10                | **Pause** game (not implemented yet)      |
+| Action                                    | Key *(keyboard)*| Button *(gamepad)*|
+|------------------------------------------ |---------------- |------------------ |
+| **Move** or **Aim** during ball throwing  | ZQSD            | POV, D-PAD        |
+| **Jump**                                  | I               | 2                 |
+| **Throw** ball or **Smash**               | J               | 1                 |
+| **Dive** to catch up ball (after smash...)| L               | 3                 |
+| **Move** camera                           | Arrow Keys      | Right joystick    |
+| **Re-throw** ball                         | Space bar       | 4                 |
+| **Quit** game                             | Esc.            | 9                 |
+| **Pause** game (not implemented yet)      | P               | 10                |
 
+You can manually change button binds in `src/Settings/input_presets.py` (pygame code key).
 
 ## Throw ball
 <img src="doc/throw.gif" height="400" />
