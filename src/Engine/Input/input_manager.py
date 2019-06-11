@@ -5,6 +5,25 @@ import pygame as pg
 from Settings import *
 
 
+def check_joystick_compatibility(pg_joystick):
+	"""
+	Check if passed joystick is compatible for this application.
+
+	Buttons, axes and hats number are checked to consider joystick as compatible or not.
+
+	:param pygame.joystick.Joystick pg_joystick: joystick
+	:return: True if :var pg_joystick: is compatible with current application, False else
+	:rtype bool:
+	"""
+	if pg_joystick.get_numaxes() % 2 != 0:  # if odd, it could be a 3 axes accelerometer
+		return False
+	if pg_joystick.get_numbuttons() < 10:
+		return False
+	if pg_joystick.get_numhats() < 1:
+		return False
+	return True
+
+
 class InputManager:
 	s_instance = None
 
@@ -13,20 +32,72 @@ class InputManager:
 		return InputManager.s_instance
 
 	def __init__(self):
-		pg.joystick.init()
-		self.input_devices = [KeyboardInputDevice(PlayerId.PLAYER_ID_1),
-							  *[JoystickInputDevice(joystick_obj=pg.joystick.Joystick(i))
-								for i in range(pg.joystick.get_count())]]
-
 		InputManager.s_instance = self
-		
+
+		self.input_devices = []
+		self.create()
+
+	def create(self):
+		pg.joystick.init()
+
+		self.input_devices += [KeyboardInputDevice(PlayerId.PLAYER_ID_1)]
+
+		# joystick
+		for joy_id in range(pg.joystick.get_count()):
+			self.add_joystick(joy_id)
+
 	def update(self):
 		joy_input_events = pg.event.get([JOYBUTTONUP, JOYBUTTONDOWN, JOYHATMOTION])
 		
 		for input_device in self.input_devices:
 			input_device.update(joy_events=joy_input_events)
 			input_device.generate_actions()
-			
+
+	def add_joystick(self, joy_id, player_id=None):
+		"""
+		Add joystick to input devices.
+
+		:param int joy_id: pygame joystick id, must be < pygame.joystick.get_count()
+		:param PlayerId enum player_id: player index to assign current joystick
+		:return: None
+		"""
+		# check if joystick is added yet
+		if self.get_joystick_by_id(joy_id) is not None:
+			print("Joystick {} is added yet".format(joy_id))
+			return None
+
+		# check index validity
+		if joy_id > pg.joystick.get_count() - 1:
+			return None
+
+		# add Joystick input device if joystick is compatible
+		pg_joy = pg.joystick.Joystick(joy_id)
+		pg_joy.init()
+		if not check_joystick_compatibility(pg_joy):
+			return None
+		joy = JoystickInputDevice(joystick_obj=pg_joy)
+
+		# assign joystick to a player
+		if player_id in PlayerId.__iter__():
+			joy.player_id = player_id
+
+		# add joystick to input_devices
+		self.input_devices += [joy]
+
+	def assign_joystick_to_player(self, joy_id, player_id):
+		device = self.get_joystick_by_id(joy_id)
+		if device is None:
+			print("Joystick {} does not exist in input devices")
+			return
+
+		device.player_id = player_id
+
+	def get_joystick_by_id(self, joy_id):
+		for device in self.input_devices:
+			if isinstance(device, JoystickInputDevice):
+				if device.joystick.get_id() == joy_id:
+					return device
+
 
 class InputDevice:
 	def __init__(self, player_id):
