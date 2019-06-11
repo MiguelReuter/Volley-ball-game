@@ -61,9 +61,8 @@ class AIEntity:
 		b_tree = Selector(self)
 		b_tree.get_control().add(find_and_run_to_ball_position)
 		b_tree.get_control().add(wait_and_serve)
-		b_tree.get_control().add(IdleUntilTrajectoryChanged(self))
+		b_tree.get_control().add(Idle(self))
 		b_tree = ResetDecorator(self, b_tree)
-		
 		
 		self.behaviour_tree = b_tree
 
@@ -80,4 +79,6 @@ class AIEntity:
 		while not self.is_frame_ended() and n < n_max:
 			self.behaviour_tree.do_action()
 			n += 1
+		if n == n_max:
+			print("possible infinite loop in ai_entity update")
 		self._is_frame_ended = False

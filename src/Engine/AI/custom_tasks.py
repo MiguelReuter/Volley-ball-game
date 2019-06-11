@@ -46,7 +46,7 @@ class MoveAndThrowDecorator(TaskDecorator):
 
 	def check_conditions(self):
 		b_do_action = should_ai_run_to_the_ball(self.ai_entity)
-		b_do_action &= should_ai_serve(self.ai_entity)
+		b_do_action &= not should_ai_serve(self.ai_entity)
 		return b_do_action
 	
 
@@ -57,7 +57,7 @@ class FindBallTargetPosition(LeafTask):
 
 		:return: None
 		"""
-		 # print("find ball target position")
+		# print("find ball target position")
 		thrower_manager = ThrowerManager.get_instance()
 
 		target_pos = Vector3(thrower_manager.current_trajectory.target_pos)
@@ -133,7 +133,7 @@ class RandomThrow(LeafTask):
 			self.get_control().finish_with_success()
 
 
-class IdleUntilTrajectoryChanged(LeafTask):
+class Idle(LeafTask):
 	def check_conditions(self):
 		b_do_action = not should_ai_run_to_the_ball(self.ai_entity)
 		b_do_action &= not should_ai_serve(self.ai_entity)
@@ -141,6 +141,7 @@ class IdleUntilTrajectoryChanged(LeafTask):
 		return b_do_action
 	
 	def do_action(self):
+		# print("idling")
 		ai_entity = self.ai_entity
 
 		if ai_entity.trajectory_changed():
@@ -156,7 +157,6 @@ class IdleUntilTrajectoryChanged(LeafTask):
 
 class WaitAndServe(TaskDecorator):
 	def do_action(self):
-		self.ai_entity.blackboard["waiting_time"] = 500
 		self.task.do_action()
 
 	def check_conditions(self):
