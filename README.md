@@ -2,9 +2,11 @@
 
 Check [Projects](https://github.com/MiguelReuter/Volley-ball-game/projects) page on Github to see progress !
 
-Inspiration: [Super Soccer SNES](https://en.wikipedia.org/wiki/Super_Soccer)
+**Game inspiration:** [Super Soccer SNES](https://en.wikipedia.org/wiki/Super_Soccer)
 
-<img src="https://upload.wikimedia.org/wikipedia/en/5/54/Super_formation_soccer_sfc.png" height="400" />
+<img src="https://upload.wikimedia.org/wikipedia/en/5/54/Super_formation_soccer_sfc.png" height="200" />
+
+---
 
 # Overview
 
@@ -24,16 +26,19 @@ Inspiration: [Super Soccer SNES](https://en.wikipedia.org/wiki/Super_Soccer)
 
 Notes:
 
-1. The target ball position is **controllable** in these actions :
+1. Ball trajectory is **controllable** in these actions :
      - **throw**
      - **smash** (depth only)
      - **serve**
-2. You must hardcode in `src/Engine/game_engine.py` in `create` method if character 2 is controllable by a joystick or by Artificial Intelligence :
-     - to play against AI: `char2 = Character((0, 5, 0), player_id=AIId.AI_ID_1, is_in_left_side=False)`
-     - to play against a human player (joystick needed): `char2 = Character((0, 5, 0), player_id=PlayerId.PLAYER_ID_2, is_in_left_side=False)`
+2. You must change code in `src/Engine/game_engine.py` in `create` method if character 2 is controllable by a joystick or by Artificial Intelligence :
+     - to play against a **bot** (by default): `char2 = Character((0, 5, 0), player_id=AIId.AI_ID_1, is_in_left_side=False)`
+     - to play against a **human player** (joystick needed): `char2 = Character((0, 5, 0), player_id=PlayerId.PLAYER_ID_2, is_in_left_side=False)`
 3. Game rules are not implemented yet
 
 ## Demo
+### Human player VS Bot
+<img src="doc/demo_1v1_bot.gif" height="400" />
+
 ### Throw ball
 <img src="doc/throw.gif" height="400" />
 
