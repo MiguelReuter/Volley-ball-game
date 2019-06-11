@@ -3,15 +3,49 @@
 Check [Projects](https://github.com/MiguelReuter/Volley-ball-game/projects) page on Github to see progress !
 
 
-# Demo
+# Overview
 
-Demo with debug display (simple shapes, not sprites yet).
+## Features
 
-The target ball position is **controllable** in these actions :
+- Debug display with simple shapes, not sprites yet
+- Play against a **human player** or a **bot** !
+- Basic actions:
+    - move
+    - jump
+    - smash
+    - serve
+    - throw ball
+    - dive
+    - quit and pause game
+    - move camera (debug purpose)
 
- - **throw**
- - **smash** (depth only)
- - **serve**
+Notes:
+
+1. The target ball position is **controllable** in these actions :
+     - **throw**
+     - **smash** (depth only)
+     - **serve**
+2. You must hardcode in `src/Engine/game_engine.py` in `create` method if character 2 is controllable by a joystick or by Artifial Intelligence :
+     - to play against AI: `char2 = Character((0, 5, 0), player_id=AIId.AI_ID_1, is_in_left_side=False)`
+     - to play against a human player (joystick needed): `char2 = Character((0, 5, 0), player_id=PlayerId.PLAYER_ID_2, is_in_left_side=False)`
+3. Game rules are not implemented yet
+
+## Demo
+### Throw ball
+<img src="doc/throw.gif" height="400" />
+
+### Smash
+<img src="doc/smash.gif" height="400" />
+
+### Dive
+<img src="doc/dive.gif" height="400" />
+
+### Serve
+<img src="doc/serve.gif" height="400" />
+
+### Collisions with net
+<img src="doc/net_collision_1.gif" height="400" /> <img src="doc/net_collision_2.gif" height="400" />
+
 
 ## Controls
 
@@ -29,21 +63,7 @@ Keyboard and Gamepad are supported. For gamepad, button binds could be different
 | P               | 10                | **Pause** game (not implemented yet)      |
 
 
-## Throw ball
-<img src="doc/throw.gif" height="400" />
-
-## Smash
-<img src="doc/smash.gif" height="400" />
-
-## Dive
-<img src="doc/dive.gif" height="400" />
-
-## Serve
-<img src="doc/serve.gif" height="400" />
-
-## Collisions with net
-<img src="doc/net_collision_1.gif" height="400" /> <img src="doc/net_collision_2.gif" height="400" />
-
+---
 
 # Dependencies
 - python3
