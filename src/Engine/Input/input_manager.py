@@ -53,38 +53,50 @@ class InputManager:
 			input_device.update(joy_events=joy_input_events)
 			input_device.generate_actions()
 
-	def add_joystick(self, index, player_index=None):
+	def add_joystick(self, joy_id, player_id=None):
 		"""
 		Add joystick to input devices.
 
-		:param int index: pygame joystick id, must be < pygame.joystick.get_count()
-		:param PlayerId enum player_index: player index to assign current joystick
+		:param int joy_id: pygame joystick id, must be < pygame.joystick.get_count()
+		:param PlayerId enum player_id: player index to assign current joystick
 		:return: None
 		"""
 		# check if joystick is added yet
-		for device in self.input_devices:
-			if isinstance(device, JoystickInputDevice):
-				if device.joystick.get_id() == index:
-					print("Joystick {} is added yet".format(index))
-					return None
+		if self.get_joystick_by_id(joy_id) is not None:
+			print("Joystick {} is added yet".format(joy_id))
+			return None
 
 		# check index validity
-		if index > pg.joystick.get_count() - 1:
+		if joy_id > pg.joystick.get_count() - 1:
 			return None
 
 		# add Joystick input device if joystick is compatible
-		pg_joy = pg.joystick.Joystick(index)
+		pg_joy = pg.joystick.Joystick(joy_id)
 		pg_joy.init()
 		if not check_joystick_compatibility(pg_joy):
 			return None
 		joy = JoystickInputDevice(joystick_obj=pg_joy)
 
 		# assign joystick to a player
-		if player_index in PlayerId.__iter__():
-			joy.player_id = player_index
+		if player_id in PlayerId.__iter__():
+			joy.player_id = player_id
 
 		# add joystick to input_devices
 		self.input_devices += [joy]
+
+	def assign_joystick_to_player(self, joy_id, player_id):
+		device = self.get_joystick_by_id(joy_id)
+		if device is None:
+			print("Joystick {} does not exist in input devices")
+			return
+
+		device.player_id = player_id
+
+	def get_joystick_by_id(self, joy_id):
+		for device in self.input_devices:
+			if isinstance(device, JoystickInputDevice):
+				if device.joystick.get_id() == joy_id:
+					return device
 
 
 class InputDevice:
