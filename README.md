@@ -28,7 +28,7 @@ Notes:
      - **throw**
      - **smash** (depth only)
      - **serve**
-2. You must hardcode in `src/Engine/game_engine.py` in `create` method if character 2 is controllable by a joystick or by Artifial Intelligence :
+2. You must hardcode in `src/Engine/game_engine.py` in `create` method if character 2 is controllable by a joystick or by Artificial Intelligence :
      - to play against AI: `char2 = Character((0, 5, 0), player_id=AIId.AI_ID_1, is_in_left_side=False)`
      - to play against a human player (joystick needed): `char2 = Character((0, 5, 0), player_id=PlayerId.PLAYER_ID_2, is_in_left_side=False)`
 3. Game rules are not implemented yet
