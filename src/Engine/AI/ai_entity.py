@@ -14,27 +14,47 @@ class AIEntity:
 		self.is_behaviour_tree_initialized = False
 		self._trajectory_changed = False
 		self._is_frame_ended = False
-		
-	def get_and_reset_flag_value(self, flag):
-		if flag in self.blackboard.keys():
-			if self.blackboard[flag]:
-				self.blackboard[flag] = False
-				return True
-			return False
 	
 	def trajectory_changed(self):
+		"""
+		Check if ball trajectory has changed
+
+		:return: True if trajectory changed, False else
+		:rtype bool:
+		"""
 		return self._trajectory_changed
 	
 	def change_trajectory(self):
+		"""
+		Set :var self._trajectory_changed: to True.
+
+		:return: None
+		"""
 		self._trajectory_changed = True
 	
 	def reset_change_trajectory(self):
+		"""
+		Set :var self._trajectory_changed: to False.
+
+		:return: None
+		"""
 		self._trajectory_changed = False
 	
 	def end_frame(self):
+		"""
+		End current frame and notify that frame was spent.
+
+		Call this method in a Behaviour Tree Leaf if no more actions have to be done in current frame.
+		:return: None
+		"""
 		self._is_frame_ended = True
 	
 	def is_frame_ended(self):
+		"""
+		Return True if frame is ended.
+
+		:rtype bool:
+		"""
 		return self._is_frame_ended
 		
 	def _create_behaviour_tree_1v1(self):
@@ -43,13 +63,13 @@ class AIEntity:
 
 		:return: None
 		"""
-		find_and_run_to_ball_position = Sequence(self)
+		run_and_throw_ball = Sequence(self)
 
-		# find target ball position and run to it
-		find_and_run_to_ball_position.get_control().add(FindBallTargetPosition(self))
-		find_and_run_to_ball_position.get_control().add(MoveToTargetPosition(self))
-		find_and_run_to_ball_position.get_control().add(RandomThrow(self))
-		find_and_run_to_ball_position = MoveAndThrowDecorator(self, find_and_run_to_ball_position)
+		# find target ball position, run to it and throw
+		run_and_throw_ball.get_control().add(FindBallTargetPosition(self))
+		run_and_throw_ball.get_control().add(MoveToTargetPosition(self))
+		run_and_throw_ball.get_control().add(RandomThrow(self))
+		run_and_throw_ball = MoveAndThrowDecorator(self, run_and_throw_ball)
 		
 		# wait and serve
 		wait_and_serve = Sequence(self)
@@ -59,7 +79,7 @@ class AIEntity:
 		
 		# root
 		b_tree = Selector(self)
-		b_tree.get_control().add(find_and_run_to_ball_position)
+		b_tree.get_control().add(run_and_throw_ball)
 		b_tree.get_control().add(wait_and_serve)
 		b_tree.get_control().add(Idle(self))
 		b_tree = ResetDecorator(self, b_tree)
@@ -70,10 +90,18 @@ class AIEntity:
 		self._create_behaviour_tree_1v1()
 
 	def update(self):
+		"""
+		Update behaviour tree for this AI Entity.
+
+		If not initialized, behaviour tree is started.
+
+		:return: None
+		"""
 		if not self.is_behaviour_tree_initialized:
 			self.is_behaviour_tree_initialized = True
 			self.behaviour_tree.start()
 
+		# max iteration to prevent infinite loop (behaviour tree leaves without end_frame() call)
 		n_max = 100
 		n = 0
 		while not self.is_frame_ended() and n < n_max:

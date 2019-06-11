@@ -2,8 +2,6 @@
 
 # see http://magicscrollsofcode.blogspot.com/2010/12/behavior-trees-by-example-ai-in-android.html
 
-from pygame import Vector3
-
 
 class TaskController:
 	def __init__(self, task):

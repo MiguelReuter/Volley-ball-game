@@ -17,12 +17,23 @@ class AIManager:
 		self.entities = []
 
 	def add_entity(self, character):
+		"""
+		Add an AI Entity, to link to a specific character.
+
+		:param Game.Character character: character to assign to new AIEntity
+		:return: None
+		"""
 		new_entity = AIEntity(character)
 		new_entity.create()
 
 		self.entities += [new_entity]
 
 	def update(self):
+		"""
+		Update all AI Entities.
+
+		:return: None
+		"""
 		# check if trajectory changed
 		if ThrowerManager.get_instance().trajectory_changed:
 			ThrowerManager.get_instance().trajectory_changed = False
