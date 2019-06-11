@@ -21,10 +21,21 @@ class ThrowerManager:
 		return ThrowerManager.s_instance
 
 	def __init__(self):
-		self.current_trajectory = Trajectory()
+		self._current_trajectory = Trajectory()
+		
+		self.trajectory_changed = False
 
 		ThrowerManager.s_instance = self
-		
+	
+	@property
+	def current_trajectory(self):
+		return self._current_trajectory
+	
+	@current_trajectory.setter
+	def current_trajectory(self, value):
+		self._current_trajectory = value
+		self.trajectory_changed = True
+	
 	@staticmethod
 	def get_effective_target_position(direction, character_position):
 		"""

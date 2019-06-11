@@ -50,19 +50,24 @@ class Running(GameEngineState, ActionObject):
 		
 		# PHYSICS
 		game_engine.ball.update_physics(dt)
-		for char in [game_engine.char1, game_engine.char2]:
+		for char in game_engine.characters:
 			char.update_physics(dt)
 		
 		# COLLISIONS
-		game_engine.collisions_manager.update(game_engine.ball, game_engine.court,
-		                                      [game_engine.char1, game_engine.char2])
+		game_engine.collisions_manager.update(game_engine.ball, game_engine.court, game_engine.characters)
 		
 		# KB EVENTS
 		game_engine.input_manager.update()
+		# AI
+		game_engine.ai_manager.update()
+		
 		actions_events = pg.event.get(ACTION_EVENT)
+		
 		# UPDATE ACTIONS
 		for action_object in ActionObject.objects + [self]:
 			action_object.update_actions(actions_events, dt=dt)
+
+
 		
 		# throw event
 		game_engine.thrower_manager.update(pg.event.get(THROW_EVENT), game_engine.ball)
@@ -83,12 +88,13 @@ class Running(GameEngineState, ActionObject):
 		filtered_action_events = self.filter_action_events_by_player_id(action_events)
 		
 		for ev in filtered_action_events:
-			if ev.action == "PAUSE":
+			if ev.action == PlayerAction.PAUSE:
 				self._pause_requested = True
-			elif ev.action == "SPACE_TEST":
+			elif ev.action == PlayerAction.SPACE_TEST:
 				game_engine = Engine.game_engine.GameEngine.get_instance()
 				
-				game_engine.serve(game_engine.get_character_by_player_id(ev.player_id))
+				# game_engine.serve(game_engine.get_character_by_player_id(ev.player_id))
+				game_engine.serve(game_engine.get_character_by_player_id(AIId.AI_ID_1))
 				# game_engine.thrower_manager.throw_ball(game_engine.ball, INITIAL_POS, TARGET_POS, WANTED_H)
 				# game_engine.thrower_manager.throw_at_random_target_position(game_engine.ball, INITIAL_POS, WANTED_H)
 	
@@ -124,7 +130,7 @@ class Pausing(GameEngineState, ActionObject):
 		filtered_action_events = self.filter_action_events_by_player_id(action_events)
 		
 		for ev in filtered_action_events:
-			if ev.action == "PAUSE":
+			if ev.action == PlayerAction.PAUSE:
 				self._resume_requested = True
 				
 

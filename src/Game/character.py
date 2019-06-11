@@ -138,3 +138,6 @@ class Character(ActionObject):
 
 		self.collider_relative_position	= collider_rel_center
 		self.collider = AABBCollider(self._position + self.collider_relative_position, collider_size3)
+		
+	def reset(self):
+		self.set_default_collider()

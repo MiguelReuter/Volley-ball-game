@@ -179,6 +179,8 @@ class Serving(CharacterState):
 	"""
 	def __init__(self, character, action_events=None, **kwargs):
 		super().__init__(character)
+		character.reset()
+		
 		self.has_served = False
 		if action_events is None:
 			action_events = []
@@ -193,7 +195,7 @@ class Serving(CharacterState):
 		:return: None
 		"""
 		
-		if is_throwing_requested(action_events):
+		if is_throwing_requested(action_events) and not self.has_served:
 			self.t0 = Engine.game_engine.GameEngine.get_instance().get_running_ticks()
 			self.has_served = True
 			direction = get_direction_requested(action_events)
@@ -319,7 +321,7 @@ def is_running_requested(action_events):
 	"""
 	b_running = False
 	for act_event in action_events:
-		b_running |= act_event.action in ("MOVE_UP", "MOVE_DOWN", "MOVE_LEFT", "MOVE_RIGHT")
+		b_running |= act_event.action in (PlayerAction.MOVE_LEFT, PlayerAction.MOVE_RIGHT, PlayerAction.MOVE_UP, PlayerAction.MOVE_DOWN)
 	return b_running
 
 
@@ -333,7 +335,7 @@ def is_throwing_requested(action_events):
 	"""
 	b_throwing = False
 	for act_event in action_events:
-		b_throwing |= act_event.action == "THROW_BALL"
+		b_throwing |= act_event.action == PlayerAction.THROW_BALL
 	return b_throwing
 
 
@@ -347,7 +349,7 @@ def is_jumping_requested(action_events):
 	"""
 	b_jumping = False
 	for act_event in action_events:
-		b_jumping |= act_event.action == "JUMP"
+		b_jumping |= act_event.action == PlayerAction.JUMP
 	return b_jumping
 
 
@@ -361,7 +363,7 @@ def is_diving_requested(action_events):
 	"""
 	b_diving = False
 	for act_event in action_events:
-		b_diving |= act_event.action == "DIVE"
+		b_diving |= act_event.action == PlayerAction.DIVE
 	return b_diving
 
 
@@ -369,10 +371,10 @@ def get_direction_requested(action_events):
 	b_up = b_down = b_left = b_right = False
 	for act_event in action_events:
 		action = act_event.action
-		b_up |= (action == "MOVE_UP")
-		b_down |= (action == "MOVE_DOWN")
-		b_left |= (action == "MOVE_LEFT")
-		b_right |= (action == "MOVE_RIGHT")
+		b_up |= (action == PlayerAction.MOVE_UP)
+		b_down |= (action == PlayerAction.MOVE_DOWN)
+		b_left |= (action == PlayerAction.MOVE_LEFT)
+		b_right |= (action == PlayerAction.MOVE_RIGHT)
 	
 	return Vector3(b_down - b_up, b_right - b_left, 0)
 

@@ -77,3 +77,4 @@ class CollisionsManager:
 
 			# update current ball trajectory
 			ThrowerManager.get_instance().current_trajectory = Trajectory(ball.position, target_pos, ball.velocity)
+			
