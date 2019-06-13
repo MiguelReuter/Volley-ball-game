@@ -73,7 +73,7 @@ class AIEntity:
 		
 		# wait and serve
 		wait_and_serve = Sequence(self)
-		wait_and_serve.get_control().add(Wait(self, duration=1000))
+		wait_and_serve.get_control().add(Wait(self, duration=500))
 		wait_and_serve.get_control().add(RandomThrow(self))
 		wait_and_serve = WaitAndServe(self, wait_and_serve)
 		

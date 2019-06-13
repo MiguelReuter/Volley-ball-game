@@ -168,8 +168,10 @@ class Wait(LeafTask):
 	def __init__(self, ai_entity, duration):
 		LeafTask.__init__(self, ai_entity)
 		self.duration = duration
-		ge = game_engine.GameEngine.get_instance()
-		self.t0 = ge.get_running_ticks() if ge is not None else 0
+		self.t0 = None
+
+	def start(self):
+		self.t0 = game_engine.GameEngine.get_instance().get_running_ticks()
 	
 	def do_action(self):
 		if game_engine.GameEngine.get_instance().get_running_ticks() - self.t0 > self.duration:
