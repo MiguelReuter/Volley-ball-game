@@ -6,6 +6,7 @@ from Settings import *
 import pygame as pg
 from math import log2, pow
 
+import Engine.game_engine
 
 class DisplayManager:
 	s_instance = None
@@ -20,6 +21,7 @@ class DisplayManager:
 		self.unscaled_surface = None
 		self.scaled_surface = None
 		self.debug_surface = None
+		self.debug_text = DisplayManager.DebugText()
 
 		self.window_mode = WINDOW_MODE
 		self.window_resize_2n = WINDOW_RESIZE_2N
@@ -29,7 +31,36 @@ class DisplayManager:
 		self.camera = Camera(CAMERA_POS, FOCUS_POINT, FOV_ANGLE)
 
 		DisplayManager.s_instance = self
+		
+	class DebugText(pg.sprite.Sprite):
+		"""
+		Class for display debug text on game window.
+		"""
+		def __init__(self):
+			pg.sprite.Sprite.__init__(self)
+			self.content = {"test": 45,
+			                "other test": "Hello"}
+			self.font = pg.font.Font("../assets/font/PressStart2P.ttf", 8)
+			self.surface = pg.Surface((0, 0))
+		
+		def update(self):
+			x = 20
+			y = 20
+			key_max_length = 10
+			text_color = (255, 255, 0)
+			
+			# update content
+			self.content["ticks"] = Engine.game_engine.GameEngine.get_instance().get_running_ticks()
+			
+			self.surface = pg.Surface(DisplayManager.get_instance().debug_surface.get_size())
+			self.surface.set_colorkey((0, 0, 0))
 
+			for k in self.content:
+				k_str = k.ljust(key_max_length)
+				text_surface = self.font.render(k_str + ": " + str(self.content[k]), 0, text_color)
+				self.surface.blit(text_surface, (x, y))
+				y += int(1.5 * self.font.get_height())
+	
 	def _create_window(self, nominal_resolution, window_mode=WindowMode.FIXED_SIZE, window_resize_2n=False):
 		"""
 		Create Game Window.
@@ -128,13 +159,18 @@ class DisplayManager:
 		self.screen.fill((50, 50, 0))
 		self.unscaled_surface.fill((0, 0, 50))
 		self.debug_surface.fill((0, 0, 0))
+		self.debug_text.surface.fill((0, 0, 0))
 		for obj in objects:
 			obj.draw()
 		
 		self._resize_display()
 		
+		# update
+		self.debug_text.update()
+		
 		self.screen.blit(self.scaled_surface, self.get_position_to_blit_centered_surfaces(self.screen.get_size(), self.scaled_surface.get_size()))
 		self.screen.blit(self.debug_surface, self.get_position_to_blit_centered_surfaces(self.screen.get_size(), self.debug_surface.get_size()))
+		self.screen.blit(self.debug_text.surface, self.get_position_to_blit_centered_surfaces(self.screen.get_size(), self.debug_text.surface.get_size()))
 		# update screen
 		pg.display.flip()
 	
