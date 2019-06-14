@@ -5,8 +5,10 @@ from Settings import *
 
 import pygame as pg
 from math import log2, pow
+from datetime import datetime
 
 import Engine.game_engine
+
 
 class DisplayManager:
 	s_instance = None
@@ -22,6 +24,7 @@ class DisplayManager:
 		self.scaled_surface = None
 		self.debug_surface = None
 		self.debug_text = DisplayManager.DebugText()
+		self.hud = DisplayManager.HUD()
 
 		self.window_mode = WINDOW_MODE
 		self.window_resize_2n = WINDOW_RESIZE_2N
@@ -34,7 +37,7 @@ class DisplayManager:
 		
 	class DebugText(pg.sprite.Sprite):
 		"""
-		Class for display debug text on game window.
+		Class for debug text displaying on game window.
 		"""
 		def __init__(self):
 			pg.sprite.Sprite.__init__(self)
@@ -61,6 +64,35 @@ class DisplayManager:
 				self.surface.blit(text_surface, (x, y))
 				y += int(1.5 * self.font.get_height())
 	
+	class HUD(pg.sprite.Sprite):
+		def __init__(self):
+			pg.sprite.Sprite.__init__(self)
+			self.font = pg.font.Font("../assets/font/PressStart2P.ttf", 8)
+			self.surface = None
+			self.scaled_surface = None
+			self.color = (200, 200, 200)
+			self.scores = (3, 5)  # dummy values
+		
+		def update(self):
+			self.surface.set_colorkey((0, 0, 0))
+
+			# time
+			t = round(Engine.game_engine.GameEngine.get_instance().get_running_ticks() / 1000)
+			t_str = "{}:{:02}".format(int(t)//60, t % 60)
+			t_surface = self.font.render(t_str, 0, self.color)
+			t_pos = ((self.surface.get_size()[0] - t_surface.get_size()[0]) / 2, 10)
+			self.surface.blit(t_surface, t_pos)
+
+			# scores
+			w = 100
+			sc_surface = self.font.render(str(self.scores[0]), 0, self.color)
+			sc_pos = (self.surface.get_size()[0] / 2 - sc_surface.get_size()[0] - w, 10)
+			self.surface.blit(sc_surface, sc_pos)
+			
+			sc_surface = self.font.render(str(self.scores[1]), 0, self.color)
+			sc_pos = (self.surface.get_size()[0] / 2 + sc_surface.get_size()[0] + w, 10)
+			self.surface.blit(sc_surface, sc_pos)
+			
 	def _create_window(self, nominal_resolution, window_mode=WindowMode.FIXED_SIZE, window_resize_2n=False):
 		"""
 		Create Game Window.
@@ -93,6 +125,8 @@ class DisplayManager:
 			scaled_size = tuple(int(f * nominal_resolution[i]) for i in (0, 1))
 		
 		self.unscaled_surface = pg.Surface(nominal_resolution)
+		self.hud.surface = pg.Surface(nominal_resolution)
+		self.hud.scaled_surface = pg.Surface(scaled_size)
 		self.scaled_surface = pg.Surface(scaled_size)
 		self.debug_surface = pg.Surface(scaled_size)
 		self.debug_surface.set_colorkey((0, 0, 0))
@@ -110,13 +144,21 @@ class DisplayManager:
 		:return: None
 		"""
 		surface = self.unscaled_surface
+		hud_surface = self.hud.surface
+		
 		if self.window_mode == WindowMode.FIXED_SIZE and self.window_resize_2n:
 			new_size = list(surface.get_size())
+			
 			new_surface = pg.Surface(new_size)
 			new_surface.blit(surface, (0, 0))
+			
+			# hud
+			new_hud_surface = pg.Surface(new_size)
+			new_hud_surface.blit(hud_surface, (0, 0))
 			for _ in range(self.screen_scale_factor_2n):
 				new_size = [new_size[i] * 2 for i in (0, 1)]
 				self.scaled_surface = pg.transform.scale2x(new_surface)
+				self.hud.scaled_surface = pg.transform.scale2x(new_hud_surface)
 				
 		elif self.window_mode == WindowMode.RESIZABLE:
 			scaled_size = self.scaled_surface.get_size()
@@ -132,9 +174,11 @@ class DisplayManager:
 			# TODO : use smoothscale instead of scale ?
 			self.scaled_surface = pg.transform.scale(self.unscaled_surface, scaled_size)
 			self.debug_surface = pg.transform.scale(self.debug_surface, scaled_size)
+			self.hud.scaled_surface = pg.transform.scale(self.hud.surface, scaled_size)
 		elif self.window_mode == WindowMode.FULL_SCREEN:
 			scaled_size = self.scaled_surface.get_size()
 			self.scaled_surface = pg.transform.scale(self.unscaled_surface, scaled_size)
+			self.hud.scaled_surface = pg.transform.scale(self.hud.surface, scaled_size)
 		else:
 			self.scaled_surface = self.unscaled_surface.copy()
 	
@@ -160,16 +204,22 @@ class DisplayManager:
 		self.unscaled_surface.fill((0, 0, 50))
 		self.debug_surface.fill((0, 0, 0))
 		self.debug_text.surface.fill((0, 0, 0))
+		self.hud.surface.fill((0, 0, 0))
+		
+		# update
+		self.debug_text.update()
+		self.hud.update()
+		
 		for obj in objects:
 			obj.draw()
 		
 		self._resize_display()
 		
-		# update
-		self.debug_text.update()
-		
 		self.screen.blit(self.scaled_surface, self.get_position_to_blit_centered_surfaces(self.screen.get_size(), self.scaled_surface.get_size()))
 		self.screen.blit(self.debug_surface, self.get_position_to_blit_centered_surfaces(self.screen.get_size(), self.debug_surface.get_size()))
+		
+		self.screen.blit(self.hud.scaled_surface, self.get_position_to_blit_centered_surfaces(self.screen.get_size(), self.hud.scaled_surface.get_size()))
+		
 		self.screen.blit(self.debug_text.surface, self.get_position_to_blit_centered_surfaces(self.screen.get_size(), self.debug_text.surface.get_size()))
 		# update screen
 		pg.display.flip()
