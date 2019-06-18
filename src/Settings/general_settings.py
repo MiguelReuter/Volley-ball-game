@@ -15,8 +15,8 @@ class WindowMode(Enum):
 	FULL_SCREEN = 2
 
 
-WINDOW_MODE = WindowMode.RESIZABLE
-WINDOW_RESIZE_2N = True  # ignored in full screen mode
+WINDOW_MODE = WindowMode.FIXED_SIZE
+WINDOW_RESIZE_2N = False  # ignored in full screen mode
 """
 FIXED_SIZE, RESIZABLE, or FULL_SCREEN
 

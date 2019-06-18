@@ -1,6 +1,6 @@
 # encoding : UTF-8
 
-from .camera import Camera
+from Engine.Display.camera import Camera
 from Settings import *
 
 import pygame as pg
@@ -64,34 +64,95 @@ class DisplayManager:
 				self.surface.blit(text_surface, (x, y))
 				y += int(1.5 * self.font.get_height())
 	
-	class HUD(pg.sprite.Sprite):
+	class HUD(pg.sprite.RenderUpdates):
+		class TimeSprite(pg.sprite.DirtySprite):
+			def __init__(self, *groups):
+				pg.sprite.DirtySprite.__init__(self, *groups)
+				self.color = (200, 200, 200)
+				self.font = pg.font.Font("../assets/font/PressStart2P.ttf", 8)
+				
+				self.t = 0
+				self.image = None
+				self.rect = None
+				
+				self.render_text()
+				
+			def update(self):
+				pg.sprite.DirtySprite.update(self)
+				current_t = int(Engine.game_engine.GameEngine.get_instance().get_running_ticks() / 1000)
+				
+				if not current_t == self.t:
+					self.t = current_t
+					self.render_text()
+
+			def render_text(self):
+				self.dirty = 1
+				
+				t_str = "{}:{:02}".format(int(self.t) // 60, self.t % 60)
+				self.image = self.font.render(t_str, 0, self.color)
+				
+				t_pos = ((NOMINAL_RESOLUTION[0] - self.image.get_size()[0]) / 2, 10)
+				self.rect = pg.Rect(t_pos, self.image.get_size())
+			
+		class ScoreSprite(pg.sprite.DirtySprite):
+			def __init__(self, *groups, on_left=True):
+				pg.sprite.DirtySprite.__init__(self, *groups)
+				self.color = (200, 200, 200)
+				self.font = pg.font.Font("../assets/font/PressStart2P.ttf", 8)
+				self.center_space = 100
+				
+				self.on_left = on_left
+				
+				self.image = None
+				self.rect = None
+				
+				self._score = 0
+				self.render_text()
+			
+			@property
+			def score(self):
+				return self._score
+			
+			@score.setter
+			def score(self, value):
+				self._score = value
+				self.render_text()
+
+			def render_text(self):
+				self.dirty = 1
+				self.image = self.font.render(str(self._score), 0, self.color)
+				if self.on_left:
+					sc_pos = (NOMINAL_RESOLUTION[0] / 2 - self.image.get_size()[0] - self.center_space, 10)
+				else:
+					sc_pos = (NOMINAL_RESOLUTION[0] / 2 + self.image.get_size()[0] + self.center_space, 10)
+				
+				self.rect = pg.Rect(sc_pos, self.image.get_size())
+			
 		def __init__(self):
-			pg.sprite.Sprite.__init__(self)
+			pg.sprite.RenderUpdates.__init__(self)
 			self.font = pg.font.Font("../assets/font/PressStart2P.ttf", 8)
-			self.surface = None
+			self.image = pg.Surface(NOMINAL_RESOLUTION)
 			self.scaled_surface = None
-			self.color = (200, 200, 200)
-			self.scores = (3, 5)  # dummy values
+			self.color = (200, 200, 200)  # TODO: to refactor
+			self.time_sprite = None
+			self.lscore_sprite = None
+			self.rscore_sprite = None
+			
+			self.rect_list = []
+			
+			self.create()
+			
+		def create(self):
+			# sprites
+			self.time_sprite = DisplayManager.HUD.TimeSprite(self)
+			self.lscore_sprite = DisplayManager.HUD.ScoreSprite(self, on_left=True)
+			self.rscore_sprite = DisplayManager.HUD.ScoreSprite(self, on_left=False)
+			
+			self.add(self.time_sprite, self.lscore_sprite, self.rscore_sprite)
 		
 		def update(self):
-			self.surface.set_colorkey((0, 0, 0))
-
-			# time
-			t = round(Engine.game_engine.GameEngine.get_instance().get_running_ticks() / 1000)
-			t_str = "{}:{:02}".format(int(t)//60, t % 60)
-			t_surface = self.font.render(t_str, 0, self.color)
-			t_pos = ((self.surface.get_size()[0] - t_surface.get_size()[0]) / 2, 10)
-			self.surface.blit(t_surface, t_pos)
-
-			# scores
-			w = 100
-			sc_surface = self.font.render(str(self.scores[0]), 0, self.color)
-			sc_pos = (self.surface.get_size()[0] / 2 - sc_surface.get_size()[0] - w, 10)
-			self.surface.blit(sc_surface, sc_pos)
-			
-			sc_surface = self.font.render(str(self.scores[1]), 0, self.color)
-			sc_pos = (self.surface.get_size()[0] / 2 + sc_surface.get_size()[0] + w, 10)
-			self.surface.blit(sc_surface, sc_pos)
+			pg.sprite.RenderUpdates.update(self)
+			self.rect_list = pg.sprite.RenderUpdates.draw(self, self.image)
 			
 	def _create_window(self, nominal_resolution, window_mode=WindowMode.FIXED_SIZE, window_resize_2n=False):
 		"""
@@ -200,14 +261,16 @@ class DisplayManager:
 		:param list() objects: list of objects to draw. Each object has to have a method : draw(self, display_manager).
 		:return: None
 		"""
+		print("-------")
+
 		self.screen.fill((50, 50, 0))
 		self.unscaled_surface.fill((0, 0, 50))
 		self.debug_surface.fill((0, 0, 0))
 		self.debug_text.surface.fill((0, 0, 0))
-		self.hud.surface.fill((0, 0, 0))
+		self.hud.image.fill((0, 0, 0))
 		
 		# update
-		self.debug_text.update()
+		# self.debug_text.update()
 		self.hud.update()
 		
 		for obj in objects:
@@ -220,9 +283,12 @@ class DisplayManager:
 		
 		self.screen.blit(self.hud.scaled_surface, self.get_position_to_blit_centered_surfaces(self.screen.get_size(), self.hud.scaled_surface.get_size()))
 		
-		self.screen.blit(self.debug_text.surface, self.get_position_to_blit_centered_surfaces(self.screen.get_size(), self.debug_text.surface.get_size()))
+		# self.screen.blit(self.debug_text.surface, self.get_position_to_blit_centered_surfaces(self.screen.get_size(), self.debug_text.surface.get_size()))
 		# update screen
-		pg.display.flip()
+		self.screen.blit(self.hud.image, self.get_position_to_blit_centered_surfaces(self.screen.get_size(),
+		                                                                               self.hud.image.get_size()))
+		pg.display.update(self.hud.rect_list)
+		#pg.display.flip()
 	
 	@staticmethod
 	def get_position_to_blit_centered_surfaces(main_surface_size, surface_to_draw_size):
@@ -244,3 +310,29 @@ class DisplayManager:
 			return tuple(int(main_surface_size[i] / 2 - surface_to_draw_size[i] / 2) for i in (0, 1))
 		return 0, 0
 	
+	
+if __name__ == "__main__":
+	pg.init()
+	
+	screen = pg.display.set_mode((100, 100))
+	
+	screen.fill((0, 0, 0))
+	
+	surf_b = pg.Surface((100, 100))
+	surf_b.fill((100, 50, 0))
+	
+	t0 = pg.time.get_ticks()
+	for _ in range(100000):
+		screen.fill((0, 0, 0))
+		screen.blit(surf_b, (0, 0))
+	pg.display.flip()
+	t1 = pg.time.get_ticks()
+	
+	for _ in range(100000):
+		screen.fill((0, 0, 0))
+		screen.blit(surf_b, (0, 0))
+		pg.display.flip()
+	t2 = pg.time.get_ticks()
+	
+	print(t1-t0)
+	print(t2-t1)
