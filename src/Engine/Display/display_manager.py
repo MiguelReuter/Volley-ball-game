@@ -35,18 +35,30 @@ class DisplayManager:
 
 		DisplayManager.s_instance = self
 		
-	class DebugText(pg.sprite.Sprite):
+	class DebugText(pg.sprite.GroupSingle):
 		"""
 		Class for debug text displaying on game window.
 		"""
 		def __init__(self):
-			pg.sprite.Sprite.__init__(self)
+			pg.sprite.GroupSingle.__init__(self)
 			self.content = {"test": 45,
 			                "other test": "Hello"}
 			self.font = pg.font.Font("../assets/font/PressStart2P.ttf", 8)
-			self.surface = pg.Surface((0, 0))
+			self.image = None
+			self.rect_list = None
+			
+			self.create()
+		
+		def create(self):
+			self.image = pg.Surface((pg.display.Info().current_w, pg.display.Info().current_h))
+			self.image.fill((0, 0, 0))
+			self.image.set_colorkey((0, 0, 0))
+			self.rect_list = []
 		
 		def update(self):
+			# pg.sprite.GroupSingle.update(self)
+			self.create()
+
 			x = 20
 			y = 20
 			key_max_length = 10
@@ -54,17 +66,15 @@ class DisplayManager:
 			
 			# update content
 			self.content["ticks"] = Engine.game_engine.GameEngine.get_instance().get_running_ticks()
-			
-			self.surface = pg.Surface(DisplayManager.get_instance().debug_surface.get_size())
-			self.surface.set_colorkey((0, 0, 0))
 
 			for k in self.content:
 				k_str = k.ljust(key_max_length)
 				text_surface = self.font.render(k_str + ": " + str(self.content[k]), 0, text_color)
-				self.surface.blit(text_surface, (x, y))
+				self.rect_list += [pg.Rect((x, y), text_surface.get_size())]
+				self.image.blit(text_surface, (x, y))
 				y += int(1.5 * self.font.get_height())
 	
-	class HUD(pg.sprite.RenderUpdates):
+	class HUD(pg.sprite.LayeredDirty):
 		class TimeSprite(pg.sprite.DirtySprite):
 			def __init__(self, *groups):
 				pg.sprite.DirtySprite.__init__(self, *groups)
@@ -129,7 +139,7 @@ class DisplayManager:
 				self.rect = pg.Rect(sc_pos, self.image.get_size())
 			
 		def __init__(self):
-			pg.sprite.RenderUpdates.__init__(self)
+			pg.sprite.LayeredDirty.__init__(self)
 			self.font = pg.font.Font("../assets/font/PressStart2P.ttf", 8)
 			self.image = pg.Surface(NOMINAL_RESOLUTION)
 			self.scaled_surface = None
@@ -149,10 +159,18 @@ class DisplayManager:
 			self.rscore_sprite = DisplayManager.HUD.ScoreSprite(self, on_left=False)
 			
 			self.add(self.time_sprite, self.lscore_sprite, self.rscore_sprite)
+			
+			# image
+			self.image.fill((0, 0, 0))
+			self.image.set_colorkey((0, 0, 0))
 		
 		def update(self):
-			pg.sprite.RenderUpdates.update(self)
-			self.rect_list = pg.sprite.RenderUpdates.draw(self, self.image)
+			pg.sprite.LayeredDirty.update(self)
+
+			for sp in self.sprites():
+				if sp.dirty > 0:
+					self.image.fill((0, 0, 0), sp.rect)
+			self.rect_list = pg.sprite.LayeredDirty.draw(self, self.image)
 			
 	def _create_window(self, nominal_resolution, window_mode=WindowMode.FIXED_SIZE, window_resize_2n=False):
 		"""
@@ -194,6 +212,8 @@ class DisplayManager:
 		
 		self.screen = pg.display.set_mode(screen_size, flags=fl)
 		pg.display.set_caption(CAPTION_TITLE)
+		self.screen.fill((50, 50, 0))
+		pg.display.flip()
 		
 	def _resize_display(self):
 		"""
@@ -205,7 +225,7 @@ class DisplayManager:
 		:return: None
 		"""
 		surface = self.unscaled_surface
-		hud_surface = self.hud.surface
+		hud_surface = self.hud.image
 		
 		if self.window_mode == WindowMode.FIXED_SIZE and self.window_resize_2n:
 			new_size = list(surface.get_size())
@@ -235,11 +255,11 @@ class DisplayManager:
 			# TODO : use smoothscale instead of scale ?
 			self.scaled_surface = pg.transform.scale(self.unscaled_surface, scaled_size)
 			self.debug_surface = pg.transform.scale(self.debug_surface, scaled_size)
-			self.hud.scaled_surface = pg.transform.scale(self.hud.surface, scaled_size)
+			self.hud.scaled_surface = pg.transform.scale(self.hud.image, scaled_size)
 		elif self.window_mode == WindowMode.FULL_SCREEN:
 			scaled_size = self.scaled_surface.get_size()
 			self.scaled_surface = pg.transform.scale(self.unscaled_surface, scaled_size)
-			self.hud.scaled_surface = pg.transform.scale(self.hud.surface, scaled_size)
+			self.hud.scaled_surface = pg.transform.scale(self.hud.image, scaled_size)
 		else:
 			self.scaled_surface = self.unscaled_surface.copy()
 	
@@ -264,31 +284,32 @@ class DisplayManager:
 		print("-------")
 
 		self.screen.fill((50, 50, 0))
-		self.unscaled_surface.fill((0, 0, 50))
-		self.debug_surface.fill((0, 0, 0))
-		self.debug_text.surface.fill((0, 0, 0))
-		self.hud.image.fill((0, 0, 0))
+		# self.screen.set_colorkey((50, 50, 0))
+		# self.unscaled_surface.fill((100, 0, 50))
+		# self.debug_surface.fill((100, 0, 0))
 		
 		# update
-		# self.debug_text.update()
+		self.debug_text.update()
 		self.hud.update()
 		
 		for obj in objects:
 			obj.draw()
 		
-		self._resize_display()
+		# self._resize_display()
 		
-		self.screen.blit(self.scaled_surface, self.get_position_to_blit_centered_surfaces(self.screen.get_size(), self.scaled_surface.get_size()))
-		self.screen.blit(self.debug_surface, self.get_position_to_blit_centered_surfaces(self.screen.get_size(), self.debug_surface.get_size()))
-		
-		self.screen.blit(self.hud.scaled_surface, self.get_position_to_blit_centered_surfaces(self.screen.get_size(), self.hud.scaled_surface.get_size()))
-		
-		# self.screen.blit(self.debug_text.surface, self.get_position_to_blit_centered_surfaces(self.screen.get_size(), self.debug_text.surface.get_size()))
-		# update screen
+		# TODO : add position_on_screen attribute on hud, debug_text etc. instead of
+		#  calling get_position_to_blit_centered_surfaces. This attribute would be updated each frame with
+		#  get_position_to_blit_centered_surfaces func or similar
+		# self.screen.blit(self.scaled_surface, self.get_position_to_blit_centered_surfaces(self.screen.get_size(), self.scaled_surface.get_size()))
+		# self.screen.blit(self.debug_surface, self.get_position_to_blit_centered_surfaces(self.screen.get_size(), self.debug_surface.get_size()))
+		self.screen.blit(self.debug_text.image, self.get_position_to_blit_centered_surfaces(self.screen.get_size(),
+		                                                                                    self.debug_text.image.get_size()))
 		self.screen.blit(self.hud.image, self.get_position_to_blit_centered_surfaces(self.screen.get_size(),
-		                                                                               self.hud.image.get_size()))
-		pg.display.update(self.hud.rect_list)
-		#pg.display.flip()
+		                                                                             self.hud.image.get_size()))
+		# update screen
+		rect_list = self.debug_text.rect_list + self.hud.rect_list
+		pg.display.update(rect_list)
+		# pg.display.flip()
 	
 	@staticmethod
 	def get_position_to_blit_centered_surfaces(main_surface_size, surface_to_draw_size):
