@@ -31,6 +31,13 @@ class DisplayManager:
 		self.screen_scale_factor_2n = None
 		self._create_window(NOMINAL_RESOLUTION, self.window_mode, self.window_resize_2n)
 		
+		# test
+		self.screen_size = None  # size of screen
+		self.scaled_size = None  # size of scaled surface ie f * self.nominal_size
+		self.nominal_size = NOMINAL_RESOLUTION
+		self.f_scale = 1
+		# end test
+		
 		self.camera = Camera(CAMERA_POS, FOCUS_POINT, FOV_ANGLE)
 
 		DisplayManager.s_instance = self
@@ -81,28 +88,48 @@ class DisplayManager:
 				self.color = (200, 200, 200)
 				self.font = pg.font.Font("../assets/font/PressStart2P.ttf", 8)
 				
-				self.t = 0
-				self.image = None
-				self.rect = None
+				self.t = -1
+				self.image = pg.Surface((0, 0))
+				self.rect = pg.Rect((0, 0), (0, 0))
 				
-				self.render_text()
-				
+				self.f_scale = 1
+			
+			def resize(self, force_resize=False):
+				if DisplayManager.get_instance().f_scale != self.f_scale or force_resize:
+					self.f_scale = DisplayManager.get_instance().f_scale
+					self.dirty = 1
+					
+					new_size = [int(self.f_scale * self.image.get_size()[i]) for i in (0, 1)]
+					
+					prev_image = self.image
+					self.image = pg.Surface(new_size)
+					self.image = pg.transform.scale(prev_image, new_size)
+					
+					# resize rect
+					x, y = [self.f_scale * self.rect.topleft[i] for i in (0, 1)]
+					
+					self.rect = pg.Rect((x, y), self.image.get_size())
+					
 			def update(self):
 				pg.sprite.DirtySprite.update(self)
-				current_t = int(Engine.game_engine.GameEngine.get_instance().get_running_ticks() / 1000)
-				
-				if not current_t == self.t:
-					self.t = current_t
-					self.render_text()
+				self.render_text()
 
 			def render_text(self):
-				self.dirty = 1
+				# update time changed
+				current_t = int(Engine.game_engine.GameEngine.get_instance().get_running_ticks() / 1000)
+				if not current_t == self.t:
+					self.dirty = 1
+					
+					self.t = current_t
+					t_str = "{}:{:02}".format(int(self.t) // 60, self.t % 60)
+					self.image = self.font.render(t_str, 0, self.color)
+					
+					t_pos = ((NOMINAL_RESOLUTION[0] - self.image.get_size()[0]) / 2, 10)
+					self.rect = pg.Rect(t_pos, self.image.get_size())
+					self.resize(force_resize=True)
 				
-				t_str = "{}:{:02}".format(int(self.t) // 60, self.t % 60)
-				self.image = self.font.render(t_str, 0, self.color)
-				
-				t_pos = ((NOMINAL_RESOLUTION[0] - self.image.get_size()[0]) / 2, 10)
-				self.rect = pg.Rect(t_pos, self.image.get_size())
+				# update size changed
+				self.resize()
 			
 		class ScoreSprite(pg.sprite.DirtySprite):
 			def __init__(self, *groups, on_left=True):
@@ -282,6 +309,14 @@ class DisplayManager:
 		:return: None
 		"""
 		print("-------")
+		
+		# scale
+		self.f_scale = 1
+		self.scaled_size = (self.f_scale * self.nominal_size[i] for i in (0, 1))
+		self.screen_size = self.screen.get_size()
+		
+		# TODO : process for each frame f_scale. If changed,
+		# end scale
 
 		self.screen.fill((50, 50, 0))
 		# self.screen.set_colorkey((50, 50, 0))
@@ -306,10 +341,13 @@ class DisplayManager:
 		                                                                                    self.debug_text.image.get_size()))
 		self.screen.blit(self.hud.image, self.get_position_to_blit_centered_surfaces(self.screen.get_size(),
 		                                                                             self.hud.image.get_size()))
+		
+		
 		# update screen
 		rect_list = self.debug_text.rect_list + self.hud.rect_list
 		pg.display.update(rect_list)
 		# pg.display.flip()
+		# self.f_scale = 0.5
 	
 	@staticmethod
 	def get_position_to_blit_centered_surfaces(main_surface_size, surface_to_draw_size):
@@ -343,17 +381,29 @@ if __name__ == "__main__":
 	surf_b.fill((100, 50, 0))
 	
 	t0 = pg.time.get_ticks()
-	for _ in range(100000):
+	for _ in range(10000):
 		screen.fill((0, 0, 0))
 		screen.blit(surf_b, (0, 0))
 	pg.display.flip()
 	t1 = pg.time.get_ticks()
 	
-	for _ in range(100000):
+	for _ in range(10000):
 		screen.fill((0, 0, 0))
 		screen.blit(surf_b, (0, 0))
 		pg.display.flip()
 	t2 = pg.time.get_ticks()
 	
+	f_scale = 3
+	scaled_surf = pg.Surface([f_scale * surf_b.get_size()[i] for i in (0, 1)])
+	
+	for _ in range(10000):
+		scaled_surf = pg.transform.scale(surf_b, scaled_surf.get_size())
+		screen.blit(scaled_surf, (0, 0))
+	pg.display.flip()
+	t3 = pg.time.get_ticks()
+
+	
 	print(t1-t0)
 	print(t2-t1)
+	print(t3-t2)
+	
