@@ -1,6 +1,7 @@
 # encoding : UTF-8
 
 from Engine.Display.camera import Camera
+from Engine.Display.scalable_sprite import ScalableSprite
 from Settings import *
 
 import pygame as pg
@@ -36,6 +37,8 @@ class DisplayManager:
 		self.scaled_size = None  # size of scaled surface ie f * self.nominal_size
 		self.nominal_size = NOMINAL_RESOLUTION
 		self.f_scale = 1
+		
+		self._frames_nb = 0
 		# end test
 		
 		self.camera = Camera(CAMERA_POS, FOCUS_POINT, FOV_ANGLE)
@@ -82,66 +85,43 @@ class DisplayManager:
 				y += int(1.5 * self.font.get_height())
 	
 	class HUD(pg.sprite.LayeredDirty):
-		class TimeSprite(pg.sprite.DirtySprite):
+		class TimeSprite(ScalableSprite):
 			def __init__(self, *groups):
-				pg.sprite.DirtySprite.__init__(self, *groups)
+				# pg.sprite.DirtySprite.__init__(self, *groups)
+				ScalableSprite.__init__(self, 1.0, *groups)
 				self.color = (200, 200, 200)
 				self.font = pg.font.Font("../assets/font/PressStart2P.ttf", 8)
 				
 				self.t = -1
-				self.image = pg.Surface((0, 0))
-				self.rect = pg.Rect((0, 0), (0, 0))
-				
-				self.f_scale = 1
-			
-			def resize(self, force_resize=False):
-				if DisplayManager.get_instance().f_scale != self.f_scale or force_resize:
-					self.f_scale = DisplayManager.get_instance().f_scale
-					self.dirty = 1
-					
-					new_size = [int(self.f_scale * self.image.get_size()[i]) for i in (0, 1)]
-					
-					prev_image = self.image
-					self.image = pg.Surface(new_size)
-					self.image = pg.transform.scale(prev_image, new_size)
-					
-					# resize rect
-					x, y = [self.f_scale * self.rect.topleft[i] for i in (0, 1)]
-					
-					self.rect = pg.Rect((x, y), self.image.get_size())
 					
 			def update(self):
 				pg.sprite.DirtySprite.update(self)
 				self.render_text()
+				
+				# rescale if needed to
+				ScalableSprite.rescale(self, DisplayManager.get_instance().f_scale)
 
 			def render_text(self):
 				# update time changed
 				current_t = int(Engine.game_engine.GameEngine.get_instance().get_running_ticks() / 1000)
-				if not current_t == self.t:
+				if current_t != self.t:
 					self.dirty = 1
 					
 					self.t = current_t
 					t_str = "{}:{:02}".format(int(self.t) // 60, self.t % 60)
-					self.image = self.font.render(t_str, 0, self.color)
+					self.set_raw_image(self.font.render(t_str, 0, self.color))
 					
-					t_pos = ((NOMINAL_RESOLUTION[0] - self.image.get_size()[0]) / 2, 10)
-					self.rect = pg.Rect(t_pos, self.image.get_size())
-					self.resize(force_resize=True)
-				
-				# update size changed
-				self.resize()
+					t_pos = ((NOMINAL_RESOLUTION[0] - self.raw_image.get_size()[0]) / 2, 10)
+					self.set_raw_rect(pg.Rect(t_pos, self.raw_image.get_size()))
 			
-		class ScoreSprite(pg.sprite.DirtySprite):
+		class ScoreSprite(ScalableSprite):
 			def __init__(self, *groups, on_left=True):
-				pg.sprite.DirtySprite.__init__(self, *groups)
+				ScalableSprite.__init__(self, 1.0, *groups)
 				self.color = (200, 200, 200)
 				self.font = pg.font.Font("../assets/font/PressStart2P.ttf", 8)
 				self.center_space = 100
 				
 				self.on_left = on_left
-				
-				self.image = None
-				self.rect = None
 				
 				self._score = 0
 				self.render_text()
@@ -157,13 +137,23 @@ class DisplayManager:
 
 			def render_text(self):
 				self.dirty = 1
-				self.image = self.font.render(str(self._score), 0, self.color)
+				self.raw_image = self.font.render(str(self._score), 0, self.color)
 				if self.on_left:
-					sc_pos = (NOMINAL_RESOLUTION[0] / 2 - self.image.get_size()[0] - self.center_space, 10)
+					sc_pos = (NOMINAL_RESOLUTION[0] / 2 - self.raw_image.get_size()[0] - self.center_space, 10)
 				else:
-					sc_pos = (NOMINAL_RESOLUTION[0] / 2 + self.image.get_size()[0] + self.center_space, 10)
+					sc_pos = (NOMINAL_RESOLUTION[0] / 2 + self.raw_image.get_size()[0] + self.center_space, 10)
 				
-				self.rect = pg.Rect(sc_pos, self.image.get_size())
+				self.prev_rect = self.rect
+				self.raw_rect = pg.Rect(sc_pos, self.raw_image.get_size())
+			
+			def update(self):
+				pg.sprite.DirtySprite.update(self)
+				# TODO : in render_text, change image only if score changed ? (actually,
+				#  render_text is also called in score setter)
+				self.render_text()
+				
+				# rescale if needed to
+				ScalableSprite.rescale(self, DisplayManager.get_instance().f_scale)
 			
 		def __init__(self):
 			pg.sprite.LayeredDirty.__init__(self)
@@ -196,7 +186,9 @@ class DisplayManager:
 
 			for sp in self.sprites():
 				if sp.dirty > 0:
+					self.image.fill((0, 0, 0), sp.prev_rect)
 					self.image.fill((0, 0, 0), sp.rect)
+
 			self.rect_list = pg.sprite.LayeredDirty.draw(self, self.image)
 			
 	def _create_window(self, nominal_resolution, window_mode=WindowMode.FIXED_SIZE, window_resize_2n=False):
@@ -310,8 +302,14 @@ class DisplayManager:
 		"""
 		print("-------")
 		
-		# scale
-		self.f_scale = 1
+		# test scale
+		self._frames_nb += 1
+		modu = 14
+		scales = (0.5, 1.0, 1.5, 1.0)
+		self.f_scale = scales[(self._frames_nb // modu) % len(scales)]
+		if self._frames_nb % modu == 0:
+			print("scale change to " + str(self.f_scale))
+			
 		self.scaled_size = (self.f_scale * self.nominal_size[i] for i in (0, 1))
 		self.screen_size = self.screen.get_size()
 		
@@ -347,7 +345,9 @@ class DisplayManager:
 		rect_list = self.debug_text.rect_list + self.hud.rect_list
 		pg.display.update(rect_list)
 		# pg.display.flip()
-		# self.f_scale = 0.5
+		
+
+		
 	
 	@staticmethod
 	def get_position_to_blit_centered_surfaces(main_surface_size, surface_to_draw_size):
