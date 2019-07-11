@@ -136,4 +136,7 @@ class PlayerId(Enum):
 class AIId(Enum):
 	AI_ID_1 = 1
 	AI_ID_2 = 2
-
+	
+	
+# DIRECTORIES
+FONT_DIR = "../assets/font/PressStart2P.ttf"

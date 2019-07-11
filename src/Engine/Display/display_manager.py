@@ -30,7 +30,8 @@ class DisplayManager:
 		self.window_mode = WINDOW_MODE
 		self.window_resize_2n = WINDOW_RESIZE_2N
 		self.screen_scale_factor_2n = None
-		self._create_window(NOMINAL_RESOLUTION, self.window_mode, self.window_resize_2n)
+		self.create_window()
+		# self._create_window(NOMINAL_RESOLUTION, self.window_mode, self.window_resize_2n)
 		
 		# test
 		self.screen_size = None  # size of screen
@@ -90,35 +91,37 @@ class DisplayManager:
 				# pg.sprite.DirtySprite.__init__(self, *groups)
 				ScalableSprite.__init__(self, 1.0, *groups)
 				self.color = (200, 200, 200)
-				self.font = pg.font.Font("../assets/font/PressStart2P.ttf", 8)
+				self.font = pg.font.Font(FONT_DIR, 8)
 				
 				self.t = -1
 					
-			def update(self):
-				pg.sprite.DirtySprite.update(self)
-				self.render_text()
-				
-				# rescale if needed to
-				ScalableSprite.rescale(self, DisplayManager.get_instance().f_scale)
-
-			def render_text(self):
-				# update time changed
+			def update(self, *args):
+				# update if time changed
 				current_t = int(Engine.game_engine.GameEngine.get_instance().get_running_ticks() / 1000)
 				if current_t != self.t:
-					self.dirty = 1
-					
 					self.t = current_t
-					t_str = "{}:{:02}".format(int(self.t) // 60, self.t % 60)
-					self.set_raw_image(self.font.render(t_str, 0, self.color))
-					
-					t_pos = ((NOMINAL_RESOLUTION[0] - self.raw_image.get_size()[0]) / 2, 10)
-					self.set_raw_rect(pg.Rect(t_pos, self.raw_image.get_size()))
+					self.render_text()
+				
+				f_scale = DisplayManager.get_instance().f_scale
+				ScalableSprite.update(self, f_scale)
+
+			def render_text(self):
+				self.dirty = 1
+				
+				# update raw image
+				t_str = "{}:{:02}".format(int(self.t) // 60, self.t % 60)
+				self.set_raw_image(self.font.render(t_str, 0, self.color))
+				
+				# update raw rect
+				t_pos = ((NOMINAL_RESOLUTION[0] - self.raw_image.get_size()[0]) / 2, 10)
+				self.prev_rect = self.rect
+				self.set_raw_rect(pg.Rect(t_pos, self.raw_image.get_size()))
 			
 		class ScoreSprite(ScalableSprite):
 			def __init__(self, *groups, on_left=True):
 				ScalableSprite.__init__(self, 1.0, *groups)
 				self.color = (200, 200, 200)
-				self.font = pg.font.Font("../assets/font/PressStart2P.ttf", 8)
+				self.font = pg.font.Font(FONT_DIR, 8)
 				self.center_space = 100
 				
 				self.on_left = on_left
@@ -137,27 +140,26 @@ class DisplayManager:
 
 			def render_text(self):
 				self.dirty = 1
+				
+				# update raw image
 				self.raw_image = self.font.render(str(self._score), 0, self.color)
 				if self.on_left:
 					sc_pos = (NOMINAL_RESOLUTION[0] / 2 - self.raw_image.get_size()[0] - self.center_space, 10)
 				else:
 					sc_pos = (NOMINAL_RESOLUTION[0] / 2 + self.raw_image.get_size()[0] + self.center_space, 10)
 				
+				# update raw rect
 				self.prev_rect = self.rect
-				self.raw_rect = pg.Rect(sc_pos, self.raw_image.get_size())
+				self.set_raw_rect(pg.Rect(sc_pos, self.raw_image.get_size()))
 			
-			def update(self):
-				pg.sprite.DirtySprite.update(self)
-				# TODO : in render_text, change image only if score changed ? (actually,
-				#  render_text is also called in score setter)
-				self.render_text()
-				
+			def update(self, *args):
 				# rescale if needed to
-				ScalableSprite.rescale(self, DisplayManager.get_instance().f_scale)
+				f_scale = DisplayManager.get_instance().f_scale
+				ScalableSprite.update(self, f_scale)
 			
 		def __init__(self):
 			pg.sprite.LayeredDirty.__init__(self)
-			self.font = pg.font.Font("../assets/font/PressStart2P.ttf", 8)
+			self.font = pg.font.Font(FONT_DIR, 8)
 			self.image = pg.Surface(NOMINAL_RESOLUTION)
 			self.scaled_surface = None
 			self.color = (200, 200, 200)  # TODO: to refactor
@@ -282,6 +284,42 @@ class DisplayManager:
 		else:
 			self.scaled_surface = self.unscaled_surface.copy()
 	
+	def create_window(self):
+		self.screen = pg.display.set_mode(NOMINAL_RESOLUTION, flags=pg.RESIZABLE)
+		pg.display.set_caption(CAPTION_TITLE)
+		
+		self.recreate_window(1.0)
+		
+	def update_screen_size(self):
+		screen_size = (pg.display.Info().current_w, pg.display.Info().current_h)
+		print(screen_size)  # not good
+		self.screen = pg.Surface(screen_size)
+		
+		# process size for displayed surfaces
+		f_w, f_h = tuple(self.screen.get_size()[i] / NOMINAL_RESOLUTION[i] for i in (0, 1))
+		scale_factor = min(f_w, f_h)
+		
+		if scale_factor != self.f_scale:
+			self.recreate_window(scale_factor)
+		
+	def recreate_window(self, scale_factor):
+		print("change size ", scale_factor)
+		self.hud.image = pg.Surface(NOMINAL_RESOLUTION)
+		
+		self.f_scale = scale_factor
+		scaled_size = [int(scale_factor * NOMINAL_RESOLUTION[i]) for i in (0, 1)]
+		
+		self.debug_surface = pg.Surface(scaled_size)
+		self.debug_text.image = pg.Surface(scaled_size)
+		
+		screen_size = (pg.display.Info().current_w, pg.display.Info().current_h)
+		self.screen = pg.Surface(screen_size)
+
+		#self.screen.fill((50, 50, 100))
+		
+		# TODO : must redraw all images !
+		pg.display.flip()
+	
 	@staticmethod
 	def _process_screen_factor_scale():
 		"""
@@ -303,15 +341,21 @@ class DisplayManager:
 		print("-------")
 		
 		# test scale
+		"""
 		self._frames_nb += 1
 		modu = 14
 		scales = (0.5, 1.0, 1.5, 1.0)
-		self.f_scale = scales[(self._frames_nb // modu) % len(scales)]
+		scale_factor = scales[(self._frames_nb // modu) % len(scales)]
+		#self.recreate_window(scale_factor)
 		if self._frames_nb % modu == 0:
 			print("scale change to " + str(self.f_scale))
-			
+			self.hud.lscore_sprite.score = int(self._frames_nb)
+		
 		self.scaled_size = (self.f_scale * self.nominal_size[i] for i in (0, 1))
 		self.screen_size = self.screen.get_size()
+		"""
+		self.update_screen_size()
+		
 		
 		# TODO : process for each frame f_scale. If changed,
 		# end scale
@@ -335,8 +379,8 @@ class DisplayManager:
 		#  get_position_to_blit_centered_surfaces func or similar
 		# self.screen.blit(self.scaled_surface, self.get_position_to_blit_centered_surfaces(self.screen.get_size(), self.scaled_surface.get_size()))
 		# self.screen.blit(self.debug_surface, self.get_position_to_blit_centered_surfaces(self.screen.get_size(), self.debug_surface.get_size()))
-		self.screen.blit(self.debug_text.image, self.get_position_to_blit_centered_surfaces(self.screen.get_size(),
-		                                                                                    self.debug_text.image.get_size()))
+		#self.screen.blit(self.debug_text.image, self.get_position_to_blit_centered_surfaces(self.screen.get_size(),
+		#                                                                                   self.debug_text.image.get_size()))
 		self.screen.blit(self.hud.image, self.get_position_to_blit_centered_surfaces(self.screen.get_size(),
 		                                                                             self.hud.image.get_size()))
 		
@@ -345,9 +389,6 @@ class DisplayManager:
 		rect_list = self.debug_text.rect_list + self.hud.rect_list
 		pg.display.update(rect_list)
 		# pg.display.flip()
-		
-
-		
 	
 	@staticmethod
 	def get_position_to_blit_centered_surfaces(main_surface_size, surface_to_draw_size):
