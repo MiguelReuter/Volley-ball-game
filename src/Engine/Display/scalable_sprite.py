@@ -32,7 +32,6 @@ class ScalableSprite(pg.sprite.DirtySprite):
 	
 	def update(self, new_scale_factor=None):
 		if new_scale_factor is not None and new_scale_factor != self._f_scale or self.dirty > 0:
-			print(self, "rescaling image")
 			self.dirty = 1
 			self._f_scale = new_scale_factor
 			
@@ -48,7 +47,6 @@ class ScalableSprite(pg.sprite.DirtySprite):
 	
 	def rescale(self, new_scale_factor):
 		if new_scale_factor != self._f_scale:
-			print("rescaling image")
 			self.dirty = 1
 			self._f_scale = new_scale_factor
 			
