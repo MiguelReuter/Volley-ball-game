@@ -13,7 +13,8 @@ class Debug3D(pg.sprite.GroupSingle):
 	def __init__(self):
 		pg.sprite.GroupSingle.__init__(self)
 		self.image = None
-		self.rect_list = None
+		self.rect_list = []
+		self.prev_rect_list = []
 	
 	def create_image(self, size=(0, 0)):
 		self.image = pg.Surface(size)
@@ -21,9 +22,12 @@ class Debug3D(pg.sprite.GroupSingle):
 		self.image.set_colorkey(DEBUG_3D_COLOR)
 	
 	def update(self, objects):
+		self.prev_rect_list = self.rect_list
+		self.rect_list = []
 		self.image.fill(DEBUG_3D_COLOR)
 		
 		for obj in objects:
-			obj.draw()
-		
-		self.rect_list = [self.image.get_clip()]
+			rects = obj.draw()
+			if rects is not None:
+				self.rect_list += rects
+				

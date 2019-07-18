@@ -1,15 +1,16 @@
 # encoding : UTF-8
 
 from pygame import Vector3
+import pygame as pg
 
 from Engine.Display import debug3D_utils
 from Engine.Collisions import SphereCollider
 from Settings import G
 
 
-class Ball:
-	def __init__(self, position, radius=0.5):
-		super(Ball, self).__init__()
+class Ball(pg.sprite.DirtySprite):
+	def __init__(self, position, radius=0.5, sprite_groups=[]):
+		pg.sprite.DirtySprite.__init__(self, *sprite_groups)
 		self.radius = radius
 		self.acceleration = Vector3()
 		self.velocity = Vector3()
@@ -22,6 +23,10 @@ class Ball:
 		self.is_colliding_character = False
 		
 		self.will_be_served = False
+		
+		# sprite
+		self.rect_shadow = pg.Rect(0, 0, 0, 0)
+		self.rect = pg.Rect(0, 0, 0, 0)
 	
 	@property
 	def position(self):
@@ -33,8 +38,14 @@ class Ball:
 		self.collider.center = self._position
 	
 	def draw(self):
-		debug3D_utils.draw_horizontal_ellipse(Vector3(self.position[0], self.position[1], 0), self.radius)
-		self.collider.draw()
+		prev_ball_rect = self.rect
+		prev_shadow_rect = self.rect_shadow
+		
+		self.rect = debug3D_utils.draw_horizontal_ellipse(Vector3(self.position[0], self.position[1], 0), self.radius)
+		self.rect_shadow = self.collider.draw()
+		
+		return [pg.Rect(0, 0, 0, 0).unionall([prev_shadow_rect, self.rect_shadow]),
+		        pg.Rect(0, 0, 0, 0).unionall([prev_ball_rect, self.rect])]
 	
 	def move_rel(self, dxyz):
 		self.position += Vector3(dxyz)

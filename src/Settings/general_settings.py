@@ -8,8 +8,8 @@ from pygame import *
 NOMINAL_RESOLUTION = (400, 320)
 CAPTION_TITLE = "Volley-ball game"
 
-FORCE_WINDOW_SCALE_FACTOR = None  # None to disable or a float
-IS_WINDOW_SCALE_FACTOR_2POW = False
+FORCE_WINDOW_SCALE_FACTOR = 1  # None to disable or a float
+IS_WINDOW_SCALE_FACTOR_2POW = True
 IS_WINDOW_SCALE_FACTOR_INT = True
 IS_WINDOW_IN_FULL_SCREEN_MODE = False
 

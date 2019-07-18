@@ -19,7 +19,7 @@ class SphereCollider(Collider):
 		self.radius = radius
 		
 	def draw(self):
-		debug3D_utils.draw_sphere(self.center, self.radius)
+		return debug3D_utils.draw_sphere(self.center, self.radius)
 		
 		
 class AABBCollider(Collider):
@@ -29,7 +29,7 @@ class AABBCollider(Collider):
 		self.size3 = size3
 		
 	def draw(self):
-		debug3D_utils.draw_aligned_axis_box(self.center, *self.size3)
+		return debug3D_utils.draw_aligned_axis_box(self.center, *self.size3)
 	
 
 def are_spheres_colliding(sphere_a, sphere_b):

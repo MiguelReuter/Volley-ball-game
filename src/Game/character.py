@@ -3,6 +3,8 @@
 from Engine.Display import debug3D_utils
 from Engine.Collisions import AABBCollider
 from Settings import *
+import pygame as pg
+
 
 from Engine.Actions import ActionObject
 from Game.character_states import *
@@ -27,6 +29,10 @@ class Character(ActionObject):
 		self.state = Idling(self)
 
 		self.set_default_collider()
+		
+		# sprite
+		self.rect = pg.Rect(0, 0, 0, 0)
+		self.rect_shadow = pg.Rect(0, 0, 0, 0)
 
 	@property
 	def position(self):
@@ -38,10 +44,16 @@ class Character(ActionObject):
 		self.collider.center = self._position + self.collider_relative_position
 
 	def draw(self):
+		prev_rect = self.rect
+		prev_shadow_rect = self.rect_shadow
+		
 		ground_pos = Vector3(self.position)
 		ground_pos.z = 0
-		debug3D_utils.draw_horizontal_ellipse(ground_pos, self.w / 2)
-		self.collider.draw()
+		self.rect_shadow = debug3D_utils.draw_horizontal_ellipse(ground_pos, self.w / 2)
+		self.rect = self.collider.draw()
+		
+		return [pg.Rect(0, 0, 0, 0).unionall([prev_shadow_rect, self.rect_shadow]),
+		        pg.Rect(0, 0, 0, 0).unionall([prev_rect, self.rect])]
 
 	def move_rel(self, dxyz):
 		"""
