@@ -3,7 +3,7 @@
 import random
 from datetime import datetime
 
-from Engine.Display.debug3D import *
+from Engine.Display.debug3D_utils import *
 from Engine.Trajectory import *
 from Engine.Trajectory.trajectory import Trajectory
 from Settings import *

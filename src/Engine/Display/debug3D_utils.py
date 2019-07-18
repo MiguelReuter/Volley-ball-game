@@ -32,7 +32,8 @@ def draw_sphere(center, radius, col=None):
 	
 	# process r_px : radius in pixel
 	camera = display_manager.camera
-	surface_size = display_manager.debug_surface.get_size()
+	surface = display_manager.debug_3d.image
+	surface_size = surface.get_size()
 	
 	c_pos = Vector3(center)
 	if SIZE_INDEPENDENT_FROM_Y_POS:
@@ -42,8 +43,7 @@ def draw_sphere(center, radius, col=None):
 	r_px = int((Vector2(camera.world_to_pixel_coords(c_pos, surface_size) -
 	            Vector2(camera.world_to_pixel_coords(c_pos + radius * Vector3(0, 1, 0), surface_size))).magnitude()))
 
-	draw.circle(display_manager.debug_surface, col,
-	            camera.world_to_pixel_coords(center, surface_size), r_px)
+	draw.circle(surface, col, camera.world_to_pixel_coords(center, surface_size), r_px)
 
 
 def draw_horizontal_ellipse(center, radius):
@@ -56,7 +56,8 @@ def draw_horizontal_ellipse(center, radius):
 	"""
 	display_manager = DisplayManager.get_instance()
 	camera = display_manager.camera
-	surface_size = display_manager.debug_surface.get_size()
+	surface = display_manager.debug_3d.image
+	surface_size = surface.get_size()
 	
 	# corners of shadow (trapeze)
 	t_l = camera.world_to_pixel_coords(Vector3(center) + (-radius, -radius, 0), surface_size)
@@ -74,8 +75,8 @@ def draw_horizontal_ellipse(center, radius):
 	rect = Rect(r_pos, (r_w, r_h))
 	
 	if r_w >= r_h:
-		draw.ellipse(display_manager.debug_surface, DBG_COLOR_HOR_ELLIPSE, rect)
-	draw.polygon(display_manager.debug_surface, DBG_COLOR_SHADOW_HOR_ELLIPSE_TRAPEZE, [t_l, t_r, b_r, b_l], 1)
+		draw.ellipse(surface, DBG_COLOR_HOR_ELLIPSE, rect)
+	draw.polygon(surface, DBG_COLOR_SHADOW_HOR_ELLIPSE_TRAPEZE, [t_l, t_r, b_r, b_l], 1)
 
 
 def draw_polygon(pts, col=None):
@@ -91,10 +92,10 @@ def draw_polygon(pts, col=None):
 
 	display_manager = DisplayManager.get_instance()
 	camera = display_manager.camera
-	surface_size = display_manager.debug_surface.get_size()
+	surface = display_manager.debug_3d.image
+	surface_size = surface.get_size()
 	
-	draw.polygon(display_manager.debug_surface, col,
-	             [(camera.world_to_pixel_coords(pt, surface_size)) for pt in pts])
+	draw.polygon(surface, col, [(camera.world_to_pixel_coords(pt, surface_size)) for pt in pts])
 
 
 def draw_line(pt_a, pt_b, col=None):
@@ -111,11 +112,11 @@ def draw_line(pt_a, pt_b, col=None):
 
 	display_manager = DisplayManager.get_instance()
 	camera = display_manager.camera
-	surface_size = display_manager.debug_surface.get_size()
+	surface = display_manager.debug_3d.image
+	surface_size = surface.get_size()
 	
-	draw.line(display_manager.debug_surface, col,
-	          camera.world_to_pixel_coords(pt_a, surface_size),
-	          camera.world_to_pixel_coords(pt_b, surface_size))
+	draw.line(surface, col, camera.world_to_pixel_coords(pt_a, surface_size),
+	                        camera.world_to_pixel_coords(pt_b, surface_size))
 
 
 def draw_aligned_axis_box(center, length_x, length_y, length_z, col=None):
@@ -136,7 +137,8 @@ def draw_aligned_axis_box(center, length_x, length_y, length_z, col=None):
 
 	display_manager = DisplayManager.get_instance()
 	camera = display_manager.camera
-	surface_size = display_manager.debug_surface.get_size()
+	surface = display_manager.debug_3d.image
+	surface_size = surface.get_size()
 	
 	top_pts = [(center.x - length_x / 2, center.y - length_y / 2, center.z + length_z / 2),
 	           (center.x - length_x / 2, center.y + length_y / 2, center.z + length_z / 2),
@@ -151,7 +153,7 @@ def draw_aligned_axis_box(center, length_x, length_y, length_z, col=None):
 	top_pts = [(camera.world_to_pixel_coords(pt, surface_size)) for pt in top_pts]
 	bottom_pts = [(camera.world_to_pixel_coords(pt, surface_size)) for pt in bottom_pts]
 	
-	draw.polygon(display_manager.debug_surface, col, top_pts, 1)  # top quad
-	draw.polygon(display_manager.debug_surface, col, bottom_pts, 1)  # bottom quad
-	draw.polygon(display_manager.debug_surface, col, [*top_pts[:2], bottom_pts[1], bottom_pts[0]], 1)  # -x quad
-	draw.polygon(display_manager.debug_surface, col, [*top_pts[2:], bottom_pts[3], bottom_pts[2]], 1)  # +x quad
+	draw.polygon(surface, col, top_pts, 1)  # top quad
+	draw.polygon(surface, col, bottom_pts, 1)  # bottom quad
+	draw.polygon(surface, col, [*top_pts[:2], bottom_pts[1], bottom_pts[0]], 1)  # -x quad
+	draw.polygon(surface, col, [*top_pts[2:], bottom_pts[3], bottom_pts[2]], 1)  # +x quad

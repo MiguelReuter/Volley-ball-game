@@ -2,7 +2,7 @@
 
 from pygame import Vector3
 
-from Engine.Display import debug3D
+from Engine.Display import debug3D_utils
 from Engine.Collisions import AABBCollider
 
 
@@ -20,17 +20,17 @@ class Court:
 
 		corners_h = 2
 		# court ground
-		debug3D.draw_polygon([(-self.h / 2, -self.w / 2, 0), (-self.h / 2, self.w / 2, 0),
-							  (self.h / 2, self.w / 2, 0), (self.h / 2, -self.w / 2, 0)])
+		debug3D_utils.draw_polygon([(-self.h / 2, -self.w / 2, 0), (-self.h / 2, self.w / 2, 0),
+		                            (self.h / 2, self.w / 2, 0), (self.h / 2, -self.w / 2, 0)])
 
 		# corners
-		debug3D.draw_line(Vector3(-self.h / 2, -self.w / 2, 0), Vector3(-self.h / 2, -self.w / 2, corners_h))
-		debug3D.draw_line(Vector3(-self.h / 2, self.w / 2, 0), Vector3(-self.h / 2, self.w / 2, corners_h))
-		debug3D.draw_line(Vector3(self.h / 2, self.w / 2, 0), Vector3(self.h / 2, self.w / 2, corners_h))
-		debug3D.draw_line(Vector3(self.h / 2, -self.w / 2, 0), Vector3(self.h / 2, -self.w / 2, corners_h))
+		debug3D_utils.draw_line(Vector3(-self.h / 2, -self.w / 2, 0), Vector3(-self.h / 2, -self.w / 2, corners_h))
+		debug3D_utils.draw_line(Vector3(-self.h / 2, self.w / 2, 0), Vector3(-self.h / 2, self.w / 2, corners_h))
+		debug3D_utils.draw_line(Vector3(self.h / 2, self.w / 2, 0), Vector3(self.h / 2, self.w / 2, corners_h))
+		debug3D_utils.draw_line(Vector3(self.h / 2, -self.w / 2, 0), Vector3(self.h / 2, -self.w / 2, corners_h))
 
 		# net
-		debug3D.draw_line(Vector3(-self.h / 2, 0, 0), Vector3(-self.h / 2, 0, self.net_z2))
-		debug3D.draw_line(Vector3(self.h / 2, 0, 0), Vector3(self.h / 2, 0, self.net_z2))
-		debug3D.draw_line(Vector3(-self.h / 2, 0, self.net_z2), Vector3(self.h / 2, 0, self.net_z2))
-		debug3D.draw_line(Vector3(-self.h / 2, 0, self.net_z1), Vector3(self.h / 2, 0, self.net_z1))
+		debug3D_utils.draw_line(Vector3(-self.h / 2, 0, 0), Vector3(-self.h / 2, 0, self.net_z2))
+		debug3D_utils.draw_line(Vector3(self.h / 2, 0, 0), Vector3(self.h / 2, 0, self.net_z2))
+		debug3D_utils.draw_line(Vector3(-self.h / 2, 0, self.net_z2), Vector3(self.h / 2, 0, self.net_z2))
+		debug3D_utils.draw_line(Vector3(-self.h / 2, 0, self.net_z1), Vector3(self.h / 2, 0, self.net_z1))

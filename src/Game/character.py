@@ -1,6 +1,6 @@
 # encoding : UTF-8
 
-from Engine.Display import debug3D
+from Engine.Display import debug3D_utils
 from Engine.Collisions import AABBCollider
 from Settings import *
 
@@ -28,7 +28,6 @@ class Character(ActionObject):
 
 		self.set_default_collider()
 
-
 	@property
 	def position(self):
 		return self._position
@@ -41,7 +40,7 @@ class Character(ActionObject):
 	def draw(self):
 		ground_pos = Vector3(self.position)
 		ground_pos.z = 0
-		debug3D.draw_horizontal_ellipse(ground_pos, self.w / 2)
+		debug3D_utils.draw_horizontal_ellipse(ground_pos, self.w / 2)
 		self.collider.draw()
 
 	def move_rel(self, dxyz):
