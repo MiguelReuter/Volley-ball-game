@@ -7,8 +7,6 @@ import pygame as pg
 
 from Engine.Display.sprites_group import HUD, Debug3D, DebugText
 
-SCREEN_COLOR = (0, 0, 50)
-
 
 class DisplayManager:
 	s_instance = None
@@ -35,6 +33,11 @@ class DisplayManager:
 		DisplayManager.s_instance = self
 		
 	def create_window(self):
+		"""
+		Create pygame window and different images.
+		
+		:return: None
+		"""
 		# size of display (not pygame window yet)
 		display_size = (pg.display.Info().current_w, pg.display.Info().current_h)
 		
@@ -53,7 +56,6 @@ class DisplayManager:
 				
 		self.scaled_size = [int(self.f_scale * NOMINAL_RESOLUTION[i]) for i in (0, 1)]
 		self.screen_size = self.scaled_size  # may be different in fullscreen mode
-		print("scaling window factor:", self.f_scale)
 		
 		# create pygame window
 		if IS_WINDOW_IN_FULL_SCREEN_MODE:
@@ -63,37 +65,34 @@ class DisplayManager:
 			
 		self.screen = pg.display.set_mode(self.screen_size, flags=fl)
 		pg.display.set_caption(CAPTION_TITLE)
-		self.screen.fill(SCREEN_COLOR)
-		self.screen.set_colorkey(SCREEN_COLOR)
+		self.screen.fill(BKGND_SCREEN_COLOR)
+		self.screen.set_colorkey(BKGND_SCREEN_COLOR)
 		
 		# setting other surfaces
 		self.create_surfaces()
 		
-	def update_screen_size(self, scale_factor=1.0):
-		if scale_factor != self.f_scale:
-			print("change scale factor to ", scale_factor)
-			self.f_scale = scale_factor
-			self.create_surfaces()
-		
 	def create_surfaces(self):
+		"""
+		Create different images.
+		
+		:return: None
+		"""
 		self.scaled_size = [int(self.f_scale * NOMINAL_RESOLUTION[i]) for i in (0, 1)]
 		
 		self.debug_3d.create_image(self.scaled_size)
 		self.debug_text.create_image(self.scaled_size)
 		self.hud.create_image(self.scaled_size)
 
-		self.screen.fill(SCREEN_COLOR)
-		# TODO : must redraw all images !
+		self.screen.fill(BKGND_SCREEN_COLOR)
 		pg.display.flip()
 	
 	def update(self, objects):
 		"""
 		Update and draw objects each frame.
 		
-		:param list() objects: list of objects to draw. Each object has to have a method : draw(self, display_manager).
+		:param list() objects: list of objects to draw. Each object has to have a draw_debug() method.
 		:return: None
 		"""
-		print("-------")
 		# update
 		self.debug_3d.update(objects)
 		self.debug_text.update()
@@ -101,22 +100,26 @@ class DisplayManager:
 		
 		# update screen
 		self.rect_list = self.debug_text.rect_list + self.hud.rect_list + self.debug_3d.rect_list
-		# print(self.rect_list)
 		for r in self.rect_list:
-			self.screen.fill(SCREEN_COLOR, r)
+			self.screen.fill(BKGND_SCREEN_COLOR, r)
 		
-		# TODO : add position_on_screen attribute on hud, debug_text etc. instead of
-		#  calling get_position_to_blit_centered_surfaces. This attribute would be updated each frame with
-		#  get_position_to_blit_centered_surfaces func or similar
 		self.blit_on_screen(self.debug_3d.image)
 		self.blit_on_screen(self.debug_text.image)
 		self.blit_on_screen(self.hud.image)
 		
 		# update screen
 		pg.display.update(self.rect_list)
-		pg.display.flip()
 	
 	def blit_on_screen(self, image, pos=None, centered=True):
+		"""
+		Blit an image on screen.
+		
+		:param pygame.Surface image: image to blit on screen
+		:param tuple(int, int) pos: pos of blitting.
+		:param bool centered: If :param pos: is not specified, pos will be set to (0, 0) if :var centered: is False,
+		else, :var pos: will be processed to center :var image: on screen.
+		:return:
+		"""
 		if pos is None:
 			pos = (0, 0)
 			if centered:
@@ -126,6 +129,13 @@ class DisplayManager:
 	
 	@staticmethod
 	def get_highest_power_of_2(n):
+		"""
+		Get highest power of 2 lower than given value.
+		
+		:param float n: value
+		:return: power of 2
+		:rtype int
+		"""
 		res = 0
 		for i in range(int(n), 0, -1):
 			# if i is a power of 2
@@ -133,42 +143,4 @@ class DisplayManager:
 				res = i
 				break
 		return res
-
-
-if __name__ == "__main__":
-	pg.init()
-	
-	screen = pg.display.set_mode((100, 100))
-	
-	screen.fill((0, 0, 0))
-	
-	surf_b = pg.Surface((100, 100))
-	surf_b.fill((100, 50, 0))
-	
-	t0 = pg.time.get_ticks()
-	for _ in range(10000):
-		screen.fill((0, 0, 0))
-		screen.blit(surf_b, (0, 0))
-	pg.display.flip()
-	t1 = pg.time.get_ticks()
-	
-	for _ in range(10000):
-		screen.fill((0, 0, 0))
-		screen.blit(surf_b, (0, 0))
-		pg.display.flip()
-	t2 = pg.time.get_ticks()
-	
-	f_scale = 3
-	scaled_surf = pg.Surface([f_scale * surf_b.get_size()[i] for i in (0, 1)])
-	
-	for _ in range(10000):
-		scaled_surf = pg.transform.scale(surf_b, scaled_surf.get_size())
-		screen.blit(scaled_surf, (0, 0))
-	pg.display.flip()
-	t3 = pg.time.get_ticks()
-
-	
-	print(t1-t0)
-	print(t2-t1)
-	print(t3-t2)
 	

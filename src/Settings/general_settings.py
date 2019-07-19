@@ -117,3 +117,10 @@ class AIId(Enum):
 	
 # DIRECTORIES
 FONT_DIR = "../assets/font/PressStart2P.ttf"
+
+
+# COLORS
+BKGND_TRANSPARENCY_COLOR = (1, 1, 1)  # color used for transparency
+HUD_FONT_COLOR = (200, 200, 200)
+DEBUG_TEXT_COLOR = (255, 255, 0)
+BKGND_SCREEN_COLOR = (0, 0, 50)

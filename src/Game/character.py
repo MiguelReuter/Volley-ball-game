@@ -43,17 +43,16 @@ class Character(ActionObject):
 		self._position = value
 		self.collider.center = self._position + self.collider_relative_position
 
-	def draw(self):
+	def draw_debug(self):
 		prev_rect = self.rect
 		prev_shadow_rect = self.rect_shadow
 		
 		ground_pos = Vector3(self.position)
 		ground_pos.z = 0
 		self.rect_shadow = debug3D_utils.draw_horizontal_ellipse(ground_pos, self.w / 2)
-		self.rect = self.collider.draw()
+		self.rect = self.collider.draw_debug()
 		
-		return [pg.Rect(0, 0, 0, 0).unionall([prev_shadow_rect, self.rect_shadow]),
-		        pg.Rect(0, 0, 0, 0).unionall([prev_rect, self.rect])]
+		return [prev_shadow_rect.union(self.rect_shadow), prev_rect.union(self.rect)]
 
 	def move_rel(self, dxyz):
 		"""

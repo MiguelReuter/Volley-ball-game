@@ -1,25 +1,35 @@
 # encoding : UTF-8
 
 import pygame as pg
+
+import Engine.game_engine
 from Engine.Display.scalable_sprite import ScalableSprite
 from Settings.general_settings import *
 
-import Engine.game_engine
-
-
-HUD_COLOR = (100, 100, 0)
-
 
 class HUD(pg.sprite.LayeredDirty):
+	"""
+	Dirty Sprites Layer Class for HUD.
+	"""
 	class TimeSprite(ScalableSprite):
+		"""
+		Sprite class for Timer.
+		"""
 		def __init__(self, *groups):
 			ScalableSprite.__init__(self, 1.0, *groups)
-			self.color = (200, 200, 200)
+			self.color = HUD_FONT_COLOR
 			self.font = pg.font.Font(FONT_DIR, 8)
 			
 			self.t = -1
 		
 		def update(self, *args):
+			"""
+			Update by checking if ticks changed.
+			
+			This method is an override of Sprite.update(*args).
+			:param args:
+			:return: None
+			"""
 			# update if time changed
 			current_t = int(Engine.game_engine.GameEngine.get_instance().get_running_ticks() / 1000)
 			if current_t != self.t:
@@ -30,6 +40,11 @@ class HUD(pg.sprite.LayeredDirty):
 			ScalableSprite.update(self, f_scale)
 		
 		def render_text(self):
+			"""
+			Force text rendering and update :var image: and :var rect: attributes.
+			
+			:return: None
+			"""
 			self.dirty = 1
 			
 			# update raw image
@@ -42,9 +57,12 @@ class HUD(pg.sprite.LayeredDirty):
 			self.set_raw_rect(pg.Rect(t_pos, self.raw_image.get_size()))
 	
 	class ScoreSprite(ScalableSprite):
+		"""
+		Sprite class for a score.
+		"""
 		def __init__(self, *groups, on_left=True):
 			ScalableSprite.__init__(self, 1.0, *groups)
-			self.color = (200, 200, 200)
+			self.color = HUD_FONT_COLOR
 			self.font = pg.font.Font(FONT_DIR, 8)
 			self.center_space = 100
 			
@@ -63,6 +81,11 @@ class HUD(pg.sprite.LayeredDirty):
 			self.render_text()
 		
 		def render_text(self):
+			"""
+			Force text rendering and update :var image: and :var rect: attributes.
+
+			:return: None
+			"""
 			self.dirty = 1
 			
 			# update raw image
@@ -77,6 +100,13 @@ class HUD(pg.sprite.LayeredDirty):
 			self.set_raw_rect(pg.Rect(sc_pos, self.raw_image.get_size()))
 		
 		def update(self, *args):
+			"""
+			Update if scale factor changed.
+
+			This method is an override of Sprite.update(*args).
+			:param args:
+			:return: None
+			"""
 			# rescale if needed to
 			f_scale = Engine.Display.display_manager.DisplayManager.get_instance().f_scale
 			ScalableSprite.update(self, f_scale)
@@ -85,7 +115,7 @@ class HUD(pg.sprite.LayeredDirty):
 		pg.sprite.LayeredDirty.__init__(self)
 		self.font = pg.font.Font(FONT_DIR, 8)
 		self.image = None
-		self.color = (200, 200, 200)  # TODO: to refactor
+		
 		self.time_sprite = None
 		self.lscore_sprite = None
 		self.rscore_sprite = None
@@ -95,6 +125,11 @@ class HUD(pg.sprite.LayeredDirty):
 		self.create()
 	
 	def create(self):
+		"""
+		Create sprites and :var image: attribute.
+		
+		:return: None
+		"""
 		# sprites
 		self.time_sprite = HUD.TimeSprite(self)
 		self.lscore_sprite = HUD.ScoreSprite(self, on_left=True)
@@ -106,16 +141,28 @@ class HUD(pg.sprite.LayeredDirty):
 		self.create_image(NOMINAL_RESOLUTION)
 	
 	def create_image(self, size=(0, 0)):
+		"""
+		Create image and set colorkey.
+
+		:param tuple(int, int) size: size of image to create
+		:return: None
+		"""
 		self.image = pg.Surface(size)
-		self.image.fill(HUD_COLOR)
-		self.image.set_colorkey(HUD_COLOR)
+		self.image.fill(BKGND_TRANSPARENCY_COLOR)
+		self.image.set_colorkey(BKGND_TRANSPARENCY_COLOR)
 	
 	def update(self):
+		"""
+		Update image and list of rects to redraw.
+
+		For each frame, sprites that need to be redraw are cleared and draw.
+
+		:return: None
+		"""
 		pg.sprite.LayeredDirty.update(self)
 		
 		for sp in self.sprites():
 			if sp.dirty > 0:
-				self.image.fill(HUD_COLOR, sp.prev_rect)
-				self.image.fill(HUD_COLOR, sp.rect)
+				self.image.fill(BKGND_TRANSPARENCY_COLOR, sp.prev_rect)
 		
 		self.rect_list = pg.sprite.LayeredDirty.draw(self, self.image)

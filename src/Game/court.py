@@ -19,10 +19,10 @@ class Court:
 		# sprite
 		self.rects = [pg.Rect(0, 0, 0, 0) for _ in range(10)]
 
-	def draw(self):
+	def draw_debug(self):
 		prev_rects = self.rects.copy()
 		
-		self.rects[0] = self.collider.draw()
+		self.rects[0] = self.collider.draw_debug()
 
 		corners_h = 2
 		# court ground
@@ -45,5 +45,5 @@ class Court:
 		self.rects[8] = debug3D_utils.draw_line(Vector3(-self.h / 2, 0, self.net_z2), Vector3(self.h / 2, 0, self.net_z2))
 		self.rects[9] = debug3D_utils.draw_line(Vector3(-self.h / 2, 0, self.net_z1), Vector3(self.h / 2, 0, self.net_z1))
 		
-		return [pg.Rect(0, 0, 0, 0).unionall([prev_rects[i], self.rects[i]]) for i in range(10)]
+		return [prev_rects[i].union(self.rects[i]) for i in range(10)]
 	

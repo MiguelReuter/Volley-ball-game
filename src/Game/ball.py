@@ -37,15 +37,14 @@ class Ball(pg.sprite.DirtySprite):
 		self._position = value
 		self.collider.center = self._position
 	
-	def draw(self):
-		prev_ball_rect = self.rect
-		prev_shadow_rect = self.rect_shadow
+	def draw_debug(self):
+		prev_rect = self.rect
+		prev_rect_shadow = self.rect_shadow
 		
 		self.rect = debug3D_utils.draw_horizontal_ellipse(Vector3(self.position[0], self.position[1], 0), self.radius)
-		self.rect_shadow = self.collider.draw()
+		self.rect_shadow = self.collider.draw_debug()
 		
-		return [pg.Rect(0, 0, 0, 0).unionall([prev_shadow_rect, self.rect_shadow]),
-		        pg.Rect(0, 0, 0, 0).unionall([prev_ball_rect, self.rect])]
+		return [prev_rect.union(self.rect), prev_rect_shadow.union(self.rect_shadow)]
 	
 	def move_rel(self, dxyz):
 		self.position += Vector3(dxyz)

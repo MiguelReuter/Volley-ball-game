@@ -24,7 +24,8 @@ def draw_sphere(center, radius, col=None):
 	:param pygame.Vector3 center: center of sphere
 	:param float radius: radius (world scale, not in pixel) of sphere
 	:param tuple(int, int, int) col: drawing color. default is :var DBG_COLOR_SPHERE:
-	:return: None
+	:return: rect bounding the changed pixels
+	:rtype pygame.Rect:
 	"""
 	display_manager = DisplayManager.get_instance()
 	if col is None:
@@ -52,7 +53,8 @@ def draw_horizontal_ellipse(center, radius):
 	
 	:param pygame.Vector3 center: center of ellipse
 	:param float radius: radius (world scale, not in pixel) of ellipse
-	:return: None
+	:return: rect bounding the changed pixels
+	:rtype pygame.Rect:
 	"""
 	display_manager = DisplayManager.get_instance()
 	camera = display_manager.camera
@@ -87,7 +89,8 @@ def draw_polygon(pts, col=None):
 	
 	:param list(pygame.Vector3) pts: 3D world points which define polygon
 	:param tuple(int, int, int) col: drawing color. default is :var DBG_COLOR_POLYGON:
-	:return: None
+	:return: rect bounding the changed pixels
+	:rtype pygame.Rect:
 	"""
 	if col is None:
 		col = DBG_COLOR_POLYGON
@@ -107,7 +110,8 @@ def draw_line(pt_a, pt_b, col=None):
 	:param pygame.Vector3 pt_a: 3D point of line start
 	:param pygame.Vector3 pt_b: 3D point of line end
 	:param tuple(int, int, int) col: drawing color. default is :var DBG_COLOR_LINE:
-	:return: None
+	:return: rect bounding the changed pixels
+	:rtype pygame.Rect:
 	"""
 	if col is None:
 		col = DBG_COLOR_LINE
@@ -132,7 +136,8 @@ def draw_aligned_axis_box(center, length_x, length_y, length_z, col=None):
 	:param float length_y: box length along y axis
 	:param float length_z: box length along z axis
 	:param tuple(int, int, int) col: drawing color. default is :var DBG_COLOR_AAB:
-	:return: None
+	:return: rect bounding the changed pixels
+	:rtype pygame.Rect:
 	"""
 	if col is None:
 		col = DBG_COLOR_AAB
@@ -160,4 +165,4 @@ def draw_aligned_axis_box(center, length_x, length_y, length_z, col=None):
 	r_left = draw.polygon(surface, col, [*top_pts[:2], bottom_pts[1], bottom_pts[0]], 1)  # -x quad
 	r_right = draw.polygon(surface, col, [*top_pts[2:], bottom_pts[3], bottom_pts[2]], 1)  # +x quad
 	
-	return Rect(0, 0, 0, 0).unionall([r_top, r_bottom, r_left, r_right])
+	return r_top.unionall([r_bottom, r_left, r_right])
