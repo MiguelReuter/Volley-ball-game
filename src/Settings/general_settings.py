@@ -8,33 +8,10 @@ from pygame import *
 NOMINAL_RESOLUTION = (400, 320)
 CAPTION_TITLE = "Volley-ball game"
 
-
-class WindowMode(Enum):
-	FIXED_SIZE = 0
-	RESIZABLE = 1
-	FULL_SCREEN = 2
-
-
-WINDOW_MODE = WindowMode.RESIZABLE
-WINDOW_RESIZE_2N = True  # ignored in full screen mode
-"""
-FIXED_SIZE, RESIZABLE, or FULL_SCREEN
-
-if FIXED_SIZE :
-	if WINDOW_RESIZE_2N:
-		- window size = nominal_resolution * 2^n  (highest possible n)
-	else:
-		- window size = nominal_resolution
-		
-elif RESIZABLE:
-	- initial window size = nominal_resolution or nominal_resolution * 2^n  according to WINDOW_RESIZE_2N
-	- if window is resized in-game :
-		- window content size = highest possible, centered content (float factor for size)
-		
-elif FULL_SCREEN
-	- window content size = highest possible, centered content (float factor for size)
-
-"""
+FORCE_WINDOW_SCALE_FACTOR = 1  # None to disable or a float
+IS_WINDOW_SCALE_FACTOR_2POW = True
+IS_WINDOW_SCALE_FACTOR_INT = True
+IS_WINDOW_IN_FULL_SCREEN_MODE = False
 
 # TIME
 NOMINAL_FRAME_RATE = 30
@@ -136,4 +113,14 @@ class PlayerId(Enum):
 class AIId(Enum):
 	AI_ID_1 = 1
 	AI_ID_2 = 2
+	
+	
+# DIRECTORIES
+FONT_DIR = "../assets/font/PressStart2P.ttf"
 
+
+# COLORS
+BKGND_TRANSPARENCY_COLOR = (1, 1, 1)  # color used for transparency
+HUD_FONT_COLOR = (200, 200, 200)
+DEBUG_TEXT_COLOR = (255, 255, 0)
+BKGND_SCREEN_COLOR = (0, 0, 50)

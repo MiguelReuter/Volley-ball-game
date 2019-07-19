@@ -1,14 +1,14 @@
 # encoding : UTF-8
 
 from pygame import Vector3
-from Engine.Display import debug3D
+from Engine.Display import debug3D_utils
 
 
 class Collider:
 	def __init__(self):
 		pass
 	
-	def draw(self):
+	def draw_debug(self):
 		pass
 	
 	
@@ -18,8 +18,8 @@ class SphereCollider(Collider):
 		self.center = center
 		self.radius = radius
 		
-	def draw(self):
-		debug3D.draw_sphere(self.center, self.radius)
+	def draw_debug(self):
+		return debug3D_utils.draw_sphere(self.center, self.radius)
 		
 		
 class AABBCollider(Collider):
@@ -28,8 +28,8 @@ class AABBCollider(Collider):
 		self.center = center
 		self.size3 = size3
 		
-	def draw(self):
-		debug3D.draw_aligned_axis_box(self.center, *self.size3)
+	def draw_debug(self):
+		return debug3D_utils.draw_aligned_axis_box(self.center, *self.size3)
 	
 
 def are_spheres_colliding(sphere_a, sphere_b):

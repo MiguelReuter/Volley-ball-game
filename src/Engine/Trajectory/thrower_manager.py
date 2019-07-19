@@ -3,7 +3,7 @@
 import random
 from datetime import datetime
 
-from Engine.Display.debug3D import *
+from Engine.Display.debug3D_utils import *
 from Engine.Trajectory import *
 from Engine.Trajectory.trajectory import Trajectory
 from Settings import *
@@ -24,6 +24,8 @@ class ThrowerManager:
 		self._current_trajectory = Trajectory()
 		
 		self.trajectory_changed = False
+		
+		self.rects_list = []
 
 		ThrowerManager.s_instance = self
 	
@@ -106,24 +108,30 @@ class ThrowerManager:
 		
 		return center + amplified_direction
 	
-	def draw(self):
+	def draw_debug(self):
 		"""
 		Draw debug 3D objects (ball trajectory, target ball position).
 		
 		:return: None
 		"""
+		prev_rects_list = self.rects_list.copy()
+		self.rects_list = []
 		
 		# draw target position
 		target_pos = self.current_trajectory.target_pos
 		ground_pos = Vector3(target_pos)
 		ground_pos.z = 0
-		draw_sphere(target_pos, 0.1, col=(255, 255, 0))
-		draw_line(target_pos, ground_pos)
+		sph_rect = draw_sphere(target_pos, 0.1, col=(255, 255, 0))
+		line_rect = draw_line(target_pos, ground_pos)
+		
+		self.rects_list += [sph_rect, line_rect]
 		
 		# draw trajectory
 		debug_trajectory_pts = self.current_trajectory.debug_pts
 		for i in range(len(debug_trajectory_pts) - 1):
-			draw_line(debug_trajectory_pts[i], debug_trajectory_pts[i + 1], col=(255, 0, 255))
+			self.rects_list += [draw_line(debug_trajectory_pts[i], debug_trajectory_pts[i + 1], col=(255, 0, 255))]
+			
+		return [prev_rects_list[i].union(self.rects_list[i]) for i in range(len(prev_rects_list))]
 
 	def throw_at_random_target_position(self, ball, initial_pos, wanted_height, corner_1=None, corner_2=None):
 		"""

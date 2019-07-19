@@ -1,13 +1,11 @@
 # encoding : UTF-8
 
-from .camera import Camera
+from Engine.Display.camera import Camera
 from Settings import *
 
 import pygame as pg
-from math import log2, pow
-from datetime import datetime
 
-import Engine.game_engine
+from Engine.Display.sprites_group import HUD, Debug3D, DebugText
 
 
 class DisplayManager:
@@ -18,229 +16,131 @@ class DisplayManager:
 		return DisplayManager.s_instance
 
 	def __init__(self):
-		# will be set in self.create_window()
+		self.debug_3d = Debug3D()
+		self.debug_text = DebugText()
+		self.hud = HUD()
+		
 		self.screen = None
-		self.unscaled_surface = None
-		self.scaled_surface = None
-		self.debug_surface = None
-		self.debug_text = DisplayManager.DebugText()
-		self.hud = DisplayManager.HUD()
-
-		self.window_mode = WINDOW_MODE
-		self.window_resize_2n = WINDOW_RESIZE_2N
-		self.screen_scale_factor_2n = None
-		self._create_window(NOMINAL_RESOLUTION, self.window_mode, self.window_resize_2n)
+		self.screen_size = None  # size of screen
+		self.scaled_size = None  # size of scaled surface ie f * self.nominal_size
+		self.f_scale = 1
+		self.rect_list = []
 		
 		self.camera = Camera(CAMERA_POS, FOCUS_POINT, FOV_ANGLE)
+		
+		self.create_window()
 
 		DisplayManager.s_instance = self
 		
-	class DebugText(pg.sprite.Sprite):
+	def create_window(self):
 		"""
-		Class for debug text displaying on game window.
-		"""
-		def __init__(self):
-			pg.sprite.Sprite.__init__(self)
-			self.content = {"test": 45,
-			                "other test": "Hello"}
-			self.font = pg.font.Font("../assets/font/PressStart2P.ttf", 8)
-			self.surface = pg.Surface((0, 0))
+		Create pygame window and different images.
 		
-		def update(self):
-			x = 20
-			y = 20
-			key_max_length = 10
-			text_color = (255, 255, 0)
-			
-			# update content
-			self.content["ticks"] = Engine.game_engine.GameEngine.get_instance().get_running_ticks()
-			
-			self.surface = pg.Surface(DisplayManager.get_instance().debug_surface.get_size())
-			self.surface.set_colorkey((0, 0, 0))
-
-			for k in self.content:
-				k_str = k.ljust(key_max_length)
-				text_surface = self.font.render(k_str + ": " + str(self.content[k]), 0, text_color)
-				self.surface.blit(text_surface, (x, y))
-				y += int(1.5 * self.font.get_height())
-	
-	class HUD(pg.sprite.Sprite):
-		def __init__(self):
-			pg.sprite.Sprite.__init__(self)
-			self.font = pg.font.Font("../assets/font/PressStart2P.ttf", 8)
-			self.surface = None
-			self.scaled_surface = None
-			self.color = (200, 200, 200)
-			self.scores = (3, 5)  # dummy values
-		
-		def update(self):
-			self.surface.set_colorkey((0, 0, 0))
-
-			# time
-			t = round(Engine.game_engine.GameEngine.get_instance().get_running_ticks() / 1000)
-			t_str = "{}:{:02}".format(int(t)//60, t % 60)
-			t_surface = self.font.render(t_str, 0, self.color)
-			t_pos = ((self.surface.get_size()[0] - t_surface.get_size()[0]) / 2, 10)
-			self.surface.blit(t_surface, t_pos)
-
-			# scores
-			w = 100
-			sc_surface = self.font.render(str(self.scores[0]), 0, self.color)
-			sc_pos = (self.surface.get_size()[0] / 2 - sc_surface.get_size()[0] - w, 10)
-			self.surface.blit(sc_surface, sc_pos)
-			
-			sc_surface = self.font.render(str(self.scores[1]), 0, self.color)
-			sc_pos = (self.surface.get_size()[0] / 2 + sc_surface.get_size()[0] + w, 10)
-			self.surface.blit(sc_surface, sc_pos)
-			
-	def _create_window(self, nominal_resolution, window_mode=WindowMode.FIXED_SIZE, window_resize_2n=False):
-		"""
-		Create Game Window.
-		
-		:param tuple(int, int) nominal_resolution: nominal pixel resolution
-		:param WindowMode.Enum window_mode: rendered mode of window. Can be FIXED_SIZE, RESIZABLE or FULL_SCREEN
-		:param bool window_resize_2n: if True, window size is set to maximum according to your current display
-		with a factor 2^n. Nominal resolution is unchanged. Only in FIXED_SIZE and RESIZABLE modes
 		:return: None
 		"""
-		scaled_size = nominal_resolution
-		screen_size = nominal_resolution
-		fl = 0
+		# size of display (not pygame window yet)
+		display_size = (pg.display.Info().current_w, pg.display.Info().current_h)
 		
-		if window_mode == WindowMode.FIXED_SIZE or window_mode == WindowMode.RESIZABLE:
-			fl = pg.RESIZABLE if window_mode == WindowMode.RESIZABLE else 0
-			if not window_resize_2n:
-				pass
-			else:
-				self.screen_scale_factor_2n = self._process_screen_factor_scale()
-				scaled_size = tuple(int(nominal_resolution[i] * pow(2, self.screen_scale_factor_2n)) for i in (0, 1))
-				screen_size = scaled_size
-				
-		elif window_mode == WindowMode.FULL_SCREEN:
-			fl = pg.FULLSCREEN
-			screen_size = pg.display.Info().current_w, pg.display.Info().current_h
-			
-			f_w, f_h = tuple(screen_size[i] / nominal_resolution[i] for i in (0, 1))
-			f = min(f_w, f_h)
-			scaled_size = tuple(int(f * nominal_resolution[i]) for i in (0, 1))
-		
-		self.unscaled_surface = pg.Surface(nominal_resolution)
-		self.hud.surface = pg.Surface(nominal_resolution)
-		self.hud.scaled_surface = pg.Surface(scaled_size)
-		self.scaled_surface = pg.Surface(scaled_size)
-		self.debug_surface = pg.Surface(scaled_size)
-		self.debug_surface.set_colorkey((0, 0, 0))
-		
-		self.screen = pg.display.set_mode(screen_size, flags=fl)
-		pg.display.set_caption(CAPTION_TITLE)
-		
-	def _resize_display(self):
-		"""
-		Resize display for each frame.
-		
-		Resize display according to attributes :
-			- :var WindowMode.Enum self.window_mode:
-			- :var bool self.window_resize_2n values:
-		:return: None
-		"""
-		surface = self.unscaled_surface
-		hud_surface = self.hud.surface
-		
-		if self.window_mode == WindowMode.FIXED_SIZE and self.window_resize_2n:
-			new_size = list(surface.get_size())
-			
-			new_surface = pg.Surface(new_size)
-			new_surface.blit(surface, (0, 0))
-			
-			# hud
-			new_hud_surface = pg.Surface(new_size)
-			new_hud_surface.blit(hud_surface, (0, 0))
-			for _ in range(self.screen_scale_factor_2n):
-				new_size = [new_size[i] * 2 for i in (0, 1)]
-				self.scaled_surface = pg.transform.scale2x(new_surface)
-				self.hud.scaled_surface = pg.transform.scale2x(new_hud_surface)
-				
-		elif self.window_mode == WindowMode.RESIZABLE:
-			scaled_size = self.scaled_surface.get_size()
-			for event in pg.event.get(pg.VIDEORESIZE):
-				new_screen_size = event.size
-				self.screen = pg.display.set_mode(new_screen_size, flags=pg.RESIZABLE)
-				
-				# process size for displayed surfaces
-				f_w, f_h = tuple(new_screen_size[i] / self.unscaled_surface.get_size()[i] for i in (0, 1))
-				f = min(f_w, f_h)
-				scaled_size = tuple(int(f * self.unscaled_surface.get_size()[i]) for i in (0, 1))
-				
-			# TODO : use smoothscale instead of scale ?
-			self.scaled_surface = pg.transform.scale(self.unscaled_surface, scaled_size)
-			self.debug_surface = pg.transform.scale(self.debug_surface, scaled_size)
-			self.hud.scaled_surface = pg.transform.scale(self.hud.surface, scaled_size)
-		elif self.window_mode == WindowMode.FULL_SCREEN:
-			scaled_size = self.scaled_surface.get_size()
-			self.scaled_surface = pg.transform.scale(self.unscaled_surface, scaled_size)
-			self.hud.scaled_surface = pg.transform.scale(self.hud.surface, scaled_size)
+		if FORCE_WINDOW_SCALE_FACTOR is not None:
+			self.f_scale = FORCE_WINDOW_SCALE_FACTOR
 		else:
-			self.scaled_surface = self.unscaled_surface.copy()
-	
-	@staticmethod
-	def _process_screen_factor_scale():
+			# if scale factor is a power of 2
+			if IS_WINDOW_SCALE_FACTOR_2POW:
+				self.f_scale = min(*[self.get_highest_power_of_2(display_size[i] / NOMINAL_RESOLUTION[i]) for i in (0, 1)])
+			else:
+				self.f_scale = min(*[display_size[i] / NOMINAL_RESOLUTION[i] for i in (0, 1)])
+			
+			# if scale factor is int or not
+			if IS_WINDOW_SCALE_FACTOR_INT:
+				self.f_scale = int(self.f_scale)
+				
+		self.scaled_size = [int(self.f_scale * NOMINAL_RESOLUTION[i]) for i in (0, 1)]
+		self.screen_size = self.scaled_size  # may be different in fullscreen mode
+		
+		# create pygame window
+		if IS_WINDOW_IN_FULL_SCREEN_MODE:
+			fl = pg.FULLSCREEN
+		else:
+			fl = 0
+			
+		self.screen = pg.display.set_mode(self.screen_size, flags=fl)
+		pg.display.set_caption(CAPTION_TITLE)
+		self.screen.fill(BKGND_SCREEN_COLOR)
+		self.screen.set_colorkey(BKGND_SCREEN_COLOR)
+		
+		# setting other surfaces
+		self.create_surfaces()
+		
+	def create_surfaces(self):
 		"""
-		Process a factor (2^n) to adapt window size.
+		Create different images.
 		
 		:return: None
 		"""
-		f_w = int(log2(pg.display.Info().current_w / NOMINAL_RESOLUTION[0]))
-		f_h = int(log2(pg.display.Info().current_h / NOMINAL_RESOLUTION[1]))
-		return min(f_w, f_h)
+		self.scaled_size = [int(self.f_scale * NOMINAL_RESOLUTION[i]) for i in (0, 1)]
+		
+		self.debug_3d.create_image(self.scaled_size)
+		self.debug_text.create_image(self.scaled_size)
+		self.hud.create_image(self.scaled_size)
+
+		self.screen.fill(BKGND_SCREEN_COLOR)
+		pg.display.flip()
 	
 	def update(self, objects):
 		"""
 		Update and draw objects each frame.
 		
-		:param list() objects: list of objects to draw. Each object has to have a method : draw(self, display_manager).
+		:param list() objects: list of objects to draw. Each object has to have a draw_debug() method.
 		:return: None
 		"""
-		self.screen.fill((50, 50, 0))
-		self.unscaled_surface.fill((0, 0, 50))
-		self.debug_surface.fill((0, 0, 0))
-		self.debug_text.surface.fill((0, 0, 0))
-		self.hud.surface.fill((0, 0, 0))
-		
 		# update
+		self.debug_3d.update(objects)
 		self.debug_text.update()
 		self.hud.update()
 		
-		for obj in objects:
-			obj.draw()
-		
-		self._resize_display()
-		
-		self.screen.blit(self.scaled_surface, self.get_position_to_blit_centered_surfaces(self.screen.get_size(), self.scaled_surface.get_size()))
-		self.screen.blit(self.debug_surface, self.get_position_to_blit_centered_surfaces(self.screen.get_size(), self.debug_surface.get_size()))
-		
-		self.screen.blit(self.hud.scaled_surface, self.get_position_to_blit_centered_surfaces(self.screen.get_size(), self.hud.scaled_surface.get_size()))
-		
-		self.screen.blit(self.debug_text.surface, self.get_position_to_blit_centered_surfaces(self.screen.get_size(), self.debug_text.surface.get_size()))
 		# update screen
-		pg.display.flip()
+		self.rect_list = self.debug_text.rect_list + self.hud.rect_list + self.debug_3d.rect_list
+		for r in self.rect_list:
+			self.screen.fill(BKGND_SCREEN_COLOR, r)
+		
+		self.blit_on_screen(self.debug_3d.image)
+		self.blit_on_screen(self.debug_text.image)
+		self.blit_on_screen(self.hud.image)
+		
+		# update screen
+		pg.display.update(self.rect_list)
+	
+	def blit_on_screen(self, image, pos=None, centered=True):
+		"""
+		Blit an image on screen.
+		
+		:param pygame.Surface image: image to blit on screen
+		:param tuple(int, int) pos: pos of blitting.
+		:param bool centered: If :param pos: is not specified, pos will be set to (0, 0) if :var centered: is False,
+		else, :var pos: will be processed to center :var image: on screen.
+		:return:
+		"""
+		if pos is None:
+			pos = (0, 0)
+			if centered:
+				pos = tuple(int(self.screen.get_size()[i] / 2 - image.get_size()[i] / 2) for i in (0, 1))
+				
+		self.screen.blit(image, pos)
 	
 	@staticmethod
-	def get_position_to_blit_centered_surfaces(main_surface_size, surface_to_draw_size):
+	def get_highest_power_of_2(n):
 		"""
-		Get position to draw a centered surface onto another.
+		Get highest power of 2 lower than given value.
 		
-		usage examples:
-			>>> DisplayManager.get_position_to_blit_centered_surfaces((50, 100), (10, 10))
-			(20, 45)
-			>>> DisplayManager.get_position_to_blit_centered_surfaces((50, 100), (1000, 1000))
-			(0, 0)
-			
-		:param tuple(int, int) main_surface_size: size of main surface to draw on
-		:param tuple(int, int) surface_to_draw_size: size of surface to draw
-		:return: left-top corner position of surface to draw on
-		:rtype tuple(int, int):
+		:param float n: value
+		:return: power of 2
+		:rtype int
 		"""
-		if main_surface_size[0] >= surface_to_draw_size[0] and main_surface_size[1] >= surface_to_draw_size[1]:
-			return tuple(int(main_surface_size[i] / 2 - surface_to_draw_size[i] / 2) for i in (0, 1))
-		return 0, 0
+		res = 0
+		for i in range(int(n), 0, -1):
+			# if i is a power of 2
+			if (i & (i - 1)) == 0:
+				res = i
+				break
+		return res
 	
