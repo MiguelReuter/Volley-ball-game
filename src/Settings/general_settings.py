@@ -124,6 +124,8 @@ class Team(Enum):
 # RULES
 class RuleType(Enum):
 	TOUCHES_NB = 1
+	GROUND = 2
+	UNDER_NET = 3
 	
 MAX_TOUCHES_NB = 3
 

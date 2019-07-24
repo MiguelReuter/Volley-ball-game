@@ -42,7 +42,30 @@ class Ball(pg.sprite.DirtySprite):
 				# TODO : create form in settings for dict to pass in post(Event)
 				d = {"faulty_character": character, "rule_type": RuleType.TOUCHES_NB}
 				pg.event.post(pg.event.Event(RULES_BREAK_EVENT, d))
-	
+				
+	def manage_touch_ground_rule(self):
+		if len(self._current_team_touches) == 0:
+			return
+		
+		last_team = self._current_team_touches[-1]
+		
+		# if ball pos in good area for last team --> last team wins
+		game_engine = Engine.game_engine.GameEngine.get_instance()
+		court = game_engine.court
+		if (self.position.y < 0 and last_team == Team.RIGHT) or (self.position.y > 0 and last_team == Team.LEFT):
+			if abs(self.position.x) < court.h / 2 and abs(self.position.y) < court.w / 2:
+				faulty_team = Team.LEFT if last_team == Team.RIGHT else Team.RIGHT
+		
+		faulty_character = None
+		for char in game_engine.characters:
+			if char.team == faulty_team:
+				faulty_character = char
+				break
+				
+		d = {"faulty_character": faulty_character, "rule_type": RuleType.GROUND}
+		pg.event.post(pg.event.Event(RULES_BREAK_EVENT, d))
+		
+		
 	def rules_reset(self):
 		self._current_team_touches = []
 	
@@ -78,6 +101,9 @@ class Ball(pg.sprite.DirtySprite):
 	
 	def update_physics(self, dt):
 		self.previous_position = Vector3(self.position)
+		
+		if self.is_colliding_ground:
+			self.manage_touch_ground_rule()
 		
 		if not self.will_be_served:
 			self.add_velocity(Vector3(0, 0, -0.001 * dt * G))
