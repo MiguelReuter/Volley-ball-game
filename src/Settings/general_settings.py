@@ -92,6 +92,7 @@ class PlayerAction(Enum):
 # events
 ACTION_EVENT = USEREVENT + 1
 THROW_EVENT = USEREVENT + 2
+RULES_BREAK_EVENT = USEREVENT + 3
 
 
 # throwing type
@@ -114,6 +115,18 @@ class AIId(Enum):
 	AI_ID_1 = 1
 	AI_ID_2 = 2
 	
+
+class Team(Enum):
+	LEFT = 1
+	RIGHT = 2
+
+
+# RULES
+class RuleType(Enum):
+	TOUCHES_NB = 1
+	
+MAX_TOUCHES_NB = 3
+
 	
 # DIRECTORIES
 FONT_DIR = "../assets/font/PressStart2P.ttf"

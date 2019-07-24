@@ -68,7 +68,7 @@ class GameEngine(ActionObject):
 							  pg.JOYBUTTONDOWN, pg.JOYBUTTONUP,
 							  pg.JOYHATMOTION,
 							  pg.QUIT, pg.VIDEORESIZE,
-		                      ACTION_EVENT, THROW_EVENT])
+		                      ACTION_EVENT, THROW_EVENT, RULES_BREAK_EVENT])
 
 		# AI
 		for char in self.characters:
@@ -89,16 +89,6 @@ class GameEngine(ActionObject):
 		:return: None
 		"""
 		self.done = True
-	
-	def serve(self, character):
-		# serving position
-		pos = Vector3(2, -5, 0)
-		pos *= 1 if character.is_in_left_side else -1
-
-		character.position = pos
-		self.ball.will_be_served = True
-		self.ball.position = character.get_hands_position()
-		character.state = CharacterStates.Serving(character)
 	
 	def run(self):
 		"""

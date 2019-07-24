@@ -25,7 +25,8 @@ class Character(ActionObject):
 		self.direction = Vector3()
 		
 		self.is_in_left_side = is_in_left_side
-
+		self.team = Team.LEFT if is_in_left_side else Team.RIGHT
+		
 		self.state = Idling(self)
 
 		self.set_default_collider()

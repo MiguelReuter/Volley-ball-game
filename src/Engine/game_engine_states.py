@@ -4,6 +4,7 @@ import pygame as pg
 
 import Engine.game_engine
 from Engine.Actions import ActionObject
+from Game import CharacterStates
 from Settings import *
 
 
@@ -67,10 +68,11 @@ class Running(GameEngineState, ActionObject):
 		for action_object in ActionObject.objects + [self]:
 			action_object.update_actions(actions_events, dt=dt)
 
-
-		
 		# throw event
 		game_engine.thrower_manager.update(pg.event.get(THROW_EVENT), game_engine.ball)
+		
+		# rules
+		self.update_rules(pg.event.get(RULES_BREAK_EVENT))
 		
 		# DISPLAY
 		game_engine.display_manager.update([*game_engine.objects, game_engine.thrower_manager])
@@ -94,11 +96,41 @@ class Running(GameEngineState, ActionObject):
 				game_engine = Engine.game_engine.GameEngine.get_instance()
 				
 				# game_engine.serve(game_engine.get_character_by_player_id(ev.player_id))
-				game_engine.serve(game_engine.get_character_by_player_id(AIId.AI_ID_1))
+				self.give_service_for_character(game_engine.get_character_by_player_id(AIId.AI_ID_1))
 				# game_engine.thrower_manager.throw_ball(game_engine.ball, INITIAL_POS, TARGET_POS, WANTED_H)
 				# game_engine.thrower_manager.throw_at_random_target_position(game_engine.ball, INITIAL_POS, WANTED_H)
 	
-	
+	def update_rules(self, rules_break_events):
+		game_engine = Engine.game_engine.GameEngine.get_instance()
+		
+		characters = game_engine.characters
+		if len(rules_break_events) > 0:
+			ev = rules_break_events[-1]
+			faulty_character = ev.faulty_character
+			rule_type = ev.rule_type
+			print("rule:", rule_type, ", faulty team:", faulty_character.team)
+		
+			# TODO: update score
+			# get character in other team
+			for char in characters:
+				if char.team != faulty_character.team:
+					self.give_service_for_character(char)
+					
+	def give_service_for_character(self, character):
+		game_engine = Engine.game_engine.GameEngine.get_instance()
+		
+		# serving position
+		pos = Vector3(2, -5, 0)
+		pos *= 1 if character.team == Team.LEFT else -1
+		
+		character.position = pos
+		
+		game_engine.ball.rules_reset()
+		game_engine.ball.will_be_served = True
+		game_engine.ball.position = character.get_hands_position()
+		character.state = CharacterStates.Serving(character)
+
+
 class Pausing(GameEngineState, ActionObject):
 	def __init__(self):
 		ActionObject.__init__(self, add_to_objects_list=False)

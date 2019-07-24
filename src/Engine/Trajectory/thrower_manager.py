@@ -161,21 +161,25 @@ class ThrowerManager:
 		for ev in throw_events:
 			direction = ev.direction
 			char_position = ev.position
+			character = ev.character
 			
 			# simple throw
 			if ev.throwing_type == ThrowingType.THROW and not ball.will_be_served:
 				velocity_efficiency = ev.velocity_efficiency
 				target_position = self.get_effective_target_position(direction, char_position)
 				self.throw_ball(ball, ball.position, target_position, velocity_efficiency=velocity_efficiency)
+				ball.add_team_touch(character)
 			# smash (during a jump)
 			elif ev.throwing_type == ThrowingType.SMASH and not ball.will_be_served:
 				target_position = self.get_effective_smash_target_position(direction, char_position)
 				self.smash_ball(ball, ball.position, target_position)
+				ball.add_team_touch(character)
 			# serve
 			elif ev.throwing_type == ThrowingType.SERVE:
 				ball.will_be_served = False
 				target_position = self.get_effective_serve_target_position(direction, char_position)
 				self.throw_ball(ball, ball.position, target_position, velocity_efficiency=1.0)
+				ball.add_team_touch(character)
 			# draft (after diving)
 			elif ev.throwing_type == ThrowingType.DRAFT:
 				velocity_efficiency = ev.velocity_efficiency
@@ -183,6 +187,7 @@ class ThrowerManager:
 				target_position.z = BALL_RADIUS
 				self.throw_ball(ball, ball.position, target_position, velocity_efficiency=velocity_efficiency,
 								wanted_height=DRAFT_THROW_HEIGHT)
+				ball.add_team_touch(character)
 
 	def throw_ball(self, ball, initial_pos, target_pos, wanted_height=4, **kwargs):
 		"""

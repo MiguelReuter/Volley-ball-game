@@ -5,7 +5,8 @@ import pygame as pg
 
 from Engine.Display import debug3D_utils
 from Engine.Collisions import SphereCollider
-from Settings import G
+from Settings.general_settings import *
+import Engine
 
 
 class Ball(pg.sprite.DirtySprite):
@@ -27,6 +28,23 @@ class Ball(pg.sprite.DirtySprite):
 		# sprite
 		self.rect_shadow = pg.Rect(0, 0, 0, 0)
 		self.rect = pg.Rect(0, 0, 0, 0)
+		
+		# game rules
+		self._current_team_touches = []
+	
+	def add_team_touch(self, character):
+		team = character.team
+		if len(self._current_team_touches) == 0 or self._current_team_touches[-1] != team:
+			self._current_team_touches = [team]
+		else:
+			self._current_team_touches.append(team)
+			if len(self._current_team_touches) > MAX_TOUCHES_NB:
+				# TODO : create form in settings for dict to pass in post(Event)
+				d = {"faulty_character": character, "rule_type": RuleType.TOUCHES_NB}
+				pg.event.post(pg.event.Event(RULES_BREAK_EVENT, d))
+	
+	def rules_reset(self):
+		self._current_team_touches = []
 	
 	@property
 	def position(self):
