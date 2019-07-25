@@ -101,35 +101,53 @@ class Running(GameEngineState, ActionObject):
 				# game_engine.thrower_manager.throw_at_random_target_position(game_engine.ball, INITIAL_POS, WANTED_H)
 	
 	def update_rules(self, rules_break_events):
-		game_engine = Engine.game_engine.GameEngine.get_instance()
-		
-		characters = game_engine.characters
+
 		if len(rules_break_events) > 0:
 			ev = rules_break_events[-1]
-			faulty_character = ev.faulty_character
+			faulty_team = ev.faulty_team
 			rule_type = ev.rule_type
-			print("rule:", rule_type, ", faulty team:", faulty_character.team)
-		
+			print("rule:", rule_type, ", faulty team:", faulty_team)
+	
 			# TODO: update score
+
+			game_engine = Engine.game_engine.GameEngine.get_instance()
+			characters = game_engine.characters
+			if faulty_team is None:
+				self.give_service_for_character(characters[0])
+			
 			# get character in other team
 			for char in characters:
-				if char.team != faulty_character.team:
+				if char.team != faulty_team:
 					self.give_service_for_character(char)
 					
 	def give_service_for_character(self, character):
 		game_engine = Engine.game_engine.GameEngine.get_instance()
 		
-		# serving position
-		pos = Vector3(2, -5, 0)
-		pos *= 1 if character.team == Team.LEFT else -1
+		self.reset_characters_pos_and_state()
 		
-		character.position = pos
+		# set position and state for character
+		character.position = Vector3(CHARACTER_SERVING_POS)
+		if character.team == Team.LEFT:
+			character.position.y *= -1
+		character.state = CharacterStates.Serving(character)
 		
 		game_engine.ball.rules_reset()
 		game_engine.ball.will_be_served = True
 		game_engine.ball.position = character.get_hands_position()
-		character.state = CharacterStates.Serving(character)
-
+		
+	def reset_characters_pos_and_state(self):
+		game_engine = Engine.game_engine.GameEngine.get_instance()
+		
+		for char in game_engine.characters:
+			char.reset()
+			
+			# position
+			char.position = Vector3(CHARACTER_INITIAL_POS)
+			if char.team == Team.LEFT:
+				char.position.y *= -1
+			# state
+			char.state = CharacterStates.Idling(char)
+		
 
 class Pausing(GameEngineState, ActionObject):
 	def __init__(self):

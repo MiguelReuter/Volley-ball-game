@@ -40,32 +40,35 @@ class Ball(pg.sprite.DirtySprite):
 			self._current_team_touches.append(team)
 			if len(self._current_team_touches) > MAX_TOUCHES_NB:
 				# TODO : create form in settings for dict to pass in post(Event)
-				d = {"faulty_character": character, "rule_type": RuleType.TOUCHES_NB}
+				d = {"faulty_team": team, "rule_type": RuleType.TOUCHES_NB}
 				pg.event.post(pg.event.Event(RULES_BREAK_EVENT, d))
 				
 	def manage_touch_ground_rule(self):
 		if len(self._current_team_touches) == 0:
-			return
+			faulty_team = None
+		else:
+			last_team = self._current_team_touches[-1]
+			faulty_team = last_team
+			
+			# if ball pos in good area for last team --> last team wins
+			game_engine = Engine.game_engine.GameEngine.get_instance()
+			court = game_engine.court
+			if (self.position.y < 0 and last_team == Team.RIGHT) or (self.position.y > 0 and last_team == Team.LEFT):
+				if abs(self.position.x) < court.h / 2 and abs(self.position.y) < court.w / 2:
+					faulty_team = Team.LEFT if last_team == Team.RIGHT else Team.RIGHT
 		
-		last_team = self._current_team_touches[-1]
-		
-		# if ball pos in good area for last team --> last team wins
-		game_engine = Engine.game_engine.GameEngine.get_instance()
-		court = game_engine.court
-		if (self.position.y < 0 and last_team == Team.RIGHT) or (self.position.y > 0 and last_team == Team.LEFT):
-			if abs(self.position.x) < court.h / 2 and abs(self.position.y) < court.w / 2:
-				faulty_team = Team.LEFT if last_team == Team.RIGHT else Team.RIGHT
-		
-		faulty_character = None
-		for char in game_engine.characters:
-			if char.team == faulty_team:
-				faulty_character = char
-				break
-				
-		d = {"faulty_character": faulty_character, "rule_type": RuleType.GROUND}
+		d = {"faulty_team": faulty_team, "rule_type": RuleType.GROUND}
 		pg.event.post(pg.event.Event(RULES_BREAK_EVENT, d))
 		
-		
+	def check_if_out_of_bounds(self):
+		game_engine = Engine.game_engine.GameEngine.get_instance()
+		court = game_engine.court
+		if abs(self.position.x) > 1.5 * court.h / 2 or abs(self.position.y) > 1.5 * court.w / 2:
+			faulty_team = self._current_team_touches[-1] if len(self._current_team_touches) > 0 else None
+			
+			d = {"faulty_team": faulty_team, "rule_type": RuleType.OUT_OF_BOUNDS}
+			pg.event.post(pg.event.Event(RULES_BREAK_EVENT, d))
+	
 	def rules_reset(self):
 		self._current_team_touches = []
 	
@@ -101,6 +104,8 @@ class Ball(pg.sprite.DirtySprite):
 	
 	def update_physics(self, dt):
 		self.previous_position = Vector3(self.position)
+		
+		self.check_if_out_of_bounds()
 		
 		if self.is_colliding_ground:
 			self.manage_touch_ground_rule()

@@ -152,3 +152,5 @@ class Character(ActionObject):
 		
 	def reset(self):
 		self.set_default_collider()
+		self.velocity = Vector3()
+		

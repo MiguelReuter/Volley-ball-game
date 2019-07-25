@@ -8,7 +8,7 @@ from pygame import *
 NOMINAL_RESOLUTION = (400, 320)
 CAPTION_TITLE = "Volley-ball game"
 
-FORCE_WINDOW_SCALE_FACTOR = 1  # None to disable or a float
+FORCE_WINDOW_SCALE_FACTOR = None  # None to disable or a float
 IS_WINDOW_SCALE_FACTOR_2POW = True
 IS_WINDOW_SCALE_FACTOR_INT = True
 IS_WINDOW_IN_FULL_SCREEN_MODE = False
@@ -38,6 +38,8 @@ BALL_RADIUS = 0.5
 # character
 CHARACTER_W = 0.4
 CHARACTER_H = 1
+CHARACTER_INITIAL_POS = (0, 0.6 * COURT_DIM_Y / 2, 0)
+CHARACTER_SERVING_POS = (0.6 * COURT_DIM_X / 2, COURT_DIM_Y / 2, 0)
 
 
 # INPUTS
@@ -125,7 +127,9 @@ class Team(Enum):
 class RuleType(Enum):
 	TOUCHES_NB = 1
 	GROUND = 2
-	UNDER_NET = 3
+	OUT_OF_BOUNDS = 3
+	UNDER_NET = 4
+	
 	
 MAX_TOUCHES_NB = 3
 
