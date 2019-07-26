@@ -93,7 +93,7 @@ class HUD(pg.sprite.LayeredDirty):
 			if self.on_left:
 				sc_pos = (NOMINAL_RESOLUTION[0] / 2 - self.raw_image.get_size()[0] - self.center_space, 10)
 			else:
-				sc_pos = (NOMINAL_RESOLUTION[0] / 2 + self.raw_image.get_size()[0] + self.center_space, 10)
+				sc_pos = (NOMINAL_RESOLUTION[0] / 2 - self.raw_image.get_size()[0] + self.center_space, 10)
 			
 			# update raw rect
 			self.prev_rect = self.rect
@@ -107,6 +107,13 @@ class HUD(pg.sprite.LayeredDirty):
 			:param args:
 			:return: None
 			"""
+			# update score
+			game_engine = Engine.game_engine.GameEngine.get_instance()
+			team_id = TeamId.LEFT if self.on_left else TeamId.RIGHT
+			team = game_engine.teams[team_id]
+			if team.score != self.score:
+				self.score = team.score
+			
 			# rescale if needed to
 			f_scale = Engine.Display.display_manager.DisplayManager.get_instance().f_scale
 			ScalableSprite.update(self, f_scale)

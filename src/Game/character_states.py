@@ -284,7 +284,7 @@ class Diving(CharacterState):
 
 		direction = get_normalized_direction_requested(action_events)
 		if direction.x == 0 and direction.y == 0:
-			direction.y = 1 if self.character.is_in_left_side else -1
+			direction.y = 1 if self.character.team.id == TeamId.LEFT else -1
 
 		self.character.velocity = DIVE_SPEED * direction
 		self.character.set_diving_collider(direction)

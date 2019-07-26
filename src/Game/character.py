@@ -11,7 +11,7 @@ from Game.character_states import *
 
 
 class Character(ActionObject):
-	def __init__(self, position, player_id=PlayerId.PLAYER_ID_1, max_velocity=4, is_in_left_side=True):
+	def __init__(self, position, player_id=PlayerId.PLAYER_ID_1, max_velocity=4):
 		ActionObject.__init__(self, player_id)
 		self._position = Vector3(position)
 		self.previous_position = Vector3()
@@ -24,8 +24,7 @@ class Character(ActionObject):
 		self.velocity = Vector3()
 		self.direction = Vector3()
 		
-		self.is_in_left_side = is_in_left_side
-		self.team = Team.LEFT if is_in_left_side else Team.RIGHT
+		self.team = Team()
 		
 		self.state = Idling(self)
 
@@ -106,7 +105,7 @@ class Character(ActionObject):
 		"""
 		dh = Vector3(0, 0, self.h)
 		dh.y = self.w / 2
-		if not self.is_in_left_side:
+		if not self.team.id == TeamId.LEFT:
 			dh.y *= -1
 		return self.position + dh
 
@@ -153,4 +152,28 @@ class Character(ActionObject):
 	def reset(self):
 		self.set_default_collider()
 		self.velocity = Vector3()
+
+
+class Team:
+	def __init__(self, team_id=TeamId.NONE, characters_list=None):
+		self.characters = characters_list
+		self.score = 0
+		self.id = team_id
+		self.set_team_to_characters()
+	
+	def reset(self, **kwargs):
+		k = kwargs.keys()
 		
+		self.characters = kwargs["characters"] if "characters" in k else None
+		self.set_team_to_characters()
+		
+		self.score = kwargs["score"] if "score" in k else 0
+		self.id = kwargs["score"] if "score" in k else TeamId.NONE
+	
+	def add_score(self, val=1):
+		self.score += val
+	
+	def set_team_to_characters(self):
+		if self.characters is not None:
+			for ch in self.characters:
+				ch.team = self

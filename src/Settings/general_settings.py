@@ -118,7 +118,8 @@ class AIId(Enum):
 	AI_ID_2 = 2
 	
 
-class Team(Enum):
+class TeamId(Enum):
+	NONE = 0
 	LEFT = 1
 	RIGHT = 2
 

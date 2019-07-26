@@ -63,21 +63,20 @@ class ThrowerManager:
 		return center + amplified_direction
 	
 	@staticmethod
-	def get_effective_smash_target_position(direction, character_position):
+	def get_effective_smash_target_position(direction, character):
 		"""
 		Affect target ball position during smash with character's direction and position.
 		
 		:param pygame.Vector3 direction: direction of smashing
-		:param pygame.Vector3 character_position: position of character on the court
+		:param Character character: character who smashes
 		:return: effective target position
 		:rtype pygame.Vector3:
 		"""
 		# TODO : use x direction to orient smash ?
-		# TODO : use character attribute "is_in_left_side" for instance
 		# center
 		center = Vector3(SMASH_CENTER)
-		center.x = character_position.x
-		if character_position.y > 0:
+		center.x = character.position.x
+		if character.team.id == TeamId.RIGHT:
 			center.y *= -1
 		
 		# control
@@ -171,7 +170,7 @@ class ThrowerManager:
 				ball.add_team_touch(character)
 			# smash (during a jump)
 			elif ev.throwing_type == ThrowingType.SMASH and not ball.will_be_served:
-				target_position = self.get_effective_smash_target_position(direction, char_position)
+				target_position = self.get_effective_smash_target_position(direction, character)
 				self.smash_ball(ball, ball.position, target_position)
 				ball.add_team_touch(character)
 			# serve

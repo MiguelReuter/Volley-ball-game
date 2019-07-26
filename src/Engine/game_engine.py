@@ -3,7 +3,7 @@
 import pygame as pg
 
 from Settings import *
-from Game import Ball, Character, Court, CharacterStates
+from Game import Ball, Team, Character, Court, CharacterStates
 
 from Engine.Actions import ActionObject
 from Engine.AI.ai_manager import AIManager
@@ -58,9 +58,13 @@ class GameEngine(ActionObject):
 		self.ball = Ball(INITIAL_POS, BALL_RADIUS)
 		self.court = Court(COURT_DIM_Y, COURT_DIM_X, NET_HEIGHT_BTM, NET_HEIGHT_TOP)
 		char1 = Character((-2, -3.5, 0), player_id=PlayerId.PLAYER_ID_1)
-		char2 = Character((0, 5, 0), player_id=AIId.AI_ID_1, is_in_left_side=False)
+		char2 = Character((0, 5, 0), player_id=AIId.AI_ID_1)
 		self.characters = [char1, char2]
 		self.objects = [self.court, self.ball] + self.characters
+		
+		# teams
+		self.teams = {TeamId.LEFT: Team(characters_list=[char1], team_id=TeamId.LEFT),
+		              TeamId.RIGHT: Team(characters_list=[char2], team_id=TeamId.RIGHT)}
 		
 		# allowed pygame events
 		pg.event.set_blocked([i for i in range(pg.NUMEVENTS)])

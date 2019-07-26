@@ -33,40 +33,40 @@ class Ball(pg.sprite.DirtySprite):
 		self._current_team_touches = []
 	
 	def add_team_touch(self, character):
-		team = character.team
-		if len(self._current_team_touches) == 0 or self._current_team_touches[-1] != team:
-			self._current_team_touches = [team]
+		team_id = character.team.id
+		if len(self._current_team_touches) == 0 or self._current_team_touches[-1] != team_id:
+			self._current_team_touches = [team_id]
 		else:
-			self._current_team_touches.append(team)
+			self._current_team_touches.append(team_id)
 			if len(self._current_team_touches) > MAX_TOUCHES_NB:
 				# TODO : create form in settings for dict to pass in post(Event)
-				d = {"faulty_team": team, "rule_type": RuleType.TOUCHES_NB}
+				d = {"faulty_team": team_id, "rule_type": RuleType.TOUCHES_NB}
 				pg.event.post(pg.event.Event(RULES_BREAK_EVENT, d))
 				
 	def manage_touch_ground_rule(self):
 		if len(self._current_team_touches) == 0:
-			faulty_team = None
+			faulty_team_id = None
 		else:
-			last_team = self._current_team_touches[-1]
-			faulty_team = last_team
+			last_team_id = self._current_team_touches[-1]
+			faulty_team_id = last_team_id
 			
 			# if ball pos in good area for last team --> last team wins
 			game_engine = Engine.game_engine.GameEngine.get_instance()
 			court = game_engine.court
-			if (self.position.y < 0 and last_team == Team.RIGHT) or (self.position.y > 0 and last_team == Team.LEFT):
+			if (self.position.y < 0 and last_team_id == TeamId.RIGHT) or (self.position.y > 0 and last_team_id == TeamId.LEFT):
 				if abs(self.position.x) < court.h / 2 and abs(self.position.y) < court.w / 2:
-					faulty_team = Team.LEFT if last_team == Team.RIGHT else Team.RIGHT
+					faulty_team_id = TeamId.LEFT if last_team_id == TeamId.RIGHT else TeamId.RIGHT
 		
-		d = {"faulty_team": faulty_team, "rule_type": RuleType.GROUND}
+		d = {"faulty_team": faulty_team_id, "rule_type": RuleType.GROUND}
 		pg.event.post(pg.event.Event(RULES_BREAK_EVENT, d))
 		
 	def check_if_out_of_bounds(self):
 		game_engine = Engine.game_engine.GameEngine.get_instance()
 		court = game_engine.court
 		if abs(self.position.x) > 1.5 * court.h / 2 or abs(self.position.y) > 1.5 * court.w / 2:
-			faulty_team = self._current_team_touches[-1] if len(self._current_team_touches) > 0 else None
+			faulty_team_id = self._current_team_touches[-1] if len(self._current_team_touches) > 0 else None
 			
-			d = {"faulty_team": faulty_team, "rule_type": RuleType.OUT_OF_BOUNDS}
+			d = {"faulty_team": faulty_team_id, "rule_type": RuleType.OUT_OF_BOUNDS}
 			pg.event.post(pg.event.Event(RULES_BREAK_EVENT, d))
 	
 	def rules_reset(self):

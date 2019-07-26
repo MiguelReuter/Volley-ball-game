@@ -101,24 +101,22 @@ class Running(GameEngineState, ActionObject):
 				# game_engine.thrower_manager.throw_at_random_target_position(game_engine.ball, INITIAL_POS, WANTED_H)
 	
 	def update_rules(self, rules_break_events):
-
 		if len(rules_break_events) > 0:
 			ev = rules_break_events[-1]
 			faulty_team = ev.faulty_team
 			rule_type = ev.rule_type
 			print("rule:", rule_type, ", faulty team:", faulty_team)
-	
-			# TODO: update score
 
 			game_engine = Engine.game_engine.GameEngine.get_instance()
-			characters = game_engine.characters
-			if faulty_team is None:
-				self.give_service_for_character(characters[0])
+
+			winner_team_id = TeamId.LEFT if faulty_team == TeamId.RIGHT else TeamId.RIGHT
+			winner_team = game_engine.teams[winner_team_id]
 			
-			# get character in other team
-			for char in characters:
-				if char.team != faulty_team:
-					self.give_service_for_character(char)
+			# update score
+			winner_team.score += 1
+
+			# give service for team who wins point
+			self.give_service_for_character(winner_team.characters[0])
 					
 	def give_service_for_character(self, character):
 		game_engine = Engine.game_engine.GameEngine.get_instance()
@@ -127,7 +125,7 @@ class Running(GameEngineState, ActionObject):
 		
 		# set position and state for character
 		character.position = Vector3(CHARACTER_SERVING_POS)
-		if character.team == Team.LEFT:
+		if character.team.id == TeamId.LEFT:
 			character.position.y *= -1
 		character.state = CharacterStates.Serving(character)
 		
@@ -143,7 +141,7 @@ class Running(GameEngineState, ActionObject):
 			
 			# position
 			char.position = Vector3(CHARACTER_INITIAL_POS)
-			if char.team == Team.LEFT:
+			if char.team.id == TeamId.LEFT:
 				char.position.y *= -1
 			# state
 			char.state = CharacterStates.Idling(char)

@@ -26,7 +26,7 @@ def should_ai_run_to_the_ball(ai_entity):
 	if thrower_manager.current_trajectory.target_pos is not None:
 		target_pos = Vector3(thrower_manager.current_trajectory.target_pos)
 		# if ball will not reached same court side than character
-		if (target_pos.y > 0 and character.is_in_left_side) or (target_pos.y < 0 and not character.is_in_left_side):
+		if (target_pos.y > 0 and character.team.id == TeamId.LEFT) or (target_pos.y < 0 and character.team.id == TeamId.RIGHT):
 			return False
 		# TODO: implement other checks (game rules): if pass number < MAX_PASS_NUMBER...
 		return True
