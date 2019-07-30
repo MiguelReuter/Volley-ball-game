@@ -62,7 +62,8 @@ class Character(ActionObject):
 		:return: None
 		"""
 		self.position += Vector3(dxyz)
-
+		self.limit_displacement_on_court()
+	
 	def move(self, direction, dt):
 		"""
 		Move object along a specified direction and amount of time.
@@ -78,6 +79,30 @@ class Character(ActionObject):
 		"""
 		dxyz = 0.001 * dt * direction * self.max_velocity
 		self.move_rel(dxyz)
+	
+	def limit_displacement_on_court(self):
+		new_pos = self.position
+		
+		# net
+		if self.team.id == TeamId.LEFT:
+			if self.collider.size3.y / 2 + self.collider.center.y + self.collider_relative_position.y > 0:
+				new_pos.y = -self.collider.size3.y / 2 - self.collider_relative_position.y
+		else:
+			new_pos.y = max(self.collider.size3.y / 2, new_pos.y)
+		
+		# out of court
+		f = 1.5
+		game_engine = Engine.game_engine.GameEngine.get_instance()
+		court = game_engine.court
+		if self.team.id == TeamId.LEFT:
+			new_pos.y = max(-f * court.w / 2, new_pos.y)
+		else:
+			new_pos.y = min(f * court.w / 2, new_pos.y)
+		
+		new_pos.x = max(-f * court.h / 2, new_pos.x)
+		new_pos.x = min(f * court.h / 2, new_pos.x)
+		
+		self.position = new_pos
 		
 	def update_actions(self, action_events, **kwargs):
 		dt = kwargs["dt"] if "dt" in kwargs.keys() else 0

@@ -116,7 +116,7 @@ class Running(GameEngineState, ActionObject):
 			winner_team.score += 1
 
 			# give service for team who wins point
-			self.give_service_for_character(winner_team.characters[0])
+			#self.give_service_for_character(winner_team.characters[0])
 					
 	def give_service_for_character(self, character):
 		game_engine = Engine.game_engine.GameEngine.get_instance()
