@@ -93,11 +93,12 @@ class Character(ActionObject):
 		
 		# net
 		if self.team.id == TeamId.LEFT:
-			if self.collider.size3.y / 2 + self.collider.center.y + self.collider_relative_position.y > 0:
+			if self.collider.get_bound_coords(axis=1, m_to_p=True) + self.collider_relative_position.y > 0:
 				new_pos.y = -self.collider.size3.y / 2 - self.collider_relative_position.y
 		else:
-			new_pos.y = max(self.collider.size3.y / 2, new_pos.y)
-		
+			if self.collider.get_bound_coords(axis=1, m_to_p=False) + self.collider_relative_position.y < 0:
+				new_pos.y = self.collider.size3.y / 2 - self.collider_relative_position.y
+
 		# out of court
 		f = 1.5
 		game_engine = Engine.game_engine.GameEngine.get_instance()
