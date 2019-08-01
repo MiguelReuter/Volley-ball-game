@@ -16,12 +16,12 @@ def test_move_rel(character):
 	assert character.collider.center == Vector3() + character.collider_relative_position
 
 	# move
-	character.move_rel(Vector3(0, 1, 0.1))
+	character.move_rel(Vector3(0, 1, 0.1), free_displacement=True)
 	assert character.position == Vector3(0, 1, 0.1)
 	assert character.collider.center == Vector3(0, 1, 0.1) + character.collider_relative_position
 
 	# move
-	character.move_rel(Vector3(-0.2, 0, 0))
+	character.move_rel(Vector3(-0.2, 0, 0), free_displacement=True)
 	assert character.position == Vector3(-0.2, 1, 0.1)
 	assert character.collider.center == Vector3(-0.2, 1, 0.1) + character.collider_relative_position
 
@@ -31,13 +31,13 @@ def test_move(character):
 	dt = 1000
 
 	# move
-	character.move(direction, dt)
+	character.move(direction, dt, free_displacement=True)
 	assert character.position == Vector3(4, 0, 0)
 	assert character.collider.center == Vector3(4, 0, 0) + character.collider_relative_position
 
 	# move
 	direction = Vector3(0, 2, 0)
-	character.move(direction, dt)
+	character.move(direction, dt, free_displacement=True)
 	assert character.position == Vector3(4, 8, 0)
 	assert character.collider.center == Vector3(4, 8, 0) + character.collider_relative_position
 
@@ -67,9 +67,9 @@ def test_change_collider(character):
 	# move, change collider, move again and reset collider
 	direction = Vector3(0, 1, 0)
 
-	character.move(Vector3(1, 0, 0), 1000)
+	character.move(Vector3(1, 0, 0), 1000, free_displacement=True)
 	character.set_diving_collider(direction)
-	character.move(Vector3(0, 1, 0), 500)
+	character.move(Vector3(0, 1, 0), 500, free_displacement=True)
 	character.set_default_collider()
 	assert character.collider.size3 == coll_original_size
 	assert character.collider.center == coll_original_center + character.max_velocity * Vector3(1, 0.5, 0)

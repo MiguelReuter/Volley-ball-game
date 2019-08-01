@@ -101,7 +101,7 @@ class Running(GameEngineState, ActionObject):
 				# game_engine.thrower_manager.throw_at_random_target_position(game_engine.ball, INITIAL_POS, WANTED_H)
 	
 	def update_rules(self, rules_break_events):
-		if len(rules_break_events) > 0:
+		if ENABLE_RULES and len(rules_break_events) > 0:
 			ev = rules_break_events[-1]
 			faulty_team = ev.faulty_team
 			rule_type = ev.rule_type
@@ -116,7 +116,7 @@ class Running(GameEngineState, ActionObject):
 			winner_team.score += 1
 
 			# give service for team who wins point
-			#self.give_service_for_character(winner_team.characters[0])
+			self.give_service_for_character(winner_team.characters[0])
 					
 	def give_service_for_character(self, character):
 		game_engine = Engine.game_engine.GameEngine.get_instance()

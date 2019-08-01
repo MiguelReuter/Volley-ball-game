@@ -130,10 +130,11 @@ class RuleType(Enum):
 	GROUND = 2
 	OUT_OF_BOUNDS = 3
 	UNDER_NET = 4
-	
-	
-MAX_TOUCHES_NB = 3
 
+
+MAX_TOUCHES_NB = 3
+FREE_DISPLACEMENT = False
+ENABLE_RULES = True
 	
 # DIRECTORIES
 FONT_DIR = "../assets/font/PressStart2P.ttf"

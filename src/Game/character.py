@@ -54,17 +54,19 @@ class Character(ActionObject):
 		
 		return [prev_shadow_rect.union(self.rect_shadow), prev_rect.union(self.rect)]
 
-	def move_rel(self, dxyz):
+	def move_rel(self, dxyz, free_displacement=FREE_DISPLACEMENT):
 		"""
 		Move object with a certain displacement.
 
 		:param pygame.Vector3 dxyz: displacement
+		:param bool free_displacement: True if displacement will be not limited on court
 		:return: None
 		"""
 		self.position += Vector3(dxyz)
-		self.limit_displacement_on_court()
+		if not free_displacement:
+			self.limit_displacement_on_court()
 	
-	def move(self, direction, dt):
+	def move(self, direction, dt, free_displacement=FREE_DISPLACEMENT):
 		"""
 		Move object along a specified direction and amount of time.
 
@@ -73,14 +75,20 @@ class Character(ActionObject):
 			- :var self.max_velocity:
 			- :var dt:
 
-		:param pygame.Vector3 direction: direction of displacement.
-		:param float dt: amount of time in ms. Usually, dt is the time between 2 frames.
+		:param pygame.Vector3 direction: direction of displacement
+		:param float dt: amount of time in ms. Usually, dt is the time between 2 frames
+		:param bool free_displacement: True if displacement will be not limited on court
 		:return: None
 		"""
 		dxyz = 0.001 * dt * direction * self.max_velocity
-		self.move_rel(dxyz)
+		self.move_rel(dxyz, free_displacement)
 	
 	def limit_displacement_on_court(self):
+		"""
+		Limit displacement on court. Called by move_rel method.
+
+		:return: None
+		"""
 		new_pos = self.position
 		
 		# net
