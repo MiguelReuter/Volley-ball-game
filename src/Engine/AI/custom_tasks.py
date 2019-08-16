@@ -22,9 +22,10 @@ def should_ai_run_to_the_ball(ai_entity):
 	character = ai_entity.character
 	
 	thrower_manager = ThrowerManager.get_instance()
-	
-	if thrower_manager.current_trajectory.target_pos is not None:
-		target_pos = Vector3(thrower_manager.current_trajectory.target_pos)
+	current_trajectory = thrower_manager.current_trajectory
+
+	if current_trajectory is not None and current_trajectory.target_pos is not None:
+		target_pos = Vector3(current_trajectory.target_pos)
 		# if ball will not reached same court side than character
 		if (target_pos.y > 0 and character.team.id == TeamId.LEFT) or (target_pos.y < 0 and character.team.id == TeamId.RIGHT):
 			return False

@@ -3,6 +3,7 @@
 import pygame as pg
 
 import Engine.game_engine
+from Engine.Trajectory import ThrowerManager
 from Engine.Actions import ActionObject
 from Game import CharacterStates
 from Settings import *
@@ -128,11 +129,10 @@ class Running(GameEngineState, ActionObject):
 		if character.team.id == TeamId.LEFT:
 			character.position.y *= -1
 		character.state = CharacterStates.Serving(character)
-		
-		game_engine.ball.rules_reset()
-		game_engine.ball.will_be_served = True
-		game_engine.ball.position = character.get_hands_position()
-		
+
+		game_engine.ball.wait_to_be_served_by(character)
+		ThrowerManager.get_instance().current_trajectory = None
+
 	def reset_characters_pos_and_state(self):
 		game_engine = Engine.game_engine.GameEngine.get_instance()
 		

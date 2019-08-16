@@ -101,7 +101,7 @@ class GameEngine(ActionObject):
 		:return: None
 		"""
 		# ball initial velocity
-		self.thrower_manager.throw_ball(self.ball, INITIAL_POS, TARGET_POS, WANTED_H)
+		#self.thrower_manager.throw_ball(self.ball, INITIAL_POS, TARGET_POS, WANTED_H)
 		
 		while not self.done:
 			self.current_state.run(dt=self.dt)

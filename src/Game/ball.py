@@ -71,7 +71,12 @@ class Ball(pg.sprite.DirtySprite):
 	
 	def rules_reset(self):
 		self._current_team_touches = []
-	
+
+	def wait_to_be_served_by(self, character):
+		self.rules_reset()
+		self.will_be_served = True
+		self.position = character.get_hands_position()
+
 	@property
 	def position(self):
 		return self._position
