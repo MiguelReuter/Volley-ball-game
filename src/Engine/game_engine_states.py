@@ -45,6 +45,9 @@ class Running(GameEngineState, ActionObject):
 	def __init__(self):
 		ActionObject.__init__(self, add_to_objects_list=False)
 		self._pause_requested = False
+
+		game_engine = Engine.game_engine.GameEngine.get_instance()
+		self.give_service_for_character(game_engine.characters[0])
 	
 	def run(self, **kwargs):
 		dt = kwargs["dt"] if "dt" in kwargs.keys() else 0

@@ -49,9 +49,6 @@ class Idling(CharacterState):
 		:param kwargs: some other parameters
 		:return: None
 		"""
-		if self.character.team.id == TeamId.LEFT:
-			print("---------")
-			print(self.character.position.y)
 		pass
 	
 	def next(self, action_events, **kwargs):
@@ -105,9 +102,6 @@ class Running(CharacterState):
 		"""
 		dt = kwargs["dt"] if "dt" in kwargs.keys() else 0
 		direction = get_normalized_direction_requested(action_events)
-		if self.character.team.id == TeamId.LEFT:
-			print("---------")
-			print(self.character.position.y)
 		self.character.move(direction, dt)
 	
 	def next(self, action_events, **kwargs):

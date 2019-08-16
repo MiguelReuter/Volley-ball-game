@@ -27,8 +27,9 @@ class GameEngine(ActionObject):
 		return GameEngine.s_instance
 
 	def __init__(self):
-		ActionObject.__init__(self)
+		GameEngine.s_instance = self
 
+		ActionObject.__init__(self)
 		self.ai_manager = AIManager()
 		self.display_manager = DisplayManager()
 		self.input_manager = InputManager()
@@ -47,12 +48,10 @@ class GameEngine(ActionObject):
 		self._running_ticks = 0
 		self.frame_count = 0
 		
-		# state
-		self.current_state = GEStates.Running()
-
 		self._create()
 
-		GameEngine.s_instance = self
+		# state
+		self.current_state = GEStates.Running()
 
 	def _create(self):
 		self.ball = Ball(INITIAL_POS, BALL_RADIUS)
@@ -100,9 +99,6 @@ class GameEngine(ActionObject):
 		
 		:return: None
 		"""
-		# ball initial velocity
-		#self.thrower_manager.throw_ball(self.ball, INITIAL_POS, TARGET_POS, WANTED_H)
-		
 		while not self.done:
 			self.current_state.run(dt=self.dt)
 			self.current_state.next()
