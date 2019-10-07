@@ -123,6 +123,14 @@ def get_time_at_z(vz_0, z_0, z):
 	return (-b + sqrt(delta)) / (2 * a)
 
 
+def get_z_at_y(initial_velocity, initial_position, z_t, y):
+	a, b, c, _ = get_time_polynomial_fun(initial_velocity.z, initial_position.z, z_t)
+
+	if initial_velocity.y != 0:
+		t_y = (y - initial_position.y) / initial_velocity.y
+		z_at_y = -(a * t_y**2 + b * t_y) + initial_position.z
+		return z_at_y
+
 
 # TODO : /!\ method not used yet /!\
 """

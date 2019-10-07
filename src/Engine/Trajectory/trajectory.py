@@ -3,7 +3,7 @@
 from pygame import Vector3
 
 from Engine import game_engine
-from Engine.Trajectory.trajectory_solver import get_time_at_z
+from Engine.Trajectory.trajectory_solver import get_time_at_z, get_z_at_y
 from Settings import G
 
 
@@ -70,3 +70,6 @@ class Trajectory:
 		:rtype float:
 		"""
 		return get_time_at_z(self.initial_velocity.z, self.origin_pos.z, z)
+
+	def get_z_at_y(self, y):
+		return get_z_at_y(self.initial_velocity, self.origin_pos, self.target_pos.z, y)
