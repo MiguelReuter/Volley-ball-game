@@ -85,11 +85,17 @@ class Ball(pg.sprite.DirtySprite):
 				d = {"faulty_team": faulty_team_id, "rule_type": RuleType.UNDER_NET, "time_stamp": ge_ticks}
 				pg.event.post(pg.event.Event(RULES_BREAK_EVENT, d))
 
-	def rules_reset(self):
+	def reset_rules(self):
 		self._current_team_touches = []
 
+	def reset_colliding(self):
+		self.is_colliding_ground = False
+		self.is_colliding_net = False
+		self.is_colliding_character = False
+
 	def wait_to_be_served_by(self, character):
-		self.rules_reset()
+		self.reset_rules()
+		self.reset_colliding()
 		self.will_be_served = True
 		self.previous_position = character.get_hands_position()
 		self.position = character.get_hands_position()
@@ -125,7 +131,6 @@ class Ball(pg.sprite.DirtySprite):
 		self.velocity += Vector3(d_vel)
 
 	def update_rules(self):
-		# check rules
 		self.check_if_out_of_bounds()
 		self.check_if_under_net()
 
