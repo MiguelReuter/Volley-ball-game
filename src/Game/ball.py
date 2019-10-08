@@ -39,8 +39,9 @@ class Ball(pg.sprite.DirtySprite):
 		else:
 			self._current_team_touches.append(team_id)
 			if len(self._current_team_touches) > MAX_TOUCHES_NB:
+				ge_ticks = Engine.GameEngine.get_instance().get_running_ticks()
 				# TODO : create form in settings for dict to pass in post(Event)
-				d = {"faulty_team": team_id, "rule_type": RuleType.TOUCHES_NB}
+				d = {"faulty_team": team_id, "rule_type": RuleType.TOUCHES_NB, "time_stamp": ge_ticks}
 				pg.event.post(pg.event.Event(RULES_BREAK_EVENT, d))
 				
 	def manage_touch_ground_rule(self):
@@ -56,8 +57,9 @@ class Ball(pg.sprite.DirtySprite):
 			if (self.position.y < 0 and last_team_id == TeamId.RIGHT) or (self.position.y > 0 and last_team_id == TeamId.LEFT):
 				if abs(self.position.x) < court.h / 2 and abs(self.position.y) < court.w / 2:
 					faulty_team_id = TeamId.LEFT if last_team_id == TeamId.RIGHT else TeamId.RIGHT
-		
-		d = {"faulty_team": faulty_team_id, "rule_type": RuleType.GROUND}
+
+		ge_ticks = Engine.GameEngine.get_instance().get_running_ticks()
+		d = {"faulty_team": faulty_team_id, "rule_type": RuleType.GROUND, "time_stamp": ge_ticks}
 		pg.event.post(pg.event.Event(RULES_BREAK_EVENT, d))
 		
 	def check_if_out_of_bounds(self):
@@ -65,8 +67,8 @@ class Ball(pg.sprite.DirtySprite):
 		court = game_engine.court
 		if abs(self.position.x) > 1.5 * court.h / 2 or abs(self.position.y) > 1.5 * court.w / 2:
 			faulty_team_id = self._current_team_touches[-1] if len(self._current_team_touches) > 0 else None
-			
-			d = {"faulty_team": faulty_team_id, "rule_type": RuleType.OUT_OF_BOUNDS}
+			ge_ticks = Engine.GameEngine.get_instance().get_running_ticks()
+			d = {"faulty_team": faulty_team_id, "rule_type": RuleType.OUT_OF_BOUNDS, "time_stamp": ge_ticks}
 			pg.event.post(pg.event.Event(RULES_BREAK_EVENT, d))
 
 	def check_if_under_net(self):
@@ -79,8 +81,8 @@ class Ball(pg.sprite.DirtySprite):
 			if (self.previous_position.y < 0 and self.position.y > 0)\
 					or (self.previous_position.y > 0 and self.position.y < 0):
 				faulty_team_id = self._current_team_touches[-1] if len(self._current_team_touches) > 0 else None
-
-				d = {"faulty_team": faulty_team_id, "rule_type": RuleType.UNDER_NET}
+				ge_ticks = game_engine.get_running_ticks()
+				d = {"faulty_team": faulty_team_id, "rule_type": RuleType.UNDER_NET, "time_stamp": ge_ticks}
 				pg.event.post(pg.event.Event(RULES_BREAK_EVENT, d))
 
 	def rules_reset(self):

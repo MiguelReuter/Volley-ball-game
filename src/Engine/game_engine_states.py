@@ -45,6 +45,7 @@ class Running(GameEngineState, ActionObject):
 	def __init__(self):
 		ActionObject.__init__(self, add_to_objects_list=False)
 		self._pause_requested = False
+		self._pending_rule = None
 
 		game_engine = Engine.game_engine.GameEngine.get_instance()
 		self.give_service_for_character(game_engine.characters[0])
@@ -106,22 +107,26 @@ class Running(GameEngineState, ActionObject):
 				# game_engine.thrower_manager.throw_at_random_target_position(game_engine.ball, INITIAL_POS, WANTED_H)
 	
 	def update_rules(self, rules_break_events):
-		if ENABLE_RULES and len(rules_break_events) > 0:
-			ev = rules_break_events[-1]
-			faulty_team = ev.faulty_team
-			rule_type = ev.rule_type
-			print("rule:", rule_type, ", faulty team:", faulty_team)
-
+		if self._pending_rule is not None:
 			game_engine = Engine.game_engine.GameEngine.get_instance()
+			if game_engine.get_running_ticks() - self._pending_rule.time_stamp > PENDING_RULE_DURATION:
+				faulty_team = self._pending_rule.faulty_team
+				rule_type = self._pending_rule.rule_type
+				print("rule:", rule_type, ", faulty team:", faulty_team)
 
-			winner_team_id = TeamId.LEFT if faulty_team == TeamId.RIGHT else TeamId.RIGHT
-			winner_team = game_engine.teams[winner_team_id]
-			
-			# update score
-			winner_team.score += 1
+				winner_team_id = TeamId.LEFT if faulty_team == TeamId.RIGHT else TeamId.RIGHT
+				winner_team = game_engine.teams[winner_team_id]
 
-			# give service for team who wins point
-			self.give_service_for_character(winner_team.characters[0])
+				# update score
+				winner_team.score += 1
+
+				# give service for team who wins point
+				self.give_service_for_character(winner_team.characters[0])
+
+				self._pending_rule = None
+				return
+		if ENABLE_RULES and len(rules_break_events) > 0:
+			self._pending_rule = rules_break_events[-1]
 					
 	def give_service_for_character(self, character):
 		game_engine = Engine.game_engine.GameEngine.get_instance()
