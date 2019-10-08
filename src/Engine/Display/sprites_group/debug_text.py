@@ -13,8 +13,7 @@ class DebugText(pg.sprite.GroupSingle):
 	
 	def __init__(self):
 		pg.sprite.GroupSingle.__init__(self)
-		self.content = {"test": 45,
-		                "other test": "Hello"}
+		self.content = {}
 		self.font = pg.font.Font("../assets/font/PressStart2P.ttf", 8)
 		self.image = None
 		self.rect_list = []
@@ -41,6 +40,7 @@ class DebugText(pg.sprite.GroupSingle):
 		"""
 		for r in self.rect_list:
 			self.image.fill(BKGND_TRANSPARENCY_COLOR, r)
+		prev_rect_list = self.rect_list
 		
 		self.rect_list = []
 		x = 20
@@ -48,12 +48,19 @@ class DebugText(pg.sprite.GroupSingle):
 		key_max_length = 10
 		
 		# update content
-		self.content["ticks"] = Engine.game_engine.GameEngine.get_instance().get_running_ticks()
+		game_engine = Engine.game_engine.GameEngine.get_instance()
+		self.content["ticks"] = game_engine.get_running_ticks()
+		self.content["ball touches"] = game_engine.ball._current_team_touches
 		
 		# for each key in self.content dict, a new line
-		for k in self.content:
+		for i, k in enumerate(self.content):
 			k_str = k.ljust(key_max_length)
 			text_surface = self.font.render(k_str + ": " + str(self.content[k]), 0, DEBUG_TEXT_COLOR)
-			self.rect_list += [pg.Rect((x, y), text_surface.get_size())]
+			
+			rect = pg.Rect((x, y), text_surface.get_size())
+			if i < len(prev_rect_list):
+				rect.union_ip(prev_rect_list[i])
+				
+			self.rect_list.append(rect)
 			self.image.blit(text_surface, (x, y))
 			y += int(1.5 * self.font.get_height())

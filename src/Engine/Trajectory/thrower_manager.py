@@ -21,7 +21,7 @@ class ThrowerManager:
 		return ThrowerManager.s_instance
 
 	def __init__(self):
-		self._current_trajectory = Trajectory()
+		self._current_trajectory = None
 		
 		self.trajectory_changed = False
 		
@@ -63,21 +63,20 @@ class ThrowerManager:
 		return center + amplified_direction
 	
 	@staticmethod
-	def get_effective_smash_target_position(direction, character_position):
+	def get_effective_smash_target_position(direction, character):
 		"""
 		Affect target ball position during smash with character's direction and position.
 		
 		:param pygame.Vector3 direction: direction of smashing
-		:param pygame.Vector3 character_position: position of character on the court
+		:param Character character: character who smashes
 		:return: effective target position
 		:rtype pygame.Vector3:
 		"""
 		# TODO : use x direction to orient smash ?
-		# TODO : use character attribute "is_in_left_side" for instance
 		# center
 		center = Vector3(SMASH_CENTER)
-		center.x = character_position.x
-		if character_position.y > 0:
+		center.x = character.position.x
+		if character.team.id == TeamId.RIGHT:
 			center.y *= -1
 		
 		# control
@@ -114,23 +113,27 @@ class ThrowerManager:
 		
 		:return: None
 		"""
+
+		if self.current_trajectory is None:
+			return self.rects_list.copy()
+		
 		prev_rects_list = self.rects_list.copy()
 		self.rects_list = []
-		
+
 		# draw target position
 		target_pos = self.current_trajectory.target_pos
 		ground_pos = Vector3(target_pos)
 		ground_pos.z = 0
 		sph_rect = draw_sphere(target_pos, 0.1, col=(255, 255, 0))
 		line_rect = draw_line(target_pos, ground_pos)
-		
+
 		self.rects_list += [sph_rect, line_rect]
-		
+
 		# draw trajectory
 		debug_trajectory_pts = self.current_trajectory.debug_pts
 		for i in range(len(debug_trajectory_pts) - 1):
 			self.rects_list += [draw_line(debug_trajectory_pts[i], debug_trajectory_pts[i + 1], col=(255, 0, 255))]
-			
+
 		return [prev_rects_list[i].union(self.rects_list[i]) for i in range(len(prev_rects_list))]
 
 	def throw_at_random_target_position(self, ball, initial_pos, wanted_height, corner_1=None, corner_2=None):
@@ -161,21 +164,25 @@ class ThrowerManager:
 		for ev in throw_events:
 			direction = ev.direction
 			char_position = ev.position
+			character = ev.character
 			
 			# simple throw
 			if ev.throwing_type == ThrowingType.THROW and not ball.will_be_served:
 				velocity_efficiency = ev.velocity_efficiency
 				target_position = self.get_effective_target_position(direction, char_position)
 				self.throw_ball(ball, ball.position, target_position, velocity_efficiency=velocity_efficiency)
+				ball.add_team_touch(character)
 			# smash (during a jump)
 			elif ev.throwing_type == ThrowingType.SMASH and not ball.will_be_served:
-				target_position = self.get_effective_smash_target_position(direction, char_position)
+				target_position = self.get_effective_smash_target_position(direction, character)
 				self.smash_ball(ball, ball.position, target_position)
+				ball.add_team_touch(character)
 			# serve
 			elif ev.throwing_type == ThrowingType.SERVE:
 				ball.will_be_served = False
 				target_position = self.get_effective_serve_target_position(direction, char_position)
 				self.throw_ball(ball, ball.position, target_position, velocity_efficiency=1.0)
+				ball.add_team_touch(character)
 			# draft (after diving)
 			elif ev.throwing_type == ThrowingType.DRAFT:
 				velocity_efficiency = ev.velocity_efficiency
@@ -183,6 +190,7 @@ class ThrowerManager:
 				target_position.z = BALL_RADIUS
 				self.throw_ball(ball, ball.position, target_position, velocity_efficiency=velocity_efficiency,
 								wanted_height=DRAFT_THROW_HEIGHT)
+				ball.add_team_touch(character)
 
 	def throw_ball(self, ball, initial_pos, target_pos, wanted_height=4, **kwargs):
 		"""

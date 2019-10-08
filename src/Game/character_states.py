@@ -134,6 +134,8 @@ class Throwing(CharacterState):
 	def __init__(self, character, action_events=None, **kwargs):
 		super().__init__(character)
 		self.t0 = Engine.game_engine.GameEngine.get_instance().get_running_ticks()
+		self.has_thrown_yet = False
+
 		if action_events is None:
 			action_events = []
 		self.run(action_events, **kwargs)
@@ -146,12 +148,14 @@ class Throwing(CharacterState):
 		:param kwargs: some other parameters
 		:return: None
 		"""
-		if self.character.is_colliding_ball:
+		if self.character.is_colliding_ball and not self.has_thrown_yet:
+			self.has_thrown_yet = True
 			# throwing velocity efficiency
 			vel_eff = get_velocity_efficiency(Engine.game_engine.GameEngine.get_instance().get_running_ticks() - self.t0)
 			
 			direction = get_direction_requested(action_events)
 			event.post(event.Event(THROW_EVENT, {"throwing_type": ThrowingType.THROW,
+			                                     "character": self.character,
 			                                     "direction": direction,
 			                                     "position": self.character.position,
 			                                     "velocity_efficiency": vel_eff}))
@@ -200,6 +204,7 @@ class Serving(CharacterState):
 			self.has_served = True
 			direction = get_direction_requested(action_events)
 			event.post(event.Event(THROW_EVENT, {"throwing_type": ThrowingType.SERVE,
+			                                     "character": self.character,
 			                                     "direction": direction,
 			                                     "position": self.character.position}))
 
@@ -228,6 +233,7 @@ class Jumping(CharacterState):
 	def __init__(self, character, action_events=None, **kwargs):
 		super().__init__(character)
 		self.character.velocity = Vector3(0, 0, JUMP_VELOCITY)
+		self.has_smashed = False
 	
 	def run(self, action_events, **kwargs):
 		"""
@@ -237,9 +243,11 @@ class Jumping(CharacterState):
 		:param kwargs: some other parameters
 		:return: None
 		"""
-		if self.character.is_colliding_ball and is_throwing_requested(action_events):
+		if self.character.is_colliding_ball and is_throwing_requested(action_events) and not self.has_smashed:
+			self.has_smashed = True
 			direction = get_direction_requested(action_events)
 			event.post(event.Event(THROW_EVENT, {"throwing_type": ThrowingType.SMASH,
+			                                     "character": self.character,
 			                                     "direction": direction,
 			                                     "position": self.character.position}))
 
@@ -270,12 +278,13 @@ class Diving(CharacterState):
 	def __init__(self, character, action_events=None, **kwargs):
 		CharacterState.__init__(self, character)
 		self.t0 = Engine.game_engine.GameEngine.get_instance().get_running_ticks()
+		self.has_touch_ball = False
 		if action_events is None:
 			action_events = []
 
 		direction = get_normalized_direction_requested(action_events)
 		if direction.x == 0 and direction.y == 0:
-			direction.y = 1 if self.character.is_in_left_side else -1
+			direction.y = 1 if self.character.team.id == TeamId.LEFT else -1
 
 		self.character.velocity = DIVE_SPEED * direction
 		self.character.set_diving_collider(direction)
@@ -284,7 +293,8 @@ class Diving(CharacterState):
 		if Engine.game_engine.GameEngine.get_instance().get_running_ticks() - self.t0 > DIVE_SLIDE_DURATION:
 			self.character.velocity = Vector3()
 
-		if self.character.is_colliding_ball:
+		if self.character.is_colliding_ball and not self.has_touch_ball:
+			self.has_touch_ball = True
 			TOTAL_DURATION = DIVE_SLIDE_DURATION + DIVE_DURATION_FOR_STANDING_UP
 
 			x = (Engine.game_engine.GameEngine.get_instance().get_running_ticks() - self.t0) / TOTAL_DURATION
@@ -294,7 +304,8 @@ class Diving(CharacterState):
 			vel_eff = 1.0 if x < thr else 1.0 - alpha * (x - thr)
 
 			event.post(event.Event(THROW_EVENT, {"throwing_type": ThrowingType.DRAFT,
-												 "direction": get_normalized_direction_requested(action_events),
+			                                     "character": self.character,
+			                                     "direction": get_normalized_direction_requested(action_events),
 			                                     "position": self.character.position,
 												 "velocity_efficiency": vel_eff}))
 

@@ -10,7 +10,10 @@ class Collider:
 	
 	def draw_debug(self):
 		pass
-	
+
+	def get_bound_coords(self, axis=0, m_to_p=True):
+		pass
+
 	
 class SphereCollider(Collider):
 	def __init__(self, center, radius):
@@ -20,9 +23,18 @@ class SphereCollider(Collider):
 		
 	def draw_debug(self):
 		return debug3D_utils.draw_sphere(self.center, self.radius)
-		
+
+	def get_bound_coords(self, axis=0, m_to_p=True):
+		if m_to_p:
+			return self.center[axis] + self.radius
+		else:
+			return self.center[axis] - self.radius
+
 		
 class AABBCollider(Collider):
+	"""
+	AABB Collider centered to :var self.center:.
+	"""
 	def __init__(self, center, size3):
 		super().__init__()
 		self.center = center
@@ -30,7 +42,13 @@ class AABBCollider(Collider):
 		
 	def draw_debug(self):
 		return debug3D_utils.draw_aligned_axis_box(self.center, *self.size3)
-	
+
+	def get_bound_coords(self, axis=0, m_to_p=True):
+		if m_to_p:
+			return self.center[axis] + self.size3[axis] / 2
+		else:
+			return self.center[axis] - self.size3[axis] / 2
+
 
 def are_spheres_colliding(sphere_a, sphere_b):
 	"""

@@ -11,7 +11,7 @@ from Game.character_states import *
 
 
 class Character(ActionObject):
-	def __init__(self, position, player_id=PlayerId.PLAYER_ID_1, max_velocity=4, is_in_left_side=True):
+	def __init__(self, position, player_id=PlayerId.PLAYER_ID_1, max_velocity=4):
 		ActionObject.__init__(self, player_id)
 		self._position = Vector3(position)
 		self.previous_position = Vector3()
@@ -24,8 +24,8 @@ class Character(ActionObject):
 		self.velocity = Vector3()
 		self.direction = Vector3()
 		
-		self.is_in_left_side = is_in_left_side
-
+		self.team = Team()
+		
 		self.state = Idling(self)
 
 		self.set_default_collider()
@@ -54,16 +54,19 @@ class Character(ActionObject):
 		
 		return [prev_shadow_rect.union(self.rect_shadow), prev_rect.union(self.rect)]
 
-	def move_rel(self, dxyz):
+	def move_rel(self, dxyz, free_displacement=FREE_DISPLACEMENT):
 		"""
 		Move object with a certain displacement.
 
 		:param pygame.Vector3 dxyz: displacement
+		:param bool free_displacement: True if displacement will be not limited on court
 		:return: None
 		"""
 		self.position += Vector3(dxyz)
-
-	def move(self, direction, dt):
+		if not free_displacement:
+			self.limit_displacement_on_court()
+	
+	def move(self, direction, dt, free_displacement=FREE_DISPLACEMENT):
 		"""
 		Move object along a specified direction and amount of time.
 
@@ -72,12 +75,43 @@ class Character(ActionObject):
 			- :var self.max_velocity:
 			- :var dt:
 
-		:param pygame.Vector3 direction: direction of displacement.
-		:param float dt: amount of time in ms. Usually, dt is the time between 2 frames.
+		:param pygame.Vector3 direction: direction of displacement
+		:param float dt: amount of time in ms. Usually, dt is the time between 2 frames
+		:param bool free_displacement: True if displacement will be not limited on court
 		:return: None
 		"""
 		dxyz = 0.001 * dt * direction * self.max_velocity
-		self.move_rel(dxyz)
+		self.move_rel(dxyz, free_displacement)
+	
+	def limit_displacement_on_court(self):
+		"""
+		Limit displacement on court. Called by move_rel method.
+
+		:return: None
+		"""
+		new_pos = self.position
+		
+		# net
+		if self.team.id == TeamId.LEFT:
+			if self.collider.get_bound_coords(axis=1, m_to_p=True) + self.collider_relative_position.y > 0:
+				new_pos.y = -self.collider.size3.y / 2 - self.collider_relative_position.y
+		else:
+			if self.collider.get_bound_coords(axis=1, m_to_p=False) + self.collider_relative_position.y < 0:
+				new_pos.y = self.collider.size3.y / 2 - self.collider_relative_position.y
+
+		# out of court
+		f = 1.5
+		game_engine = Engine.game_engine.GameEngine.get_instance()
+		court = game_engine.court
+		if self.team.id == TeamId.LEFT:
+			new_pos.y = max(-f * court.w / 2, new_pos.y)
+		else:
+			new_pos.y = min(f * court.w / 2, new_pos.y)
+		
+		new_pos.x = max(-f * court.h / 2, new_pos.x)
+		new_pos.x = min(f * court.h / 2, new_pos.x)
+		
+		self.position = new_pos
 		
 	def update_actions(self, action_events, **kwargs):
 		dt = kwargs["dt"] if "dt" in kwargs.keys() else 0
@@ -105,7 +139,7 @@ class Character(ActionObject):
 		"""
 		dh = Vector3(0, 0, self.h)
 		dh.y = self.w / 2
-		if not self.is_in_left_side:
+		if not self.team.id == TeamId.LEFT:
 			dh.y *= -1
 		return self.position + dh
 
@@ -151,3 +185,29 @@ class Character(ActionObject):
 		
 	def reset(self):
 		self.set_default_collider()
+		self.velocity = Vector3()
+
+
+class Team:
+	def __init__(self, team_id=TeamId.NONE, characters_list=None):
+		self.characters = characters_list
+		self.score = 0
+		self.id = team_id
+		self.set_team_to_characters()
+	
+	def reset(self, **kwargs):
+		k = kwargs.keys()
+		
+		self.characters = kwargs["characters"] if "characters" in k else None
+		self.set_team_to_characters()
+		
+		self.score = kwargs["score"] if "score" in k else 0
+		self.id = kwargs["score"] if "score" in k else TeamId.NONE
+	
+	def add_score(self, val=1):
+		self.score += val
+	
+	def set_team_to_characters(self):
+		if self.characters is not None:
+			for ch in self.characters:
+				ch.team = self
