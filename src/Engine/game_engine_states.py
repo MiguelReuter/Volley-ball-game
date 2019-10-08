@@ -54,6 +54,7 @@ class Running(GameEngineState, ActionObject):
 		game_engine = Engine.game_engine.GameEngine.get_instance()
 		
 		# PHYSICS
+		game_engine.ball.update_rules()
 		game_engine.ball.update_physics(dt)
 		for char in game_engine.characters:
 			char.update_physics(dt)

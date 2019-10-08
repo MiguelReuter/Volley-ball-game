@@ -68,13 +68,28 @@ class Ball(pg.sprite.DirtySprite):
 			
 			d = {"faulty_team": faulty_team_id, "rule_type": RuleType.OUT_OF_BOUNDS}
 			pg.event.post(pg.event.Event(RULES_BREAK_EVENT, d))
-	
+
+	def check_if_under_net(self):
+		game_engine = Engine.game_engine.GameEngine.get_instance()
+		court = game_engine.court
+
+		# check ball height
+		if self.position.z + self.radius < court.net_z1:
+			# check if ball crossed net plane
+			if (self.previous_position.y < 0 and self.position.y > 0)\
+					or (self.previous_position.y > 0 and self.position.y < 0):
+				faulty_team_id = self._current_team_touches[-1] if len(self._current_team_touches) > 0 else None
+
+				d = {"faulty_team": faulty_team_id, "rule_type": RuleType.UNDER_NET}
+				pg.event.post(pg.event.Event(RULES_BREAK_EVENT, d))
+
 	def rules_reset(self):
 		self._current_team_touches = []
 
 	def wait_to_be_served_by(self, character):
 		self.rules_reset()
 		self.will_be_served = True
+		self.previous_position = character.get_hands_position()
 		self.position = character.get_hands_position()
 
 	@property
@@ -106,15 +121,17 @@ class Ball(pg.sprite.DirtySprite):
 	
 	def add_velocity(self, d_vel):
 		self.velocity += Vector3(d_vel)
-	
-	def update_physics(self, dt):
-		self.previous_position = Vector3(self.position)
-		
+
+	def update_rules(self):
+		# check rules
 		self.check_if_out_of_bounds()
-		
+		self.check_if_under_net()
+
 		if self.is_colliding_ground:
 			self.manage_touch_ground_rule()
-		
+
+	def update_physics(self, dt):
+		self.previous_position = Vector3(self.position)
 		if not self.will_be_served:
 			self.add_velocity(Vector3(0, 0, -0.001 * dt * G))
 			self.move_rel(0.001 * dt * self.velocity)
