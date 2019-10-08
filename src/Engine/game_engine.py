@@ -51,7 +51,8 @@ class GameEngine(ActionObject):
 		self._create()
 
 		# state
-		self.current_state = GEStates.Running()
+		self.running_state_instance = GEStates.Running()
+		self.current_state = self.running_state_instance
 
 	def _create(self):
 		self.ball = Ball(INITIAL_POS, BALL_RADIUS)
