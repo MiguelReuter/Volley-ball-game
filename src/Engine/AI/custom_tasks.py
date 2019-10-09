@@ -92,6 +92,45 @@ class MoveToTargetPosition(LeafTask):
 		pass
 
 	def do_action(self):
+		thrower_manager = ThrowerManager.get_instance()
+
+		trajectory = thrower_manager.current_trajectory
+		if trajectory is not None:
+			# remaining time in ms before ball touches ground (with marge m)
+			m = 0.2
+			final_t = int(trajectory.t0 + 1000 * trajectory.get_time_at_z(BALL_RADIUS + m))
+			delta_t = final_t - game_engine.GameEngine.get_instance().get_running_ticks()
+
+			# distance between character and target position
+			# TODO: add trajectory.get_pos_at_t(ti) instead of target_position (not really target_position with marge m)
+			delta_xy = self.ai_entity.blackboard["target_position"] - self.ai_entity.character.position
+			delta_xy.z = 0
+			dis = delta_xy.length()
+
+			# distance travelled by running or diving, shape of collider taken in account
+			run_distance = RUN_SPEED * delta_t / 1000 + CHARACTER_W / 2
+			dive_distance = DIVE_SPEED * min(delta_t, DIVE_SLIDE_DURATION) / 1000 + CHARACTER_H - CHARACTER_W / 2
+
+			# print("run: ", run_distance, "dive: ", dive_distance, "distance: ", d)
+			if run_distance < dis <= dive_distance:
+				# dive action event will be posted
+				dive_actions = [PlayerAction.DIVE]
+
+				if delta_xy.x < -CHARACTER_W / 2:
+					dive_actions.append(PlayerAction.MOVE_UP)
+				elif delta_xy.x > CHARACTER_W / 2:
+					dive_actions.append(PlayerAction.MOVE_DOWN)
+				if delta_xy.y < -CHARACTER_W / 2:
+					dive_actions.append(PlayerAction.MOVE_LEFT)
+				elif delta_xy.y > CHARACTER_W / 2:
+					dive_actions.append(PlayerAction.MOVE_RIGHT)
+
+				for act in dive_actions:
+					ev = pg.event.Event(ACTION_EVENT, {"player_id": self.ai_entity.character.player_id, "action": act})
+					pg.event.post(ev)
+
+				self.get_control().finish_with_success()
+
 		pos_is_reached = move_to(self.ai_entity, self.ai_entity.blackboard["target_position"])
 
 		if pos_is_reached:
