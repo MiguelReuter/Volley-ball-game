@@ -48,11 +48,11 @@ class GameEngine(ActionObject):
 		self._running_ticks = 0
 		self.frame_count = 0
 
-		self._create()
+		# states
+		self._states = {}
+		self._current_state_type = None
 
-		# state
-		self.running_state_instance = GEStates.Running()
-		self.current_state = self.running_state_instance
+		self._create()
 
 	def _create(self):
 		self.ball = Ball(INITIAL_POS, BALL_RADIUS)
@@ -79,6 +79,18 @@ class GameEngine(ActionObject):
 			if char.player_id in AIId.__iter__():
 				self.ai_manager.add_entity(char)
 
+		# states
+		self._states[GEStateType.RUNNING] = GEStates.Running()
+		self._states[GEStateType.PAUSING] = GEStates.Pausing()
+
+		self._current_state_type = GEStateType.RUNNING
+
+	def set_current_state(self, state_type):
+		if state_type in self._states.keys():
+			self._current_state_type = state_type
+		else:
+			print("GEStateType {} not in self._states".format(state_type))
+
 	def update_actions(self, action_events, **kwargs):
 		for ev in action_events:
 			if ev.action == PlayerAction.QUIT:
@@ -101,8 +113,9 @@ class GameEngine(ActionObject):
 		:return: None
 		"""
 		while not self.done:
-			self.current_state.run(dt=self.dt)
-			self.current_state.next()
+			current_state = self._states[self._current_state_type]
+			current_state.run(dt=self.dt)
+			current_state.next()
 
 		print("run with {} fps".format(self.get_average_fps()))
 

@@ -136,7 +136,15 @@ MAX_TOUCHES_NB = 3
 FREE_DISPLACEMENT = False
 ENABLE_RULES = True
 PENDING_RULE_DURATION = 1000
-	
+
+
+# GAME ENGINE STATES
+class GEStateType(Enum):
+	PAUSING = 0
+	RUNNING = 1
+	ON_MENU = 2
+
+
 # DIRECTORIES
 FONT_DIR = "../assets/font/PressStart2P.ttf"
 
