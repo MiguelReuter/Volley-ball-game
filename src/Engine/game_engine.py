@@ -85,11 +85,14 @@ class GameEngine(ActionObject):
 
 		self._current_state_type = GEStateType.RUNNING
 
-	def set_current_state(self, state_type):
+	def set_current_state_type(self, state_type):
 		if state_type in self._states.keys():
 			self._current_state_type = state_type
 		else:
 			print("GEStateType {} not in self._states".format(state_type))
+
+	def get_current_state(self):
+		return self._states[self._current_state_type]
 
 	def update_actions(self, action_events, **kwargs):
 		for ev in action_events:

@@ -91,7 +91,7 @@ class Running(GameEngineState, ActionObject):
 		
 	def next(self, **kwargs):
 		if self._pause_requested:
-			Engine.game_engine.GameEngine.get_instance().set_current_state(GEStateType.PAUSING)
+			Engine.game_engine.GameEngine.get_instance().set_current_state_type(GEStateType.PAUSING)
 			self._pause_requested = False
 			print("game paused")
 	
@@ -182,7 +182,7 @@ class Pausing(GameEngineState, ActionObject):
 	
 	def next(self, **kwargs):
 		if self._resume_requested:
-			Engine.game_engine.GameEngine.get_instance().set_current_state(GEStateType.RUNNING)
+			Engine.game_engine.GameEngine.get_instance().set_current_state_type(GEStateType.RUNNING)
 			print("game resumed")
 			self._resume_requested = False
 	
