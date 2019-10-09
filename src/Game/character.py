@@ -11,7 +11,7 @@ from Game.character_states import *
 
 
 class Character(ActionObject):
-	def __init__(self, position, player_id=PlayerId.PLAYER_ID_1, max_velocity=4):
+	def __init__(self, position=(0, 0, 0), player_id=PlayerId.PLAYER_ID_1, max_velocity=4):
 		ActionObject.__init__(self, player_id)
 		self._position = Vector3(position)
 		self.previous_position = Vector3()

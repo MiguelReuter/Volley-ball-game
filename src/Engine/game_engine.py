@@ -48,6 +48,12 @@ class GameEngine(ActionObject):
 		self._running_ticks = 0
 		self.frame_count = 0
 
+		# game objects
+		self.ball = None
+		self.court = None
+		self.characters = []
+		self.teams = {}
+
 		# states
 		self._states = {}
 		self._current_state_type = None
@@ -55,17 +61,6 @@ class GameEngine(ActionObject):
 		self._create()
 
 	def _create(self):
-		self.ball = Ball(INITIAL_POS, BALL_RADIUS)
-		self.court = Court(COURT_DIM_Y, COURT_DIM_X, NET_HEIGHT_BTM, NET_HEIGHT_TOP)
-		char1 = Character((-2, -3.5, 0), player_id=PlayerId.PLAYER_ID_1)
-		char2 = Character((0, 5, 0), player_id=AIId.AI_ID_1)
-		self.characters = [char1, char2]
-		self.objects = [self.court, self.ball] + self.characters
-
-		# teams
-		self.teams = {TeamId.LEFT: Team(characters_list=[char1], team_id=TeamId.LEFT),
-		              TeamId.RIGHT: Team(characters_list=[char2], team_id=TeamId.RIGHT)}
-
 		# allowed pygame events
 		pg.event.set_blocked([i for i in range(pg.NUMEVENTS)])
 		pg.event.set_allowed([pg.KEYDOWN, pg.KEYUP,
@@ -74,10 +69,7 @@ class GameEngine(ActionObject):
 							  pg.QUIT, pg.VIDEORESIZE,
 		                      ACTION_EVENT, THROW_EVENT, RULES_BREAK_EVENT])
 
-		# AI
-		for char in self.characters:
-			if char.player_id in AIId.__iter__():
-				self.ai_manager.add_entity(char)
+		self.new_game([PlayerId.PLAYER_ID_1, AIId.AI_ID_1])
 
 		# states
 		self._states[GEStateType.RUNNING] = GEStates.Running()
@@ -93,6 +85,29 @@ class GameEngine(ActionObject):
 
 	def get_current_state(self):
 		return self._states[self._current_state_type]
+
+	def new_game(self, player_id_list):
+		self.ball = Ball(INITIAL_POS, BALL_RADIUS)
+		self.court = Court(COURT_DIM_Y, COURT_DIM_X, NET_HEIGHT_BTM, NET_HEIGHT_TOP)
+		self.characters = []
+
+		for pl_id in player_id_list:
+			char = Character(player_id=pl_id)
+			self.characters.append(char)
+			# AI
+			if pl_id in AIId.__iter__():
+				self.ai_manager.add_entity(char)
+
+		self.objects = [self.court, self.ball] + self.characters
+
+		# teams
+		l_char = self.characters[0:len(self.characters)//2]
+		l_team = Team(characters_list=l_char, team_id=TeamId.LEFT)
+
+		r_char = self.characters[len(self.characters)//2:]
+		r_team = Team(characters_list=r_char, team_id=TeamId.RIGHT)
+
+		self.teams = {TeamId.LEFT: l_team, TeamId.RIGHT: r_team}
 
 	def update_actions(self, action_events, **kwargs):
 		for ev in action_events:
