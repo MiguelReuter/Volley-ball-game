@@ -28,6 +28,9 @@ class AIManager:
 
 		self.entities += [new_entity]
 
+	def reset(self):
+		self.entities = []
+
 	def update(self):
 		"""
 		Update all AI Entities.

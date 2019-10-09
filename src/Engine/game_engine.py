@@ -86,8 +86,11 @@ class GameEngine(ActionObject):
 	def get_current_state(self):
 		return self._states[self._current_state_type]
 
-	def new_game(self, player_id_list):
-		self.ball = Ball(INITIAL_POS, BALL_RADIUS)
+	def new_game(self, player_id_list=None):
+		self.ai_manager.reset()
+		
+		player_id_list = player_id_list if player_id_list is not None else [AIId.AI_ID_1, AIId.AI_ID_2]
+		self.ball = Ball(radius=BALL_RADIUS)
 		self.court = Court(COURT_DIM_Y, COURT_DIM_X, NET_HEIGHT_BTM, NET_HEIGHT_TOP)
 		self.characters = []
 

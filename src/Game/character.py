@@ -11,10 +11,10 @@ from Game.character_states import *
 
 
 class Character(ActionObject):
-	def __init__(self, position=(0, 0, 0), player_id=PlayerId.PLAYER_ID_1, max_velocity=4):
+	def __init__(self, position=None, player_id=PlayerId.PLAYER_ID_1, max_velocity=4):
 		ActionObject.__init__(self, player_id)
-		self._position = Vector3(position)
-		self.previous_position = Vector3()
+		self._position = Vector3(position) if position is not None else Vector3()
+		self.previous_position = Vector3(self._position)
 		self.w = CHARACTER_W
 		self.h = CHARACTER_H
 		self.collider_relative_position = Vector3()

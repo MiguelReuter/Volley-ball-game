@@ -10,13 +10,13 @@ import Engine
 
 
 class Ball(pg.sprite.DirtySprite):
-	def __init__(self, position, radius=0.5, sprite_groups=[]):
+	def __init__(self, position=None, radius=0.5, sprite_groups=[]):
 		pg.sprite.DirtySprite.__init__(self, *sprite_groups)
 		self.radius = radius
 		self.acceleration = Vector3()
 		self.velocity = Vector3()
-		self._position = Vector3(position)
-		self.previous_position = Vector3(position)
+		self._position = Vector3(position) if position is not None else Vector3()
+		self.previous_position = Vector3(self._position)
 		self.collider = SphereCollider(position, radius)
 		
 		self.is_colliding_ground = False
