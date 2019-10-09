@@ -55,6 +55,7 @@ THROW_DURATION = 500    				# in ms
 SERVE_DURATION = 500    				# in ms
 JUMP_VELOCITY = 8       				# in m/s
 SMASH_VELOCITY = 15     				# in m/s
+RUN_SPEED = 4							# in m/s
 DIVE_SPEED = 4							# in m/s
 DIVE_SLIDE_DURATION = 250				# in ms
 DIVE_DURATION_FOR_STANDING_UP = 500		# in ms
