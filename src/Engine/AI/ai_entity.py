@@ -76,12 +76,18 @@ class AIEntity:
 		wait_and_serve.get_control().add(Wait(self, duration=500))
 		wait_and_serve.get_control().add(RandomThrow(self))
 		wait_and_serve = WaitAndServe(self, wait_and_serve)
-		
+
+		# replace and idling
+		replace_and_idling = Sequence(self)
+		replace_and_idling.get_control().add(MoveToIdlingPosition(self))
+		replace_and_idling.get_control().add(Idle(self))
+		replace_and_idling = MoveAndIdleDecorator(self, replace_and_idling)
+
 		# root
 		b_tree = Selector(self)
 		b_tree.get_control().add(run_and_throw_ball)
 		b_tree.get_control().add(wait_and_serve)
-		b_tree.get_control().add(Idle(self))
+		b_tree.get_control().add(replace_and_idling)
 		b_tree = ResetDecorator(self, b_tree)
 		
 		self.behaviour_tree = b_tree

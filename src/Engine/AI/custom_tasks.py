@@ -70,46 +70,66 @@ class FindBallTargetPosition(LeafTask):
 			self.get_control().finish_with_success()
 
 
+def move_to(ai_entity, target, thr=0.1):
+	character = ai_entity.character
+
+	dxy = target - character.position
+	events_map = {PlayerAction.MOVE_UP: dxy[0] < -thr, PlayerAction.MOVE_DOWN: dxy[0] > thr,
+				  PlayerAction.MOVE_RIGHT: dxy[1] > thr, PlayerAction.MOVE_LEFT: dxy[1] < -thr}
+	for action in events_map.keys():
+		if events_map[action]:
+			ev = pg.event.Event(ACTION_EVENT, {"player_id": character.player_id, "action": action})
+			pg.event.post(ev)
+
+	ai_entity.end_frame()
+
+	# if position reached
+	return abs(dxy[0]) < thr and abs(dxy[1]) < thr
+
+
 class MoveToTargetPosition(LeafTask):
 	def start(self):
-		# print("i'm moving")
 		pass
 
 	def do_action(self):
-		ai_entity = self.ai_entity
-		character = ai_entity.character
-		target_pos = ai_entity.blackboard["target_position"]
-		
-		dxy = target_pos - character.position
-		thr = 0.1
-		events_map = {PlayerAction.MOVE_UP: dxy[0] < -thr, PlayerAction.MOVE_DOWN: dxy[0] > thr,
-		              PlayerAction.MOVE_RIGHT: dxy[1] > thr, PlayerAction.MOVE_LEFT: dxy[1] < -thr}
-		for action in events_map.keys():
-			if events_map[action]:
-				ev = pg.event.Event(ACTION_EVENT, {"player_id": character.player_id, "action": action})
-				pg.event.post(ev)
+		pos_is_reached = move_to(self.ai_entity, self.ai_entity.blackboard["target_position"])
 
-		self.ai_entity.end_frame()
-		
-		# if position reached
-		if abs(dxy[0]) < thr and abs(dxy[1]) < thr:
-			# print("position reached")
+		if pos_is_reached:
 			self.get_control().finish_with_success()
 			
-		if ai_entity.trajectory_changed():
-			ai_entity.reset_change_trajectory()
-			# print("trajectory changed [moving]")
+		if self.ai_entity.trajectory_changed():
+			self.ai_entity.reset_change_trajectory()
 			self.get_control().finish_with_failure()
 			
-		if character.is_colliding_ball:
+		if self.ai_entity.character.is_colliding_ball:
 			self.get_control().finish_with_success()
+
+
+class MoveToIdlingPosition(LeafTask):
+	def do_action(self):
+		idling_pos = Vector3(CHARACTER_INITIAL_POS)
+		if self.ai_entity.character.team.id == TeamId.LEFT:
+			idling_pos.y *= -1
+
+		pos_is_reached = move_to(self.ai_entity, idling_pos)
+		if pos_is_reached:
+			self.get_control().finish_with_success()
+
+		if should_ai_run_to_the_ball(self.ai_entity):
+			self.get_control().finish_with_failure()
+
+
+class MoveAndIdleDecorator(TaskDecorator):
+	def do_action(self):
+		self.task.do_action()
+
+	def check_conditions(self):
+		b_do_action = not should_ai_run_to_the_ball(self.ai_entity)
+		b_do_action &= not should_ai_serve(self.ai_entity)
+		return b_do_action
 
 
 class RandomThrow(LeafTask):
-	def start(self):
-		# print("i'm throwing !")
-		pass
-	
 	def do_action(self):
 		ai_entity = self.ai_entity
 		character = ai_entity.character
@@ -142,7 +162,6 @@ class Idle(LeafTask):
 		return b_do_action
 	
 	def do_action(self):
-		# print("idling")
 		ai_entity = self.ai_entity
 
 		if ai_entity.trajectory_changed():

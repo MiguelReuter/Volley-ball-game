@@ -119,7 +119,7 @@ class LeafTask(Task):
 class ParentTask(Task):
 	def __init__(self, ai_entity):
 		Task.__init__(self, ai_entity)
-		self.control = None  # TODO : protected ?
+		self.control = None
 		self.create_controller()
 		
 	def create_controller(self):
