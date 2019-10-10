@@ -41,6 +41,50 @@ def should_ai_serve(ai_entity):
 	return False
 
 
+def should_ai_dive(ai_entity):
+	thrower_manager = ThrowerManager.get_instance()
+	trajectory = thrower_manager.current_trajectory
+
+	if trajectory is not None:
+		# remaining time in ms before ball touches ground (with marge m)
+		m = 0.2
+		final_t = int(trajectory.t0 + 1000 * trajectory.get_time_at_z(BALL_RADIUS + m))
+		delta_t = final_t - game_engine.GameEngine.get_instance().get_running_ticks()
+
+		# distance between character and target position
+		# TODO: add trajectory.get_pos_at_t(ti) instead of target_position (not really target_position with marge m)
+		delta_xy = ai_entity.blackboard["target_position"] - ai_entity.character.position
+		delta_xy.z = 0
+		dis = delta_xy.length()
+
+		# distance travelled by running or diving, shape of collider taken in account
+		run_distance = RUN_SPEED * delta_t / 1000 + CHARACTER_W / 2
+		dive_distance = DIVE_SPEED * min(delta_t, DIVE_SLIDE_DURATION) / 1000 + CHARACTER_H - CHARACTER_W / 2
+
+		# print("run: ", run_distance, "dive: ", dive_distance, "distance: ", d)
+		if run_distance < dis <= dive_distance:
+			return True, delta_xy
+	return False, None
+
+
+def dive(ai_entity, dxy):
+	# dive action event will be posted
+	dive_actions = [PlayerAction.DIVE]
+
+	if dxy.x < -CHARACTER_W / 2:
+		dive_actions.append(PlayerAction.MOVE_UP)
+	elif dxy.x > CHARACTER_W / 2:
+		dive_actions.append(PlayerAction.MOVE_DOWN)
+	if dxy.y < -CHARACTER_W / 2:
+		dive_actions.append(PlayerAction.MOVE_LEFT)
+	elif dxy.y > CHARACTER_W / 2:
+		dive_actions.append(PlayerAction.MOVE_RIGHT)
+
+	for act in dive_actions:
+		ev = pg.event.Event(ACTION_EVENT, {"player_id": ai_entity.character.player_id, "action": act})
+		pg.event.post(ev)
+
+
 class MoveAndThrowDecorator(TaskDecorator):
 	def do_action(self):
 		self.task.do_action()
@@ -92,56 +136,22 @@ class MoveToTargetPosition(LeafTask):
 		pass
 
 	def do_action(self):
-		thrower_manager = ThrowerManager.get_instance()
+		b_dive, delta_xy = should_ai_dive(self.ai_entity)
+		if b_dive:
+			dive(self.ai_entity, delta_xy)
+			self.get_control().finish_with_success()
+		else:
+			pos_is_reached = move_to(self.ai_entity, self.ai_entity.blackboard["target_position"])
 
-		trajectory = thrower_manager.current_trajectory
-		if trajectory is not None:
-			# remaining time in ms before ball touches ground (with marge m)
-			m = 0.2
-			final_t = int(trajectory.t0 + 1000 * trajectory.get_time_at_z(BALL_RADIUS + m))
-			delta_t = final_t - game_engine.GameEngine.get_instance().get_running_ticks()
-
-			# distance between character and target position
-			# TODO: add trajectory.get_pos_at_t(ti) instead of target_position (not really target_position with marge m)
-			delta_xy = self.ai_entity.blackboard["target_position"] - self.ai_entity.character.position
-			delta_xy.z = 0
-			dis = delta_xy.length()
-
-			# distance travelled by running or diving, shape of collider taken in account
-			run_distance = RUN_SPEED * delta_t / 1000 + CHARACTER_W / 2
-			dive_distance = DIVE_SPEED * min(delta_t, DIVE_SLIDE_DURATION) / 1000 + CHARACTER_H - CHARACTER_W / 2
-
-			# print("run: ", run_distance, "dive: ", dive_distance, "distance: ", d)
-			if run_distance < dis <= dive_distance:
-				# dive action event will be posted
-				dive_actions = [PlayerAction.DIVE]
-
-				if delta_xy.x < -CHARACTER_W / 2:
-					dive_actions.append(PlayerAction.MOVE_UP)
-				elif delta_xy.x > CHARACTER_W / 2:
-					dive_actions.append(PlayerAction.MOVE_DOWN)
-				if delta_xy.y < -CHARACTER_W / 2:
-					dive_actions.append(PlayerAction.MOVE_LEFT)
-				elif delta_xy.y > CHARACTER_W / 2:
-					dive_actions.append(PlayerAction.MOVE_RIGHT)
-
-				for act in dive_actions:
-					ev = pg.event.Event(ACTION_EVENT, {"player_id": self.ai_entity.character.player_id, "action": act})
-					pg.event.post(ev)
-
+			if pos_is_reached:
 				self.get_control().finish_with_success()
 
-		pos_is_reached = move_to(self.ai_entity, self.ai_entity.blackboard["target_position"])
+			if self.ai_entity.trajectory_changed():
+				self.ai_entity.reset_change_trajectory()
+				self.get_control().finish_with_failure()
 
-		if pos_is_reached:
-			self.get_control().finish_with_success()
-			
-		if self.ai_entity.trajectory_changed():
-			self.ai_entity.reset_change_trajectory()
-			self.get_control().finish_with_failure()
-			
-		if self.ai_entity.character.is_colliding_ball:
-			self.get_control().finish_with_success()
+			if self.ai_entity.character.is_colliding_ball:
+				self.get_control().finish_with_success()
 
 
 class MoveToIdlingPosition(LeafTask):
