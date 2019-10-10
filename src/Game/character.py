@@ -172,12 +172,12 @@ class Character(ActionObject):
 									  self.w / 2)
 		if dive_direction.x < 0:
 			collider_rel_center.x += self.w / 2
-		else:
+		elif dive_direction.x > 0:
 			collider_rel_center.x -= self.w / 2
 
 		if dive_direction.y < 0:
 			collider_rel_center.y += self.w / 2
-		else:
+		elif dive_direction.y > 0:
 			collider_rel_center.y -= self.w / 2
 
 		self.collider_relative_position	= collider_rel_center
