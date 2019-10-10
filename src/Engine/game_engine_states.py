@@ -130,7 +130,7 @@ class Running(GameEngineState, ActionObject):
 	def give_service_for_character(self, character):
 		game_engine = Engine.game_engine.GameEngine.get_instance()
 		
-		self.reset_characters_pos_and_state()
+		self.reset_characters_pos_and_state(excepted_char=character)
 		
 		# set position and state for character
 		pos = Vector3(CHARACTER_SERVING_POS)
@@ -143,19 +143,26 @@ class Running(GameEngineState, ActionObject):
 		ThrowerManager.get_instance().current_trajectory = None
 
 	@staticmethod
-	def reset_characters_pos_and_state():
-		game_engine = Engine.game_engine.GameEngine.get_instance()
-		
-		for char in game_engine.characters:
+	def reset_characters_pos_and_state(excepted_char=None):
+		"""
+		Reset position, state of all characters and call reset() Character method.
+
+		State of characters will be changed to Idling state. Position will be set to CHARACTER_INITIAL_POS.
+		:param Character excepted_char: character which position and state will not be reset
+		:return:
+		"""
+		for char in Engine.game_engine.GameEngine.get_instance().characters:
 			char.reset()
-			
-			# position
-			pos = Vector3(CHARACTER_INITIAL_POS)
-			if char.team.id == TeamId.LEFT:
-				pos.y *= -1
-			char.position = pos
-			# state
-			char.state = CharacterStates.Idling(char)
+
+			# don't reset position and state for excepted_char
+			if char != excepted_char:
+				# position
+				pos = Vector3(CHARACTER_INITIAL_POS)
+				if char.team.id == TeamId.LEFT:
+					pos.y *= -1
+				char.position = pos
+				# state
+				char.state = CharacterStates.Idling(char)
 
 	def has_pending_rule(self):
 		return self._pending_rule is not None

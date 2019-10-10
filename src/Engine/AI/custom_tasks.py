@@ -156,16 +156,21 @@ class MoveToTargetPosition(LeafTask):
 
 class MoveToIdlingPosition(LeafTask):
 	def do_action(self):
-		idling_pos = Vector3(CHARACTER_INITIAL_POS)
-		if self.ai_entity.character.team.id == TeamId.LEFT:
-			idling_pos.y *= -1
-
-		pos_is_reached = move_to(self.ai_entity, idling_pos)
-		if pos_is_reached:
-			self.get_control().finish_with_success()
+		if should_ai_serve(self.ai_entity):
+			self.get_control().finish_with_failure()
 
 		if should_ai_run_to_the_ball(self.ai_entity):
 			self.get_control().finish_with_failure()
+
+		# move to idling position
+		idling_pos = Vector3(CHARACTER_INITIAL_POS)
+		if self.ai_entity.character.team.id == TeamId.LEFT:
+			idling_pos.y *= -1
+		pos_is_reached = move_to(self.ai_entity, idling_pos)
+
+		# if idling position reached --> success
+		if pos_is_reached:
+			self.get_control().finish_with_success()
 
 
 class MoveAndIdleDecorator(TaskDecorator):
