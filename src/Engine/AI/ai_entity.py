@@ -65,10 +65,15 @@ class AIEntity:
 		"""
 		run_and_throw_ball = Sequence(self)
 
+		# random throw or throw after diving
+		random_or_draft_throw = Selector(self)
+		random_or_draft_throw.get_control().add(ThrowAfterDiving(self))
+		random_or_draft_throw.get_control().add(RandomThrow(self))
+
 		# find target ball position, run to it and throw
 		run_and_throw_ball.get_control().add(FindBallTargetPosition(self))
 		run_and_throw_ball.get_control().add(MoveToTargetPosition(self))
-		run_and_throw_ball.get_control().add(RandomThrow(self))
+		run_and_throw_ball.get_control().add(random_or_draft_throw)
 		run_and_throw_ball = MoveAndThrowDecorator(self, run_and_throw_ball)
 		
 		# wait and serve

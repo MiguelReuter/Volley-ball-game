@@ -83,6 +83,7 @@ def dive(ai_entity, dxy):
 	for act in dive_actions:
 		ev = pg.event.Event(ACTION_EVENT, {"player_id": ai_entity.character.player_id, "action": act})
 		pg.event.post(ev)
+	ai_entity.end_frame()
 
 
 class MoveAndThrowDecorator(TaskDecorator):
@@ -124,7 +125,6 @@ def move_to(ai_entity, target, thr=0.1):
 		if events_map[action]:
 			ev = pg.event.Event(ACTION_EVENT, {"player_id": character.player_id, "action": action})
 			pg.event.post(ev)
-
 	ai_entity.end_frame()
 
 	# if position reached
@@ -206,6 +206,23 @@ class RandomThrow(LeafTask):
 					pg.event.post(ev)
 			
 			self.get_control().finish_with_success()
+
+
+class ThrowAfterDiving(LeafTask):
+	def check_conditions(self):
+		return self.ai_entity.character.state.__class__.type == CharacterStateType.DIVING
+
+	def do_action(self):
+		character = self.ai_entity.character
+
+		if character.is_colliding_ball:
+			ev = pg.event.Event(ACTION_EVENT, {"player_id": character.player_id, "action": PlayerAction.THROW_BALL})
+			pg.event.post(ev)
+
+			# we can set a direction for draft throw here by sending events
+
+			self.get_control().finish_with_success()
+		self.ai_entity.end_frame()
 
 
 class Idle(LeafTask):
