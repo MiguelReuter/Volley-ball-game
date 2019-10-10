@@ -11,7 +11,7 @@ from Game.character_states import *
 
 
 class Character(ActionObject):
-	def __init__(self, position=None, player_id=PlayerId.PLAYER_ID_1):
+	def __init__(self, position=None, player_id=PlayerId.PLAYER_ID_1, max_velocity=None):
 		ActionObject.__init__(self, player_id)
 		self._position = Vector3(position) if position is not None else Vector3()
 		self.previous_position = Vector3(self._position)
@@ -20,7 +20,7 @@ class Character(ActionObject):
 		self.collider_relative_position = Vector3()
 		self.collider = None
 		self.is_colliding_ball = False
-		self.max_velocity = RUN_SPEED  # m/s
+		self.max_velocity = max_velocity if max_velocity is not None else RUN_SPEED  # m/s
 		self.velocity = Vector3()
 		self.direction = Vector3()
 		
