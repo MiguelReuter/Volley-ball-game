@@ -133,9 +133,10 @@ class Running(GameEngineState, ActionObject):
 		self.reset_characters_pos_and_state()
 		
 		# set position and state for character
-		character.position = Vector3(CHARACTER_SERVING_POS)
+		pos = Vector3(CHARACTER_SERVING_POS)
 		if character.team.id == TeamId.LEFT:
-			character.position.y *= -1
+			pos.y *= -1
+		character.position = pos
 		character.state = CharacterStates.Serving(character)
 
 		game_engine.ball.wait_to_be_served_by(character)
@@ -149,9 +150,10 @@ class Running(GameEngineState, ActionObject):
 			char.reset()
 			
 			# position
-			char.position = Vector3(CHARACTER_INITIAL_POS)
+			pos = Vector3(CHARACTER_INITIAL_POS)
 			if char.team.id == TeamId.LEFT:
-				char.position.y *= -1
+				pos.y *= -1
+			char.position = pos
 			# state
 			char.state = CharacterStates.Idling(char)
 
