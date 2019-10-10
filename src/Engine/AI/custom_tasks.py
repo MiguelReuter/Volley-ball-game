@@ -47,8 +47,7 @@ def should_ai_dive(ai_entity):
 
 	if trajectory is not None:
 		# remaining time in ms before ball touches ground (with marge m)
-		m = 0.2
-		final_t = int(trajectory.t0 + 1000 * trajectory.get_time_at_z(BALL_RADIUS + m))
+		final_t = int(trajectory.t0 + 1000 * trajectory.get_final_time())
 		delta_t = final_t - game_engine.GameEngine.get_instance().get_running_ticks()
 
 		# distance between character and target position
