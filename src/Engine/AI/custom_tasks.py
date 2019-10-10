@@ -35,9 +35,9 @@ def should_ai_run_to_the_ball(ai_entity):
 
 
 def should_ai_serve(ai_entity):
-	character_state = ai_entity.character.state
-	if isinstance(character_state, Serving):
-		return not character_state.has_served
+	character_state_type = ai_entity.character.state.__class__.type
+	if character_state_type == CharacterStateType.SERVING:
+		return not ai_entity.character.state.has_served
 	return False
 
 

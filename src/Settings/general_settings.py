@@ -146,6 +146,17 @@ class GEStateType(Enum):
 	ON_MENU = 2
 
 
+# CHARACTER STATES
+class CharacterStateType(Enum):
+	NONE = -1
+	IDLING = 0
+	RUNNING = 1
+	THROWING = 2
+	SERVING = 3
+	JUMPING = 4
+	DIVING = 5
+
+
 # DIRECTORIES
 FONT_DIR = "../assets/font/PressStart2P.ttf"
 

@@ -8,6 +8,9 @@ class CharacterState:
 	"""
 	Virtual class for character's state.
 	"""
+
+	type = CharacterStateType.NONE
+
 	def __init__(self, character):
 		"""
 		:param Character character: character which state is attached to
@@ -41,6 +44,8 @@ class Idling(CharacterState):
 	"""
 	Character state for idling.
 	"""
+	type = CharacterStateType.IDLING
+
 	def run(self, action_events=None, **kwargs):
 		"""
 		Main function for this state, usually called at each frame.
@@ -78,6 +83,9 @@ class Running(CharacterState):
 	"""
 	Character state for running.
 	"""
+
+	type = CharacterStateType.RUNNING
+
 	def __init__(self, character, action_events=None, **kwargs):
 		"""
 		:param Character character: character which state is attached to
@@ -131,6 +139,9 @@ class Throwing(CharacterState):
 	"""
 	Character state for throwing a ball
 	"""
+
+	type = CharacterStateType.THROWING
+
 	def __init__(self, character, action_events=None, **kwargs):
 		super().__init__(character)
 		self.t0 = Engine.game_engine.GameEngine.get_instance().get_running_ticks()
@@ -181,6 +192,9 @@ class Serving(CharacterState):
 	"""
 	Character state for serving a ball
 	"""
+
+	type = CharacterStateType.SERVING
+
 	def __init__(self, character, action_events=None, **kwargs):
 		super().__init__(character)
 		character.reset()
@@ -229,6 +243,8 @@ class Jumping(CharacterState):
 	"""
 	Character state for jumping
 	"""
+
+	type = CharacterStateType.JUMPING
 	
 	def __init__(self, character, action_events=None, **kwargs):
 		super().__init__(character)
@@ -274,6 +290,8 @@ class Diving(CharacterState):
 	"""
 	Character state for diving
 	"""
+
+	type = CharacterStateType.DIVING
 
 	def __init__(self, character, action_events=None, **kwargs):
 		CharacterState.__init__(self, character)
