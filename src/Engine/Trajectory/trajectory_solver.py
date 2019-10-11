@@ -132,6 +132,17 @@ def get_z_at_y(initial_velocity, initial_position, z_t, y):
 		return z_at_y
 
 
+def get_x_at_y(origin_pos, initial_velocity, y):
+	dy = y - origin_pos.y
+
+	if initial_velocity.y != 0:
+		dt = dy / initial_velocity.y
+		dx = dt * initial_velocity.x
+		return origin_pos.x + dx
+	else:
+		return None
+
+
 # TODO : /!\ method not used yet /!\
 """
 THR_NEAR_ZONE = 2
