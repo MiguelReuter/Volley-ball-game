@@ -11,12 +11,12 @@ import pygame as pg
 from random import randint
 
 
-def should_ai_move_to_the_ball(ai_entity):
+def should_ai_catch_the_ball(ai_entity):
 	"""
-	Check if specified AI entity should move to the ball to throw it.
+	Check if specified AI entity should catch the ball to throw it.
 	
 	:param AIEntity ai_entity: specified AI entity
-	:return: True if AI entity should move to target position
+	:return: True if AI entity should catch the ball
 	:rtype bool:
 	"""
 	character = ai_entity.character
@@ -38,11 +38,14 @@ def move_to(ai_entity, target, thr=0.1):
 	"""
 	Make AI entity to move to a specified target position.
 
+	This function ends frame for AI entity.
 	:param AI_Entity ai_entity: AI entity who is going to move to target position
 	:param pygame.Vector3 target: target position
 	:param float thr: threshold for x and y axis which final position is considered as target
-	:return: None
+	:return: True if target position is reached
 	"""
+	ai_entity.end_frame()
+
 	character = ai_entity.character
 
 	dxy = target - character.position
@@ -52,7 +55,6 @@ def move_to(ai_entity, target, thr=0.1):
 		if events_map[action]:
 			ev = pg.event.Event(ACTION_EVENT, {"player_id": character.player_id, "action": action})
 			pg.event.post(ev)
-	ai_entity.end_frame()
 
 	# if position reached
 	return abs(dxy[0]) < thr and abs(dxy[1]) < thr
@@ -109,11 +111,14 @@ def dive(ai_entity, dxy):
 	"""
 	Make AI entity to dive in a direction.
 
+	This function ends frame for AI entity.
 	Given direction is continuous, but not resulting diving direction (8 possible directions)
 	:param AIEnity ai_entity: AI entity who's going to dive
 	:param pygame.Vector3 dxy: direction of diving
 	:return: None
 	"""
+	ai_entity.end_frame()
+
 	# dive action event will be posted
 	dive_actions = [PlayerAction.DIVE]
 
@@ -129,7 +134,6 @@ def dive(ai_entity, dxy):
 	for act in dive_actions:
 		ev = pg.event.Event(ACTION_EVENT, {"player_id": ai_entity.character.player_id, "action": act})
 		pg.event.post(ev)
-	ai_entity.end_frame()
 
 
 class MoveAndThrowDecorator(TaskDecorator):
@@ -137,7 +141,7 @@ class MoveAndThrowDecorator(TaskDecorator):
 		self.task.do_action()
 
 	def check_conditions(self):
-		b_do_action = should_ai_move_to_the_ball(self.ai_entity)
+		b_do_action = should_ai_catch_the_ball(self.ai_entity)
 		b_do_action &= not should_ai_serve(self.ai_entity)
 		return b_do_action
 	
@@ -189,7 +193,7 @@ class MoveToIdlingPosition(LeafTask):
 		if should_ai_serve(self.ai_entity):
 			self.get_control().finish_with_failure()
 
-		if should_ai_move_to_the_ball(self.ai_entity):
+		if should_ai_catch_the_ball(self.ai_entity):
 			self.get_control().finish_with_failure()
 
 		# move to idling position
@@ -208,7 +212,7 @@ class MoveAndIdleDecorator(TaskDecorator):
 		self.task.do_action()
 
 	def check_conditions(self):
-		b_do_action = not should_ai_move_to_the_ball(self.ai_entity)
+		b_do_action = not should_ai_catch_the_ball(self.ai_entity)
 		b_do_action &= not should_ai_serve(self.ai_entity)
 		return b_do_action
 
@@ -256,7 +260,7 @@ class ThrowAfterDiving(LeafTask):
 
 class Idle(LeafTask):
 	def check_conditions(self):
-		b_do_action = not should_ai_move_to_the_ball(self.ai_entity)
+		b_do_action = not should_ai_catch_the_ball(self.ai_entity)
 		b_do_action &= not should_ai_serve(self.ai_entity)
 		
 		return b_do_action
@@ -297,4 +301,3 @@ class Wait(LeafTask):
 			self.get_control().finish_with_success()
 		
 		self.ai_entity.end_frame()
-		
