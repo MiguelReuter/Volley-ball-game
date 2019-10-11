@@ -11,12 +11,12 @@ import pygame as pg
 from random import randint
 
 
-def should_ai_run_to_the_ball(ai_entity):
+def should_ai_move_to_the_ball(ai_entity):
 	"""
-	Check if specified AI entity should run to the ball to throw it.
+	Check if specified AI entity should move to the ball to throw it.
 	
 	:param AIEntity ai_entity: specified AI entity
-	:return: True if AI entity should run
+	:return: True if AI entity should move to target position
 	:rtype bool:
 	"""
 	character = ai_entity.character
@@ -34,7 +34,38 @@ def should_ai_run_to_the_ball(ai_entity):
 	return False
 
 
+def move_to(ai_entity, target, thr=0.1):
+	"""
+	Make AI entity to move to a specified target position.
+
+	:param AI_Entity ai_entity: AI entity who is going to move to target position
+	:param pygame.Vector3 target: target position
+	:param float thr: threshold for x and y axis which final position is considered as target
+	:return: None
+	"""
+	character = ai_entity.character
+
+	dxy = target - character.position
+	events_map = {PlayerAction.MOVE_UP: dxy[0] < -thr, PlayerAction.MOVE_DOWN: dxy[0] > thr,
+				  PlayerAction.MOVE_RIGHT: dxy[1] > thr, PlayerAction.MOVE_LEFT: dxy[1] < -thr}
+	for action in events_map.keys():
+		if events_map[action]:
+			ev = pg.event.Event(ACTION_EVENT, {"player_id": character.player_id, "action": action})
+			pg.event.post(ev)
+	ai_entity.end_frame()
+
+	# if position reached
+	return abs(dxy[0]) < thr and abs(dxy[1]) < thr
+
+
 def should_ai_serve(ai_entity):
+	"""
+	Check if specified AI entity should serve.
+
+	:param AIEntity ai_entity: specified AI entity
+	:return: True if AI entity has to serve
+	:rtype bool:
+	"""
 	character_state_type = ai_entity.character.state.__class__.type
 	if character_state_type == CharacterStateType.SERVING:
 		return not ai_entity.character.state.has_served
@@ -42,10 +73,20 @@ def should_ai_serve(ai_entity):
 
 
 def should_ai_dive(ai_entity):
+	"""
+	Check if specified AI entity has to dive to catch ball instead of running.
+
+	:param AIEntity ai_entity: specified AI entity
+	:return:
+		(True, delta_xy) if AI entity should dive in :var delta_xy: direction,
+		(False, None) else.
+	;:rtype : (bool, pygame.Vector3) or (bool, None)
+	"""
 	thrower_manager = ThrowerManager.get_instance()
 	trajectory = thrower_manager.current_trajectory
 
 	if trajectory is not None:
+		# TODO: change by comparing time to reach target position, by running or diving.
 		# remaining time in ms before ball touches ground (with marge m)
 		final_t = int(trajectory.t0 + 1000 * trajectory.get_final_time())
 		delta_t = final_t - game_engine.GameEngine.get_instance().get_running_ticks()
@@ -65,6 +106,14 @@ def should_ai_dive(ai_entity):
 
 
 def dive(ai_entity, dxy):
+	"""
+	Make AI entity to dive in a direction.
+
+	Given direction is continuous, but not resulting diving direction (8 possible directions)
+	:param AIEnity ai_entity: AI entity who's going to dive
+	:param pygame.Vector3 dxy: direction of diving
+	:return: None
+	"""
 	# dive action event will be posted
 	dive_actions = [PlayerAction.DIVE]
 
@@ -88,7 +137,7 @@ class MoveAndThrowDecorator(TaskDecorator):
 		self.task.do_action()
 
 	def check_conditions(self):
-		b_do_action = should_ai_run_to_the_ball(self.ai_entity)
+		b_do_action = should_ai_move_to_the_ball(self.ai_entity)
 		b_do_action &= not should_ai_serve(self.ai_entity)
 		return b_do_action
 	
@@ -110,22 +159,6 @@ class FindBallTargetPosition(LeafTask):
 			self.get_control().finish_with_failure()
 		else:
 			self.get_control().finish_with_success()
-
-
-def move_to(ai_entity, target, thr=0.1):
-	character = ai_entity.character
-
-	dxy = target - character.position
-	events_map = {PlayerAction.MOVE_UP: dxy[0] < -thr, PlayerAction.MOVE_DOWN: dxy[0] > thr,
-				  PlayerAction.MOVE_RIGHT: dxy[1] > thr, PlayerAction.MOVE_LEFT: dxy[1] < -thr}
-	for action in events_map.keys():
-		if events_map[action]:
-			ev = pg.event.Event(ACTION_EVENT, {"player_id": character.player_id, "action": action})
-			pg.event.post(ev)
-	ai_entity.end_frame()
-
-	# if position reached
-	return abs(dxy[0]) < thr and abs(dxy[1]) < thr
 
 
 class MoveToTargetPosition(LeafTask):
@@ -156,7 +189,7 @@ class MoveToIdlingPosition(LeafTask):
 		if should_ai_serve(self.ai_entity):
 			self.get_control().finish_with_failure()
 
-		if should_ai_run_to_the_ball(self.ai_entity):
+		if should_ai_move_to_the_ball(self.ai_entity):
 			self.get_control().finish_with_failure()
 
 		# move to idling position
@@ -175,7 +208,7 @@ class MoveAndIdleDecorator(TaskDecorator):
 		self.task.do_action()
 
 	def check_conditions(self):
-		b_do_action = not should_ai_run_to_the_ball(self.ai_entity)
+		b_do_action = not should_ai_move_to_the_ball(self.ai_entity)
 		b_do_action &= not should_ai_serve(self.ai_entity)
 		return b_do_action
 
@@ -223,7 +256,7 @@ class ThrowAfterDiving(LeafTask):
 
 class Idle(LeafTask):
 	def check_conditions(self):
-		b_do_action = not should_ai_run_to_the_ball(self.ai_entity)
+		b_do_action = not should_ai_move_to_the_ball(self.ai_entity)
 		b_do_action &= not should_ai_serve(self.ai_entity)
 		
 		return b_do_action
