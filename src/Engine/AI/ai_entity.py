@@ -63,7 +63,11 @@ class AIEntity:
 
 		:return: None
 		"""
-		run_and_throw_ball = Sequence(self)
+
+		# run and smash
+		run_and_smash = Sequence(self)
+		run_and_smash.get_control().add(MoveToSmashingPosition(self))
+		run_and_smash.get_control().add(JumpForSmashing(self))
 
 		# random throw or throw after diving
 		random_or_draft_throw = Selector(self)
@@ -71,11 +75,18 @@ class AIEntity:
 		random_or_draft_throw.get_control().add(RandomThrow(self))
 
 		# find target ball position, run to it and throw
+		run_and_throw_ball = Sequence(self)
 		run_and_throw_ball.get_control().add(FindBallTargetPosition(self))
 		run_and_throw_ball.get_control().add(MoveToTargetPosition(self))
 		run_and_throw_ball.get_control().add(random_or_draft_throw)
 		run_and_throw_ball = MoveAndThrowDecorator(self, run_and_throw_ball)
-		
+
+		# random throw or smash
+		# TODO: add conditions to check before smashing ! Just for test
+		smash_or_throw = Selector(self)
+		smash_or_throw.get_control().add(run_and_smash)
+		smash_or_throw.get_control().add(run_and_throw_ball)
+
 		# wait and serve
 		wait_and_serve = Sequence(self)
 		wait_and_serve.get_control().add(Wait(self, duration=500))
@@ -90,9 +101,9 @@ class AIEntity:
 
 		# root
 		b_tree = Selector(self)
-		b_tree.get_control().add(run_and_throw_ball)
-		b_tree.get_control().add(wait_and_serve)
 		b_tree.get_control().add(replace_and_idling)
+		b_tree.get_control().add(smash_or_throw)
+		b_tree.get_control().add(wait_and_serve)
 		b_tree = ResetDecorator(self, b_tree)
 		
 		self.behaviour_tree = b_tree

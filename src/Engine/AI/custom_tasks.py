@@ -207,6 +207,30 @@ class MoveToIdlingPosition(LeafTask):
 			self.get_control().finish_with_success()
 
 
+class MoveToSmashingPosition(LeafTask):
+	def do_action(self):
+		if should_ai_catch_the_ball(self.ai_entity):
+			trajectory = ThrowerManager.get_instance().current_trajectory
+			if trajectory is not None:
+				y = CHARACTER_W / 2
+				pos = Vector3(trajectory.get_x_at_y(y), y, 0)
+
+				if move_to(self.ai_entity, pos):
+					self.get_control().finish_with_success()
+		else:
+			self.get_control().finish_with_failure()
+
+
+class JumpForSmashing(LeafTask):
+	def do_action(self):
+		# if right time
+		ev = pg.event.Event(ACTION_EVENT, {"player_id": self.ai_entity.character.player_id, "action": PlayerAction.JUMP})
+		pg.event.post(ev)
+
+		self.ai_entity.end_frame()
+		self.get_control().finish_with_success()
+
+
 class MoveAndIdleDecorator(TaskDecorator):
 	def do_action(self):
 		self.task.do_action()
