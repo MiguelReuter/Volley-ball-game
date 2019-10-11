@@ -209,7 +209,7 @@ class RandomThrow(LeafTask):
 
 class ThrowAfterDiving(LeafTask):
 	def check_conditions(self):
-		return self.ai_entity.character.state.__class__.type == CharacterStateType.DIVING
+		return self.ai_entity.character.is_state_type_of(CharacterStateType.DIVING)
 
 	def do_action(self):
 		character = self.ai_entity.character
@@ -217,7 +217,6 @@ class ThrowAfterDiving(LeafTask):
 		if character.is_colliding_ball:
 			ev = pg.event.Event(ACTION_EVENT, {"player_id": character.player_id, "action": PlayerAction.THROW_BALL})
 			pg.event.post(ev)
-
 			# we can set a direction for draft throw here by sending events
 
 			self.get_control().finish_with_success()

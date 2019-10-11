@@ -187,6 +187,9 @@ class Character(ActionObject):
 		self.set_default_collider()
 		self.velocity = Vector3()
 
+	def is_state_type_of(self, state_type):
+		return self.state.__class__.type == state_type
+
 
 class Team:
 	def __init__(self, team_id=TeamId.NONE, characters_list=None):
