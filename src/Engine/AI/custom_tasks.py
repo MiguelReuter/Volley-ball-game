@@ -51,7 +51,6 @@ def should_ai_dive(ai_entity):
 		delta_t = final_t - game_engine.GameEngine.get_instance().get_running_ticks()
 
 		# distance between character and target position
-		# TODO: add trajectory.get_pos_at_t(ti) instead of target_position (not really target_position with marge m)
 		delta_xy = ai_entity.blackboard["target_position"] - ai_entity.character.position
 		delta_xy.z = 0
 		dis = delta_xy.length()
@@ -60,7 +59,6 @@ def should_ai_dive(ai_entity):
 		run_distance = RUN_SPEED * delta_t / 1000 + CHARACTER_W / 2
 		dive_distance = DIVE_SPEED * min(delta_t, DIVE_SLIDE_DURATION) / 1000 + CHARACTER_H - CHARACTER_W / 2
 
-		# print("run: ", run_distance, "dive: ", dive_distance, "distance: ", d)
 		if run_distance < dis <= dive_distance:
 			return True, delta_xy
 	return False, None
