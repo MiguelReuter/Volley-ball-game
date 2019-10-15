@@ -4,7 +4,7 @@ from Engine.Display import debug3D_utils
 from Engine.Collisions import AABBCollider
 from Settings import *
 import pygame as pg
-
+from math import sqrt
 
 from Engine.Actions import ActionObject
 from Game.character_states import *
@@ -189,6 +189,51 @@ class Character(ActionObject):
 
 	def is_state_type_of(self, state_type):
 		return self.state.__class__.type == state_type
+
+	def get_time_to_run_to(self, target_position, origin_pos=None):
+		"""
+		Give time that takes character by running from an origin to a target position.
+
+		Time is processed with displacements in 8 possible directions.
+		:param pygame.Vector3 target_position: target position
+		:param pygame.Vector3 origin_pos: origin position. Current character position is default value.
+		:return: given time in sec
+		:rtype: float
+		"""
+		if origin_pos is None:
+			origin_pos = self.position
+
+		# absolute delta position
+		delta_pos = target_position - origin_pos
+		delta_pos = Vector3([abs(delta_pos[i]) for i in (0, 1, 2)])
+
+		# diagonal travel
+		dist_on_each_axis = min(delta_pos.x, delta_pos.y)
+		diagonal_time = 1.4142 * dist_on_each_axis / self.max_velocity
+
+		# orthogonal travel
+		direct_time = (max(delta_pos.x, delta_pos.y) - dist_on_each_axis) / self.max_velocity
+
+		return diagonal_time + direct_time
+
+	def get_time_to_jump_to_height(self, h):
+		"""
+		Give time that takes the top of character reaches a specific height by jumping.
+
+		Given time is processed in ascending phase.
+		:param float h: height at which time is given
+		:return: given time is sec or None if there is no solution
+		:rtype: float or None
+		"""
+		# at t=t1, self.position.z(0) + self.h = h
+		# -G / 2 * t1**2 + JUMP_VELOCITY * t1 + self.h - h = 0
+		a, b, c = -G/2, JUMP_VELOCITY, self.h - h
+		delta = b**2 - 4 * a * c
+
+		if delta >= 0:
+			return (-b + sqrt(delta)) / (2 * a)  #
+		else:
+			return None
 
 
 class Team:
