@@ -42,6 +42,25 @@ def test_move(character):
 	assert character.collider.center == Vector3(4, 8, 0) + character.collider_relative_position
 
 
+def test_move_time(character):
+	dt = 10
+
+	origin_pos = Vector3()
+	character.position = Vector3(origin_pos)
+
+	n = 100
+	# move along +y axis for n frames
+	for _ in range(n):
+		character.move(Vector3(0, 1, 0), dt, free_displacement=True)
+	assert n * dt / 1000 == pytest.approx(character.get_time_to_run_to(origin_pos), 0.01)
+
+	# move along +x +y axis for n frames
+	for _ in range(n):
+		character.move(Vector3(0.7071, 0.7071, 0), dt, free_displacement=True)
+
+	assert 2 * n * dt / 1000 == pytest.approx(character.get_time_to_run_to(origin_pos), 0.01)
+
+
 def test_change_collider(character):
 	char_original_pos = Vector3(character.position)
 	char_original_collider_rel_pos = Vector3(character.collider_relative_position)
