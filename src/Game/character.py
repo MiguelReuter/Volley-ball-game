@@ -125,11 +125,11 @@ class Character(ActionObject):
 		# eventually switch state
 		self.state = self.state.next(filtered_action_events, dt=dt)
 	
-	def update_physics(self, dt):
+	def update_physics(self, dt, free_displacement=FREE_DISPLACEMENT):
 		self.previous_position = Vector3(self.position)
 		
 		self.velocity += Vector3(0, 0, -0.001 * dt * G)
-		self.move_rel(0.001 * dt * self.velocity)
+		self.move_rel(0.001 * dt * self.velocity, free_displacement)
 		
 	def get_hands_position(self):
 		"""

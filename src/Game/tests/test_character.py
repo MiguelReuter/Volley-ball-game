@@ -8,7 +8,7 @@ import pytest
 
 @pytest.fixture()
 def character():
-	return Character(Vector3(), max_velocity=4)
+	return Character(Vector3(), max_velocity=4, jump_velocity=8)
 
 
 def test_move_rel(character):
@@ -59,6 +59,22 @@ def test_move_time(character):
 		character.move(Vector3(0.7071, 0.7071, 0), dt, free_displacement=True)
 
 	assert 2 * n * dt / 1000 == pytest.approx(character.get_time_to_run_to(origin_pos), 0.01)
+
+
+def test_jump_time(character):
+	# jump
+	character.velocity.z = character.jump_velocity
+
+	# height
+	h = 2
+
+	dt = 10
+	for i in range(100):
+		character.update_physics(dt, free_displacement=True)
+		if character.position.z + character.h > h:
+			break
+
+	assert i * dt / 1000 == pytest.approx(character.get_time_to_jump_to_height(h), 0.1)
 
 
 def test_change_collider(character):
