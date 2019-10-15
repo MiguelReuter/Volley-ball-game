@@ -248,7 +248,7 @@ class Jumping(CharacterState):
 	
 	def __init__(self, character, action_events=None, **kwargs):
 		super().__init__(character)
-		self.character.velocity = Vector3(0, 0, JUMP_VELOCITY)
+		self.character.velocity = Vector3(0, 0, self.character.jump_velocity)
 		self.has_smashed = False
 	
 	def run(self, action_events, **kwargs):

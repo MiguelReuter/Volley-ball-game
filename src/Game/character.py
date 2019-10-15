@@ -11,7 +11,7 @@ from Game.character_states import *
 
 
 class Character(ActionObject):
-	def __init__(self, position=None, player_id=PlayerId.PLAYER_ID_1, max_velocity=None):
+	def __init__(self, position=None, player_id=PlayerId.PLAYER_ID_1, max_velocity=None, jump_velocity=None):
 		ActionObject.__init__(self, player_id)
 		self._position = Vector3(position) if position is not None else Vector3()
 		self.previous_position = Vector3(self._position)
@@ -21,6 +21,7 @@ class Character(ActionObject):
 		self.collider = None
 		self.is_colliding_ball = False
 		self.max_velocity = max_velocity if max_velocity is not None else RUN_SPEED  # m/s
+		self.jump_velocity = jump_velocity if jump_velocity is not None else JUMP_VELOCITY  # m/s
 		self.velocity = Vector3()
 		self.direction = Vector3()
 		
@@ -226,8 +227,8 @@ class Character(ActionObject):
 		:rtype: float or None
 		"""
 		# at t=t1, self.position.z(0) + self.h = h
-		# -G / 2 * t1**2 + JUMP_VELOCITY * t1 + self.h - h = 0
-		a, b, c = -G/2, JUMP_VELOCITY, self.h - h
+		# -G / 2 * t1**2 + self.jump_velocity * t1 + self.h - h = 0
+		a, b, c = -G/2, self.jump_velocity, self.h - h
 		delta = b**2 - 4 * a * c
 
 		if delta >= 0:
