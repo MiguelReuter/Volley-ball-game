@@ -123,6 +123,22 @@ def get_time_at_z(vz_0, z_0, z):
 	return (-b + sqrt(delta)) / (2 * a)
 
 
+def get_time_at_y(vy_0, y_0, y):
+	"""
+	Get time at specific y coordinate.
+
+	:param float vy_0: initial velocity along y axis
+	:param float y_0: initial y value
+	:param float y: y value at which time is given
+	:return: time in sec when y coordinate will be reached, or None if there is no solution
+	:rtype: float or None
+	"""
+	delta_y = y - y_0
+	if vy_0 != 0:
+		return delta_y / vy_0
+	return None
+
+
 def get_z_at_y(initial_velocity, initial_position, z_t, y):
 	a, b, c, _ = get_time_polynomial_fun(initial_velocity.z, initial_position.z, z_t)
 
