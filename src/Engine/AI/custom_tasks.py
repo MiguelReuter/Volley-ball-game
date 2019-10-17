@@ -177,6 +177,9 @@ def dive(ai_entity, dxy):
 
 
 class FindBallTargetPosition(LeafTask):
+	def check_conditions(self):
+		return ThrowerManager.get_instance().current_trajectory is not None
+
 	def do_action(self):
 		"""
 		Find target ball position and write it in blackboard.
@@ -196,9 +199,6 @@ class FindBallTargetPosition(LeafTask):
 
 
 class MoveToTargetPosition(LeafTask):
-	def start(self):
-		pass
-
 	def do_action(self):
 		b_dive, delta_xy = should_ai_dive(self.ai_entity)
 		if b_dive:
