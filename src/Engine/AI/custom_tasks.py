@@ -176,16 +176,6 @@ def dive(ai_entity, dxy):
 		pg.event.post(ev)
 
 
-class MoveAndThrowDecorator(TaskDecorator):
-	def do_action(self):
-		self.task.do_action()
-
-	def check_conditions(self):
-		b_do_action = should_ai_catch_the_ball(self.ai_entity)
-		b_do_action &= not should_ai_serve(self.ai_entity)
-		return b_do_action
-	
-
 class FindBallTargetPosition(LeafTask):
 	def do_action(self):
 		"""
@@ -247,6 +237,19 @@ class MoveToIdlingPosition(LeafTask):
 			self.get_control().finish_with_success()
 
 
+class SmashSequenceDecorator(TaskDecorator):
+	def do_action(self):
+		self.task.do_action()
+
+	def check_conditions(self):
+		b_do_action = should_ai_catch_the_ball(self.ai_entity)
+		b_do_action &= not should_ai_serve(self.ai_entity)
+
+		b_do_action &= should_ai_smash(self.ai_entity)
+
+		return b_do_action
+
+
 class MoveToSmashingPosition(LeafTask):
 	def do_action(self):
 		if should_ai_catch_the_ball(self.ai_entity):
@@ -263,7 +266,7 @@ class MoveToSmashingPosition(LeafTask):
 
 class JumpForSmashing(LeafTask):
 	def do_action(self):
-		# if right time
+		# TODO: jump at right time
 		ev = pg.event.Event(ACTION_EVENT, {"player_id": self.ai_entity.character.player_id, "action": PlayerAction.JUMP})
 		pg.event.post(ev)
 
@@ -271,39 +274,24 @@ class JumpForSmashing(LeafTask):
 		self.get_control().finish_with_success()
 
 
-class MoveAndIdleDecorator(TaskDecorator):
+class RandomSmash(LeafTask):
 	def do_action(self):
-		self.task.do_action()
+		if self.ai_entity.character.is_state_type_of(CharacterStateType.JUMPING):
+			if self.ai_entity.character.is_colliding_ball:
+				actions = [PlayerAction.THROW_BALL]
+				direction_action = (PlayerAction.MOVE_LEFT, None, PlayerAction.MOVE_RIGHT)[randint(0, 2)]
+				if direction_action is not None:
+					actions.append(direction_action)
 
-	def check_conditions(self):
-		b_do_action = not should_ai_catch_the_ball(self.ai_entity)
-		b_do_action &= not should_ai_serve(self.ai_entity)
-		return b_do_action
-
-
-class RandomThrow(LeafTask):
-	def do_action(self):
-		ai_entity = self.ai_entity
-		character = ai_entity.character
-		ai_entity.end_frame()
-		
-		if ai_entity.trajectory_changed():
-			ai_entity.reset_change_trajectory()
+				pl_id = self.ai_entity.character.player_id
+				for action in actions:
+					ev = pg.event.Event(ACTION_EVENT, {"player_id": pl_id, "action": action})
+					pg.event.post(ev)
+				self.get_control().finish_with_success()
+		else:
 			self.get_control().finish_with_failure()
 
-		if character.is_colliding_ball:
-			ev = pg.event.Event(ACTION_EVENT, {"player_id": character.player_id, "action": PlayerAction.THROW_BALL})
-			pg.event.post(ev)
-
-			# random direction
-			left_right_action = (PlayerAction.MOVE_LEFT, PlayerAction.MOVE_RIGHT, None)[randint(0, 2)]
-			up_down_action = (PlayerAction.MOVE_UP, PlayerAction.MOVE_DOWN, None)[randint(0, 2)]
-			for action in (left_right_action, up_down_action):
-				if action is not None:
-					ev = pg.event.Event(ACTION_EVENT, {"player_id": character.player_id, "action": action})
-					pg.event.post(ev)
-			
-			self.get_control().finish_with_success()
+		self.ai_entity.end_frame()
 
 
 class ThrowAfterDiving(LeafTask):
@@ -322,35 +310,52 @@ class ThrowAfterDiving(LeafTask):
 		self.ai_entity.end_frame()
 
 
+class RandomThrow(LeafTask):
+	def do_action(self):
+		ai_entity = self.ai_entity
+		character = ai_entity.character
+		ai_entity.end_frame()
+
+		if ai_entity.trajectory_changed():
+			ai_entity.reset_change_trajectory()
+			self.get_control().finish_with_failure()
+
+		if character.is_colliding_ball:
+			ev = pg.event.Event(ACTION_EVENT, {"player_id": character.player_id, "action": PlayerAction.THROW_BALL})
+			pg.event.post(ev)
+
+			# random direction
+			left_right_action = (PlayerAction.MOVE_LEFT, PlayerAction.MOVE_RIGHT, None)[randint(0, 2)]
+			up_down_action = (PlayerAction.MOVE_UP, PlayerAction.MOVE_DOWN, None)[randint(0, 2)]
+			for action in (left_right_action, up_down_action):
+				if action is not None:
+					ev = pg.event.Event(ACTION_EVENT, {"player_id": character.player_id, "action": action})
+					pg.event.post(ev)
+
+			self.get_control().finish_with_success()
+
+
 class Idle(LeafTask):
 	def check_conditions(self):
 		b_do_action = not should_ai_catch_the_ball(self.ai_entity)
 		b_do_action &= not should_ai_serve(self.ai_entity)
-		
+
 		return b_do_action
-	
+
 	def do_action(self):
 		ai_entity = self.ai_entity
 
 		if ai_entity.trajectory_changed():
 			ai_entity.reset_change_trajectory()
 			self.get_control().finish_with_success()
-			
+
 		if should_ai_serve(ai_entity):
 			ai_entity.reset_change_trajectory()
 			self.get_control().finish_with_success()
-		
+
 		ai_entity.end_frame()
 
 
-class WaitAndServe(TaskDecorator):
-	def do_action(self):
-		self.task.do_action()
-
-	def check_conditions(self):
-		return should_ai_serve(self.ai_entity)
-	
-	
 class Wait(LeafTask):
 	def __init__(self, ai_entity, duration):
 		LeafTask.__init__(self, ai_entity)
@@ -359,9 +364,39 @@ class Wait(LeafTask):
 
 	def start(self):
 		self.t0 = game_engine.GameEngine.get_instance().get_running_ticks()
-	
+
 	def do_action(self):
 		if game_engine.GameEngine.get_instance().get_running_ticks() - self.t0 > self.duration:
 			self.get_control().finish_with_success()
-		
+
 		self.ai_entity.end_frame()
+
+
+##########   DECORATOR   ##########
+
+class WaitAndServe(TaskDecorator):
+	def do_action(self):
+		self.task.do_action()
+
+	def check_conditions(self):
+		return should_ai_serve(self.ai_entity)
+
+
+class MoveAndIdleDecorator(TaskDecorator):
+	def do_action(self):
+		self.task.do_action()
+
+	def check_conditions(self):
+		b_do_action = not should_ai_catch_the_ball(self.ai_entity)
+		b_do_action &= not should_ai_serve(self.ai_entity)
+		return b_do_action
+	
+
+class MoveAndThrowDecorator(TaskDecorator):
+	def do_action(self):
+		self.task.do_action()
+
+	def check_conditions(self):
+		b_do_action = should_ai_catch_the_ball(self.ai_entity)
+		b_do_action &= not should_ai_serve(self.ai_entity)
+		return b_do_action
