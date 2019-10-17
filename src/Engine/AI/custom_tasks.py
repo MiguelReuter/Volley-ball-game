@@ -86,13 +86,23 @@ def should_ai_smash(ai_entity):
 	margin_h = 0.2
 
 	# check ball height
-	ball = game_engine.GameEngine.get_instance().ball
-	net_h = game_engine.GameEngine.get_instance().court.net_z2
+	ge = game_engine.GameEngine.get_instance()
+	ball = ge.ball
+	net_h = ge.court.net_z2
 
 	trajectory = ThrowerManager.get_instance().current_trajectory
 
 	if trajectory is not None:
-		ball_z_at_net = trajectory.get_z_at_y(0)
+		y = CHARACTER_W / 2
+		if ai_entity.character.team.id == TeamId.LEFT:
+			y *= -1
+		ball_z_at_net = trajectory.get_z_at_y(y)
+
+		# check if ball trajectory crosses specified y
+		if ball_z_at_net is None:
+			return False
+
+		# check if ball height at specified y is acceptable (between 2 thresholds)
 		if ball_z_at_net < net_h + ball.radius + margin_h or ball_z_at_net > ai_entity.character.get_max_height_jump():
 			return False
 	else:
@@ -100,14 +110,14 @@ def should_ai_smash(ai_entity):
 
 	# check if enough time
 	# time to run (in sec)
-	target_pos = Vector3(trajectory.get_x_at_y(CHARACTER_W/2), CHARACTER_W/2, 0)
+	target_pos = Vector3(trajectory.get_x_at_y(y), y, 0)
 	run_time = ai_entity.character.get_time_to_run_to(target_pos)
 
 	# time to jump (in sec)
-	jump_time = ai_entity.character.get_time_to_jump_to_height(ball_z_at_net-ball.radius)
+	jump_time = ai_entity.character.get_time_to_jump_to_height(ball_z_at_net - ball.radius)
 
 	# remaining time (in sec)
-	remaining_time = trajectory.get_time_at_z(ball_z_at_net) + (trajectory.t0 - game_engine.GameEngine.get_instance().get_running_ticks()) / 1000
+	remaining_time = trajectory.get_time_at_z(ball_z_at_net) + (trajectory.t0 - ge.get_running_ticks()) / 1000
 
 	if run_time + jump_time > remaining_time:
 		return False
@@ -249,6 +259,8 @@ class MoveToSmashingPosition(LeafTask):
 			trajectory = ThrowerManager.get_instance().current_trajectory
 			if trajectory is not None:
 				y = CHARACTER_W / 2
+				if self.ai_entity.character.team.id == TeamId.LEFT:
+					y *= -1
 				pos = Vector3(trajectory.get_x_at_y(y), y, 0)
 
 				if move_to(self.ai_entity, pos):
@@ -264,9 +276,12 @@ class JumpForSmashing(LeafTask):
 
 	def start(self):
 		trajectory = ThrowerManager.get_instance().current_trajectory
-		good_time_to_smash = 1000 * trajectory.get_time_at_y(CHARACTER_W / 2) + trajectory.t0
+		y = CHARACTER_W / 2
+		if self.ai_entity.character.team.id == TeamId.LEFT:
+			y *= -1
+		good_time_to_smash = 1000 * trajectory.get_time_at_y(y) + trajectory.t0
 
-		z = trajectory.get_z_at_y(CHARACTER_W / 2)
+		z = trajectory.get_z_at_y(y)
 		self.good_time_to_jump = good_time_to_smash - 1000 * self.ai_entity.character.get_time_to_jump_to_height(z)
 
 	def do_action(self):
