@@ -243,19 +243,6 @@ class MoveToIdlingPosition(LeafTask):
 			self.get_control().finish_with_success()
 
 
-class SmashSequenceDecorator(TaskDecorator):
-	def do_action(self):
-		self.task.do_action()
-
-	def check_conditions(self):
-		b_do_action = should_ai_catch_the_ball(self.ai_entity)
-		b_do_action &= not should_ai_serve(self.ai_entity)
-
-		b_do_action &= should_ai_smash(self.ai_entity)
-
-		return b_do_action
-
-
 class MoveToSmashingPosition(LeafTask):
 	def do_action(self):
 		if should_ai_catch_the_ball(self.ai_entity):
@@ -271,13 +258,25 @@ class MoveToSmashingPosition(LeafTask):
 
 
 class JumpForSmashing(LeafTask):
+	def __init__(self, ai_entity):
+		LeafTask.__init__(self, ai_entity)
+		self.good_time_to_jump = None
+
+	def start(self):
+		trajectory = ThrowerManager.get_instance().current_trajectory
+		good_time_to_smash = 1000 * trajectory.get_time_at_y(CHARACTER_W / 2) + trajectory.t0
+
+		z = trajectory.get_z_at_y(CHARACTER_W / 2)
+		self.good_time_to_jump = good_time_to_smash - 1000 * self.ai_entity.character.get_time_to_jump_to_height(z)
+
 	def do_action(self):
-		# TODO: jump at right time
-		ev = pg.event.Event(ACTION_EVENT, {"player_id": self.ai_entity.character.player_id, "action": PlayerAction.JUMP})
-		pg.event.post(ev)
+		ge = game_engine.GameEngine.get_instance()
+		if self.good_time_to_jump < ge.get_running_ticks():
+			ev = pg.event.Event(ACTION_EVENT, {"player_id": self.ai_entity.character.player_id, "action": PlayerAction.JUMP})
+			pg.event.post(ev)
+			self.get_control().finish_with_success()
 
 		self.ai_entity.end_frame()
-		self.get_control().finish_with_success()
 
 
 class RandomSmash(LeafTask):
@@ -378,8 +377,6 @@ class Wait(LeafTask):
 		self.ai_entity.end_frame()
 
 
-##########   DECORATOR   ##########
-
 class WaitAndServe(TaskDecorator):
 	def do_action(self):
 		self.task.do_action()
@@ -387,6 +384,8 @@ class WaitAndServe(TaskDecorator):
 	def check_conditions(self):
 		return should_ai_serve(self.ai_entity)
 
+
+##########   DECORATOR   ##########
 
 class MoveAndIdleDecorator(TaskDecorator):
 	def do_action(self):
@@ -396,7 +395,7 @@ class MoveAndIdleDecorator(TaskDecorator):
 		b_do_action = not should_ai_catch_the_ball(self.ai_entity)
 		b_do_action &= not should_ai_serve(self.ai_entity)
 		return b_do_action
-	
+
 
 class MoveAndThrowDecorator(TaskDecorator):
 	def do_action(self):
@@ -405,4 +404,17 @@ class MoveAndThrowDecorator(TaskDecorator):
 	def check_conditions(self):
 		b_do_action = should_ai_catch_the_ball(self.ai_entity)
 		b_do_action &= not should_ai_serve(self.ai_entity)
+		return b_do_action
+	
+
+class SmashSequenceDecorator(TaskDecorator):
+	def do_action(self):
+		self.task.do_action()
+
+	def check_conditions(self):
+		b_do_action = should_ai_catch_the_ball(self.ai_entity)
+		b_do_action &= not should_ai_serve(self.ai_entity)
+
+		b_do_action &= should_ai_smash(self.ai_entity)
+
 		return b_do_action
