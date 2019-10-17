@@ -159,27 +159,6 @@ def get_x_at_y(origin_pos, initial_velocity, y):
 		return None
 
 
-# TODO : /!\ method not used yet /!\
-"""
-THR_NEAR_ZONE = 2
-
-def find_effective_target_position(origin_pos, target_pos, wanted_height):
-	# all targets and wanted heights are not physically possible for the player : huge velocity needed, skills...
-	
-	# TODO : add dependence on target and origin position
-	eff_target_pos = Vector3(target_pos)
-	eff_wanted_height = wanted_height
-	if _are_points_in_same_y_side(origin_pos, target_pos):
-		if abs(origin_pos.y) < THR_NEAR_ZONE:
-			eff_target_pos.y = _apply_signed_threshold(eff_target_pos.y, min=THR_NEAR_ZONE)
-			
-	# TODO : add dependence on player direction and distance from the ball
-
-	
-	return eff_target_pos, eff_wanted_height
-"""
-
-
 def _are_points_in_same_y_side(p1, p2):
 	"""
 	Return True if the 2 given points are on same side (y axis).

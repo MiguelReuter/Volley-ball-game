@@ -83,7 +83,6 @@ class AIEntity:
 		catch_ball_sequence.get_control().add(random_throw_or_dive)
 
 		# random throw or smash
-		# TODO: add conditions to check before smashing ! Just for test
 		smash_or_throw = Selector(self)
 		smash_or_throw.get_control().add(smash_sequence)
 		smash_or_throw.get_control().add(catch_ball_sequence)

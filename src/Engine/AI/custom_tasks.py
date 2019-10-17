@@ -29,7 +29,7 @@ def should_ai_catch_the_ball(ai_entity):
 		# if ball will not reached same court side than character
 		if (target_pos.y > 0 and character.team.id == TeamId.LEFT) or (target_pos.y < 0 and character.team.id == TeamId.RIGHT):
 			return False
-		# TODO: implement other checks (game rules): if pass number < MAX_PASS_NUMBER...
+		# TODO: implement other checks (game rules): if pass number < MAX_PASS_NUMBER, if OUT_OF_BOUNDS...
 		return True
 	return False
 
