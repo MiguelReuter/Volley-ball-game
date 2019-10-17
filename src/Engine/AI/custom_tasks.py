@@ -74,6 +74,46 @@ def should_ai_serve(ai_entity):
 	return False
 
 
+def should_ai_smash(ai_entity):
+	"""
+	Check if specified AI entity should run to net, jump and smash.
+
+	:param AIEntity ai_entity: specified AI entity
+	:return: True if AI entity should smash
+	:rtype bool:
+	"""
+	# margin
+	margin_h = 0.2
+
+	# check ball height
+	ball = game_engine.GameEngine.get_instance().ball
+	net_h = game_engine.GameEngine.get_instance().court.net_z2
+
+	trajectory = ThrowerManager.get_instance().current_trajectory
+
+	if trajectory is not None:
+		ball_z_at_net = trajectory.get_z_at_y(0)
+		if ball_z_at_net < net_h + ball.radius + margin_h:
+			return False
+	else:
+		return False
+
+	# check if enough time
+	# time to run (in sec)
+	target_pos = Vector3(trajectory.get_x_at_y(CHARACTER_W/2), CHARACTER_W/2, 0)
+	run_time = ai_entity.character.get_time_to_run_to(target_pos)
+
+	# time to jump (in sec)
+	jump_time = ai_entity.character.get_time_to_jump_to_height(ball_z_at_net-ball.radius)
+
+	# remaining time (in sec)
+	remaining_time = trajectory.get_time_at_z(ball_z_at_net) + (trajectory.t0 - game_engine.GameEngine.get_instance().get_running_ticks()) / 1000
+
+	if run_time + jump_time > remaining_time:
+		return False
+	return True
+
+
 def should_ai_dive(ai_entity):
 	"""
 	Check if specified AI entity has to dive to catch ball instead of running.
