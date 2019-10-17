@@ -97,6 +97,7 @@ class AIEntity:
 
 		# replace and idling
 		replace_and_idling_sequence = Sequence(self)
+		replace_and_idling_sequence.get_control().add(ChooseIdlingPosition(self))
 		replace_and_idling_sequence.get_control().add(MoveToIdlingPosition(self))
 		replace_and_idling_sequence.get_control().add(Idle(self))
 		replace_and_idling_sequence = MoveAndIdleDecorator(self, replace_and_idling_sequence)

@@ -186,7 +186,6 @@ class FindBallTargetPosition(LeafTask):
 
 		:return: None
 		"""
-		# print("find ball target position")
 		thrower_manager = ThrowerManager.get_instance()
 
 		target_pos = Vector3(thrower_manager.current_trajectory.target_pos)
@@ -218,6 +217,17 @@ class MoveToTargetPosition(LeafTask):
 				self.get_control().finish_with_success()
 
 
+class ChooseIdlingPosition(LeafTask):
+	def do_action(self):
+		idling_pos = Vector3(CHARACTER_INITIAL_POS)
+		if self.ai_entity.character.team.id == TeamId.LEFT:
+			idling_pos.y *= -1
+
+		self.ai_entity.blackboard["idling_position"] = idling_pos
+
+		self.get_control().finish_with_success()
+
+
 class MoveToIdlingPosition(LeafTask):
 	def do_action(self):
 		if should_ai_serve(self.ai_entity):
@@ -227,13 +237,9 @@ class MoveToIdlingPosition(LeafTask):
 			self.get_control().finish_with_failure()
 
 		# move to idling position
-		idling_pos = Vector3(CHARACTER_INITIAL_POS)
-		if self.ai_entity.character.team.id == TeamId.LEFT:
-			idling_pos.y *= -1
-		pos_is_reached = move_to(self.ai_entity, idling_pos)
-
+		idling_pos = self.ai_entity.blackboard["idling_position"]
 		# if idling position reached --> success
-		if pos_is_reached:
+		if move_to(self.ai_entity, idling_pos):
 			self.get_control().finish_with_success()
 
 
