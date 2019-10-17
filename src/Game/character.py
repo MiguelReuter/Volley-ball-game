@@ -236,6 +236,17 @@ class Character(ActionObject):
 		else:
 			return None
 
+	def get_max_height_jump(self):
+		"""
+		Give max height reached by top of character by jumping.
+
+		:return: max height reached
+		:rtype: float
+		"""
+		a, b, c = -G/2, self.jump_velocity, self.h
+		delta = b**2 - 4 * a * c
+		return -delta / (4 * a)
+
 
 class Team:
 	def __init__(self, team_id=TeamId.NONE, characters_list=None):

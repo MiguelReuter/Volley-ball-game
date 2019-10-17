@@ -93,7 +93,7 @@ def should_ai_smash(ai_entity):
 
 	if trajectory is not None:
 		ball_z_at_net = trajectory.get_z_at_y(0)
-		if ball_z_at_net < net_h + ball.radius + margin_h:
+		if ball_z_at_net < net_h + ball.radius + margin_h or ball_z_at_net > ai_entity.character.get_max_height_jump():
 			return False
 	else:
 		return False
