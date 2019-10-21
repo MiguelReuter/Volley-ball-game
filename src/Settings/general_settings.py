@@ -38,7 +38,7 @@ BALL_RADIUS = 0.5
 # character
 CHARACTER_W = 0.4
 CHARACTER_H = 1
-CHARACTER_INITIAL_POS = (0, 0.6 * COURT_DIM_Y / 2, 0)
+CHARACTER_INITIAL_POS = (0, 0.5 * COURT_DIM_Y / 2, 0)
 CHARACTER_SERVING_POS = (0.6 * COURT_DIM_X / 2, COURT_DIM_Y / 2, 0)
 
 
@@ -56,8 +56,8 @@ SERVE_DURATION = 500    				# in ms
 JUMP_VELOCITY = 8       				# in m/s
 SMASH_VELOCITY = 15     				# in m/s
 RUN_SPEED = 4							# in m/s
-DIVE_SPEED = 4							# in m/s
-DIVE_SLIDE_DURATION = 250				# in ms
+DIVE_SPEED = 6							# in m/s
+DIVE_SLIDE_DURATION = 170				# in ms
 DIVE_DURATION_FOR_STANDING_UP = 500		# in ms
 
 # THROW PARAMETERS
