@@ -83,15 +83,18 @@ def should_ai_smash(ai_entity):
 	:rtype bool:
 	"""
 	# margin
-	margin_h = 0.3
+	margin_h = 0.2
 
 	# check ball height
 	ge = game_engine.GameEngine.get_instance()
 	ball = ge.ball
 	net_h = ge.court.net_z2
 
-	trajectory = ThrowerManager.get_instance().current_trajectory
+	# if character has smashed yet and is still in air
+	if ai_entity.character.is_state_type_of(CharacterStateType.JUMPING):
+		return False
 
+	trajectory = ThrowerManager.get_instance().current_trajectory
 	if trajectory is not None:
 		ball_z_at_net = trajectory.get_z_at_y(0)
 
@@ -100,7 +103,9 @@ def should_ai_smash(ai_entity):
 			return False
 
 		# check if ball height at specified y is acceptable (between 2 thresholds)
-		if ball_z_at_net < net_h + ball.radius + margin_h or ball_z_at_net > ai_entity.character.get_max_height_jump():
+		if ball_z_at_net < net_h + ball.radius + margin_h:
+			return False
+		if ball_z_at_net - ball.radius > ai_entity.character.get_max_height_jump():
 			return False
 	else:
 		return False
@@ -117,7 +122,7 @@ def should_ai_smash(ai_entity):
 	jump_time = ai_entity.character.get_time_to_jump_to_height(ball_z_at_net - ball.radius)
 
 	# remaining time (in sec)
-	remaining_time = trajectory.get_time_at_z(ball_z_at_net) + (trajectory.t0 - ge.get_running_ticks()) / 1000
+	remaining_time = trajectory.get_time_at_y(0) + (trajectory.t0 - ge.get_running_ticks()) / 1000
 
 	if run_time + jump_time > remaining_time:
 		return False
@@ -276,12 +281,9 @@ class JumpForSmashing(LeafTask):
 
 	def start(self):
 		trajectory = ThrowerManager.get_instance().current_trajectory
-		y = CHARACTER_W / 2
-		if self.ai_entity.character.team.id == TeamId.LEFT:
-			y *= -1
-		good_time_to_smash = 1000 * trajectory.get_time_at_y(y) + trajectory.t0
+		good_time_to_smash = 1000 * trajectory.get_time_at_y(0) + trajectory.t0
 
-		z = trajectory.get_z_at_y(y)
+		z = trajectory.get_z_at_y(0)
 		self.good_time_to_jump = good_time_to_smash - 1000 * self.ai_entity.character.get_time_to_jump_to_height(z)
 
 	def do_action(self):
