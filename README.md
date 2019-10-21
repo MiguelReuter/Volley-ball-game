@@ -2,13 +2,19 @@
 
 Check [Projects](https://github.com/MiguelReuter/Volley-ball-game/projects) page on Github to see progress !
 
-**Game inspiration:** [Super Soccer SNES](https://en.wikipedia.org/wiki/Super_Soccer)
+# Demo
+<img src="doc/demo_2.gif" height="400" />
 
-<img src="https://upload.wikimedia.org/wikipedia/en/5/54/Super_formation_soccer_sfc.png" height="200" />
+**human player** (left) V.S. **bot** (right)
 
 ---
 
 # Overview
+
+**Game inspiration:** [Super Soccer SNES](https://en.wikipedia.org/wiki/Super_Soccer)
+
+<img src="https://upload.wikimedia.org/wikipedia/en/5/54/Super_formation_soccer_sfc.png" height="200" />
+
 
 ## Features
 
@@ -43,9 +49,7 @@ Notes:
 | **bot** vs **bot**                            |`self.new_game([AIId.AI_ID_1, AIId.AI_ID_2])` or `self.new_game()`|
 
 
-## Demo
-### Human player VS Bot
-<img src="doc/demo_1v1_bot.gif" height="400" />
+## Demo - moves
 
 ### Throw ball
 <img src="doc/throw.gif" height="400" />
@@ -89,7 +93,8 @@ You can manually change button binds in `src/Settings/input_presets.py` (pygame 
 
 # Launch game
 ```
-python3 src/main.py
+cd src/
+python3 main.py
 ```
 
 # Run tests (optional)
