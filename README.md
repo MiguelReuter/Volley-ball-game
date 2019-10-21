@@ -21,8 +21,12 @@ Check [Projects](https://github.com/MiguelReuter/Volley-ball-game/projects) page
     - serve
     - throw ball
     - dive
-    - quit and pause game
+    - pause game
     - move camera (debug purpose)
+- Rules (1V1):
+    - ball does not touch ground in player area
+    - ball does not cross space under net
+    - player can touch a maximum of 3 times the ball consecutively
 
 Notes:
 
@@ -30,10 +34,14 @@ Notes:
      - **throw**
      - **smash** (depth only)
      - **serve**
-2. You must change code in `src/Engine/game_engine.py` in `create` method if character 2 is controllable by a joystick or by Artificial Intelligence :
-     - to play against a **bot** (by default): `char2 = Character((0, 5, 0), player_id=AIId.AI_ID_1, is_in_left_side=False)`
-     - to play against a **human player** (joystick needed): `char2 = Character((0, 5, 0), player_id=PlayerId.PLAYER_ID_2, is_in_left_side=False)`
-3. Game rules are not implemented yet
+2. To change team composition, you must change code in `src/Engine/game_engine.py` in `create` method:
+
+| teams composition                             | code to change                                                   |
+|-----------------------------------------------|------------------------------------------------------------------|
+|**human** (keyboard)  vs **human** (joystick)  |`self.new_game([PlayerId.PLAYER_ID_1, PlayerId.PLAYER_ID_2])`     |
+|**human** vs **bot**                           |`self.new_game([PlayerId.PLAYER_ID_1, AIId.AI_ID_1])`             |
+| **bot** vs **bot**                            |`self.new_game([AIId.AI_ID_1, AIId.AI_ID_2])` or `self.new_game()`|
+
 
 ## Demo
 ### Human player VS Bot
@@ -68,7 +76,7 @@ Keyboard and Gamepad are supported. For gamepad, button binds could be different
 | **Move** camera                           | Arrow Keys      | Right joystick    |
 | **Re-throw** ball                         | Space bar       | 4                 |
 | **Quit** game                             | Esc.            | 9                 |
-| **Pause** game (not implemented yet)      | P               | 10                |
+| **Pause** game                            | P               | 10                |
 
 You can manually change button binds in `src/Settings/input_presets.py` (pygame code key).
 

@@ -3,7 +3,7 @@
 from pygame import Vector3
 
 from Engine import game_engine
-from Engine.Trajectory.trajectory_solver import get_time_at_z, get_z_at_y
+from Engine.Trajectory.trajectory_solver import get_time_at_z, get_z_at_y, get_x_at_y, get_time_at_y
 from Settings import G
 
 
@@ -71,5 +71,18 @@ class Trajectory:
 		"""
 		return get_time_at_z(self.initial_velocity.z, self.origin_pos.z, z)
 
+	def get_time_at_y(self, y):
+		"""
+		Get time at specific y coordinate.
+
+		:param float y: y value at which time is given
+		:return: time in sec when y coordinate will be reached, or None if there is no solution
+		:rtype: float or None
+		"""
+		return get_time_at_y(self.initial_velocity.y, self.origin_pos.y, y)
+
 	def get_z_at_y(self, y):
 		return get_z_at_y(self.initial_velocity, self.origin_pos, self.target_pos.z, y)
+
+	def get_x_at_y(self, y):
+		return get_x_at_y(self.origin_pos, self.initial_velocity, y)

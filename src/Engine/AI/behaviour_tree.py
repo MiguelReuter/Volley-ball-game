@@ -119,7 +119,7 @@ class LeafTask(Task):
 class ParentTask(Task):
 	def __init__(self, ai_entity):
 		Task.__init__(self, ai_entity)
-		self.control = None  # TODO : protected ?
+		self.control = None
 		self.create_controller()
 		
 	def create_controller(self):
@@ -275,10 +275,29 @@ class DummyTask2(LeafTask):
 		self.get_control().finish_with_success()
 
 
+class DummyTaskFail1(LeafTask):
+	def check_conditions(self):
+		print("cc 1 (false)")
+		return False
+
+
+class DummyTaskFail2(LeafTask):
+	def check_conditions(self):
+		print("cc 2 (true)")
+		return True
+
+	def do_action(self):
+		print("do action 2")
+		if self.ai_entity is not None:
+			self.ai_entity.end_frame()
+		self.get_control().finish_with_failure()
+
+
 if __name__ == "__main__":
 	# dummy create behaviour tree
 	ai_entity = None
 	
+	"""
 	dummy_task_1 = DummyTask1(ai_entity)
 	dummy_task_2 = DummyTask2(ai_entity)
 	
@@ -286,8 +305,16 @@ if __name__ == "__main__":
 	planner.get_control().add(dummy_task_1)
 	planner.get_control().add(dummy_task_2)
 	planner = ResetDecorator(ai_entity, planner)
-	
+	"""
+	t1 = DummyTaskFail1(ai_entity)
+	t2 = DummyTaskFail1(ai_entity)
+
+	planner = Selector(ai_entity)
+	planner.get_control().add(t1)
+	planner.get_control().add(t2)
+	planner = ResetDecorator(ai_entity, planner)
+
 	planner.start()
-	for _ in range(10):
+	for _ in range(100):
 		planner.do_action()
 		

@@ -63,25 +63,49 @@ class AIEntity:
 
 		:return: None
 		"""
-		run_and_throw_ball = Sequence(self)
+
+		# run and smash
+		smash_sequence = Sequence(self)
+		smash_sequence.get_control().add(MoveToSmashingPosition(self))
+		smash_sequence.get_control().add(JumpForSmashing(self))
+		smash_sequence.get_control().add(RandomSmash(self))
+		smash_sequence = SmashSequenceDecorator(self, smash_sequence)
+
+		# random throw or throw after diving
+		random_throw_or_dive = Selector(self)
+		random_throw_or_dive.get_control().add(ThrowAfterDiving(self))
+		random_throw_or_dive.get_control().add(RandomThrow(self))
 
 		# find target ball position, run to it and throw
-		run_and_throw_ball.get_control().add(FindBallTargetPosition(self))
-		run_and_throw_ball.get_control().add(MoveToTargetPosition(self))
-		run_and_throw_ball.get_control().add(RandomThrow(self))
-		run_and_throw_ball = MoveAndThrowDecorator(self, run_and_throw_ball)
-		
+		catch_ball_sequence = Sequence(self)
+		catch_ball_sequence.get_control().add(FindBallTargetPosition(self))
+		catch_ball_sequence.get_control().add(MoveToTargetPosition(self))
+		catch_ball_sequence.get_control().add(random_throw_or_dive)
+
+		# random throw or smash
+		smash_or_throw = Selector(self)
+		smash_or_throw.get_control().add(smash_sequence)
+		smash_or_throw.get_control().add(catch_ball_sequence)
+		smash_or_throw = MoveAndThrowDecorator(self, smash_or_throw)
+
 		# wait and serve
-		wait_and_serve = Sequence(self)
-		wait_and_serve.get_control().add(Wait(self, duration=1000))
-		wait_and_serve.get_control().add(RandomThrow(self))
-		wait_and_serve = WaitAndServe(self, wait_and_serve)
-		
+		serve = Sequence(self)
+		serve.get_control().add(Wait(self, duration=500))
+		serve.get_control().add(RandomThrow(self))
+		serve = WaitAndServe(self, serve)
+
+		# replace and idling
+		replace_and_idling_sequence = Sequence(self)
+		replace_and_idling_sequence.get_control().add(ChooseIdlingPosition(self))
+		replace_and_idling_sequence.get_control().add(MoveToIdlingPosition(self))
+		replace_and_idling_sequence.get_control().add(Idle(self))
+		replace_and_idling_sequence = MoveAndIdleDecorator(self, replace_and_idling_sequence)
+
 		# root
 		b_tree = Selector(self)
-		b_tree.get_control().add(run_and_throw_ball)
-		b_tree.get_control().add(wait_and_serve)
-		b_tree.get_control().add(Idle(self))
+		b_tree.get_control().add(serve)
+		b_tree.get_control().add(replace_and_idling_sequence)
+		b_tree.get_control().add(smash_or_throw)
 		b_tree = ResetDecorator(self, b_tree)
 		
 		self.behaviour_tree = b_tree

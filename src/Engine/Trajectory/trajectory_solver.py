@@ -123,6 +123,22 @@ def get_time_at_z(vz_0, z_0, z):
 	return (-b + sqrt(delta)) / (2 * a)
 
 
+def get_time_at_y(vy_0, y_0, y):
+	"""
+	Get time at specific y coordinate.
+
+	:param float vy_0: initial velocity along y axis
+	:param float y_0: initial y value
+	:param float y: y value at which time is given
+	:return: time in sec when y coordinate will be reached, or None if there is no solution
+	:rtype: float or None
+	"""
+	delta_y = y - y_0
+	if vy_0 != 0:
+		return delta_y / vy_0
+	return None
+
+
 def get_z_at_y(initial_velocity, initial_position, z_t, y):
 	a, b, c, _ = get_time_polynomial_fun(initial_velocity.z, initial_position.z, z_t)
 
@@ -132,25 +148,15 @@ def get_z_at_y(initial_velocity, initial_position, z_t, y):
 		return z_at_y
 
 
-# TODO : /!\ method not used yet /!\
-"""
-THR_NEAR_ZONE = 2
+def get_x_at_y(origin_pos, initial_velocity, y):
+	dy = y - origin_pos.y
 
-def find_effective_target_position(origin_pos, target_pos, wanted_height):
-	# all targets and wanted heights are not physically possible for the player : huge velocity needed, skills...
-	
-	# TODO : add dependence on target and origin position
-	eff_target_pos = Vector3(target_pos)
-	eff_wanted_height = wanted_height
-	if _are_points_in_same_y_side(origin_pos, target_pos):
-		if abs(origin_pos.y) < THR_NEAR_ZONE:
-			eff_target_pos.y = _apply_signed_threshold(eff_target_pos.y, min=THR_NEAR_ZONE)
-			
-	# TODO : add dependence on player direction and distance from the ball
-
-	
-	return eff_target_pos, eff_wanted_height
-"""
+	if initial_velocity.y != 0:
+		dt = dy / initial_velocity.y
+		dx = dt * initial_velocity.x
+		return origin_pos.x + dx
+	else:
+		return None
 
 
 def _are_points_in_same_y_side(p1, p2):

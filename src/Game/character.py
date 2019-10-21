@@ -4,14 +4,14 @@ from Engine.Display import debug3D_utils
 from Engine.Collisions import AABBCollider
 from Settings import *
 import pygame as pg
-
+from math import sqrt
 
 from Engine.Actions import ActionObject
 from Game.character_states import *
 
 
 class Character(ActionObject):
-	def __init__(self, position=None, player_id=PlayerId.PLAYER_ID_1, max_velocity=4):
+	def __init__(self, position=None, player_id=PlayerId.PLAYER_ID_1, max_velocity=None, jump_velocity=None):
 		ActionObject.__init__(self, player_id)
 		self._position = Vector3(position) if position is not None else Vector3()
 		self.previous_position = Vector3(self._position)
@@ -20,7 +20,8 @@ class Character(ActionObject):
 		self.collider_relative_position = Vector3()
 		self.collider = None
 		self.is_colliding_ball = False
-		self.max_velocity = max_velocity  # m/s
+		self.max_velocity = max_velocity if max_velocity is not None else RUN_SPEED  # m/s
+		self.jump_velocity = jump_velocity if jump_velocity is not None else JUMP_VELOCITY  # m/s
 		self.velocity = Vector3()
 		self.direction = Vector3()
 		
@@ -124,11 +125,11 @@ class Character(ActionObject):
 		# eventually switch state
 		self.state = self.state.next(filtered_action_events, dt=dt)
 	
-	def update_physics(self, dt):
+	def update_physics(self, dt, free_displacement=FREE_DISPLACEMENT):
 		self.previous_position = Vector3(self.position)
 		
 		self.velocity += Vector3(0, 0, -0.001 * dt * G)
-		self.move_rel(0.001 * dt * self.velocity)
+		self.move_rel(0.001 * dt * self.velocity, free_displacement)
 		
 	def get_hands_position(self):
 		"""
@@ -172,12 +173,12 @@ class Character(ActionObject):
 									  self.w / 2)
 		if dive_direction.x < 0:
 			collider_rel_center.x += self.w / 2
-		else:
+		elif dive_direction.x > 0:
 			collider_rel_center.x -= self.w / 2
 
 		if dive_direction.y < 0:
 			collider_rel_center.y += self.w / 2
-		else:
+		elif dive_direction.y > 0:
 			collider_rel_center.y -= self.w / 2
 
 		self.collider_relative_position	= collider_rel_center
@@ -186,6 +187,65 @@ class Character(ActionObject):
 	def reset(self):
 		self.set_default_collider()
 		self.velocity = Vector3()
+
+	def is_state_type_of(self, state_type):
+		return self.state.__class__.type == state_type
+
+	def get_time_to_run_to(self, target_position, origin_pos=None):
+		"""
+		Give time that takes character by running from an origin to a target position.
+
+		Time is processed with displacements in 8 possible directions.
+		:param pygame.Vector3 target_position: target position
+		:param pygame.Vector3 origin_pos: origin position. Current character position is default value.
+		:return: given time in sec
+		:rtype: float
+		"""
+		if origin_pos is None:
+			origin_pos = self.position
+
+		# absolute delta position
+		delta_pos = target_position - origin_pos
+		delta_pos = Vector3([abs(delta_pos[i]) for i in (0, 1, 2)])
+
+		# diagonal travel
+		dist_on_each_axis = min(delta_pos.x, delta_pos.y)
+		diagonal_time = 1.4142 * dist_on_each_axis / self.max_velocity
+
+		# orthogonal travel
+		direct_time = (max(delta_pos.x, delta_pos.y) - dist_on_each_axis) / self.max_velocity
+
+		return diagonal_time + direct_time
+
+	def get_time_to_jump_to_height(self, h):
+		"""
+		Give time that takes the top of character reaches a specific height by jumping.
+
+		Given time is processed in ascending phase.
+		:param float h: height at which time is given
+		:return: given time is sec or None if there is no solution
+		:rtype: float or None
+		"""
+		# at t=t1, self.position.z(0) + self.h = h
+		# -G / 2 * t1**2 + self.jump_velocity * t1 + self.h - h = 0
+		a, b, c = -G/2, self.jump_velocity, self.h - h
+		delta = b**2 - 4 * a * c
+
+		if delta >= 0:
+			return (-b + sqrt(delta)) / (2 * a)  #
+		else:
+			return None
+
+	def get_max_height_jump(self):
+		"""
+		Give max height reached by top of character by jumping.
+
+		:return: max height reached
+		:rtype: float
+		"""
+		a, b, c = -G/2, self.jump_velocity, self.h
+		delta = b**2 - 4 * a * c
+		return -delta / (4 * a)
 
 
 class Team:
