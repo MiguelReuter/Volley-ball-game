@@ -5,7 +5,7 @@ from Settings import *
 
 import pygame as pg
 
-from Engine.Display.sprites_group import HUD, Debug3D, DebugText
+from Engine.Display.sprites_group import HUD, Debug3D, DebugText, Scene3D
 
 
 class DisplayManager:
@@ -16,6 +16,7 @@ class DisplayManager:
 		return DisplayManager.s_instance
 
 	def __init__(self):
+		self.scene_3d = Scene3D()
 		self.debug_3d = Debug3D()
 		self.debug_text = DebugText()
 		self.hud = HUD()
@@ -78,7 +79,8 @@ class DisplayManager:
 		:return: None
 		"""
 		self.scaled_size = [int(self.f_scale * NOMINAL_RESOLUTION[i]) for i in (0, 1)]
-		
+
+		self.scene_3d.create_image(self.scaled_size)
 		self.debug_3d.create_image(self.scaled_size)
 		self.debug_text.create_image(self.scaled_size)
 		self.hud.create_image(self.scaled_size)
@@ -94,15 +96,17 @@ class DisplayManager:
 		:return: None
 		"""
 		# update
+		self.scene_3d.update()
 		self.debug_3d.update(objects)
 		self.debug_text.update()
 		self.hud.update()
 		
 		# update screen
-		self.rect_list = self.debug_text.rect_list + self.hud.rect_list + self.debug_3d.rect_list
+		self.rect_list = self.debug_text.rect_list + self.hud.rect_list + self.debug_3d.rect_list + self.scene_3d.rect_list
 		for r in self.rect_list:
 			self.screen.fill(BKGND_SCREEN_COLOR, r)
-		
+
+		self.blit_on_screen(self.scene_3d.image)
 		self.blit_on_screen(self.debug_3d.image)
 		self.blit_on_screen(self.debug_text.image)
 		self.blit_on_screen(self.hud.image)
