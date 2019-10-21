@@ -83,7 +83,7 @@ def should_ai_smash(ai_entity):
 	:rtype bool:
 	"""
 	# margin
-	margin_h = 0.2
+	margin_h = 0.3
 
 	# check ball height
 	ge = game_engine.GameEngine.get_instance()
@@ -93,10 +93,7 @@ def should_ai_smash(ai_entity):
 	trajectory = ThrowerManager.get_instance().current_trajectory
 
 	if trajectory is not None:
-		y = CHARACTER_W / 2
-		if ai_entity.character.team.id == TeamId.LEFT:
-			y *= -1
-		ball_z_at_net = trajectory.get_z_at_y(y)
+		ball_z_at_net = trajectory.get_z_at_y(0)
 
 		# check if ball trajectory crosses specified y
 		if ball_z_at_net is None:
@@ -110,6 +107,9 @@ def should_ai_smash(ai_entity):
 
 	# check if enough time
 	# time to run (in sec)
+	y = CHARACTER_W / 2
+	if ai_entity.character.team.id == TeamId.LEFT:
+		y *= -1
 	target_pos = Vector3(trajectory.get_x_at_y(y), y, 0)
 	run_time = ai_entity.character.get_time_to_run_to(target_pos)
 
