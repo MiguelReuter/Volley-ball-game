@@ -50,10 +50,9 @@ class HUD(pg.sprite.LayeredDirty):
 			# update raw image
 			t_str = "{}:{:02}".format(int(self.t) // 60, self.t % 60)
 			self.set_raw_image(self.font.render(t_str, 0, self.color))
-			
+
 			# update raw rect
 			t_pos = ((NOMINAL_RESOLUTION[0] - self.raw_image.get_size()[0]) / 2, 10)
-			self.prev_rect = self.rect
 			self.set_raw_rect(pg.Rect(t_pos, self.raw_image.get_size()))
 	
 	class ScoreSprite(ScalableSprite):
@@ -89,14 +88,13 @@ class HUD(pg.sprite.LayeredDirty):
 			self.dirty = 1
 			
 			# update raw image
-			self.raw_image = self.font.render(str(self._score), 0, self.color)
+			self.set_raw_image(self.font.render(str(self._score), 0, self.color))
 			if self.on_left:
 				sc_pos = (NOMINAL_RESOLUTION[0] / 2 - self.raw_image.get_size()[0] - self.center_space, 10)
 			else:
 				sc_pos = (NOMINAL_RESOLUTION[0] / 2 - self.raw_image.get_size()[0] + self.center_space, 10)
 			
 			# update raw rect
-			self.prev_rect = self.rect
 			self.set_raw_rect(pg.Rect(sc_pos, self.raw_image.get_size()))
 		
 		def update(self, *args):
@@ -117,7 +115,7 @@ class HUD(pg.sprite.LayeredDirty):
 			# rescale if needed to
 			f_scale = Engine.Display.display_manager.DisplayManager.get_instance().f_scale
 			ScalableSprite.update(self, f_scale)
-	
+
 	def __init__(self):
 		pg.sprite.LayeredDirty.__init__(self)
 		self.font = pg.font.Font(FONT_DIR, 8)
@@ -170,6 +168,7 @@ class HUD(pg.sprite.LayeredDirty):
 		
 		for sp in self.sprites():
 			if sp.dirty > 0:
-				self.image.fill(BKGND_TRANSPARENCY_COLOR, sp.prev_rect)
+				for r in sp.rect_list_to_redraw + sp.rect_list_to_erase:
+					self.image.fill(BKGND_TRANSPARENCY_COLOR, r)
 		
 		self.rect_list = pg.sprite.LayeredDirty.draw(self, self.image)
