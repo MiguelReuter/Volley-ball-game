@@ -35,7 +35,7 @@ class HUD(pg.sprite.LayeredDirty):
 			if current_t != self.t:
 				self.t = current_t
 				self.render_text()
-			
+
 			f_scale = Engine.Display.display_manager.DisplayManager.get_instance().f_scale
 			ScalableSprite.update(self, f_scale)
 		

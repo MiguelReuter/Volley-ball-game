@@ -4,17 +4,25 @@ import pygame as pg
 
 from Settings.general_settings import BKGND_TRANSPARENCY_COLOR, NOMINAL_RESOLUTION
 
+from Game.ground import Ground
+
 
 class Scene3D(pg.sprite.LayeredDirty):
 	def __init__(self):
 		pg.sprite.LayeredDirty.__init__(self)
 		self.image = None
 
+		# sprites
+		self.ground = None
+
 		self.rect_list = []
+
+		self.create()
 
 	def create(self):
 		# create sprites and add them
-		# self.add(sp)
+		self.ground = Ground()
+		self.add(self.ground)
 
 		# create image
 		self.create_image(NOMINAL_RESOLUTION)
@@ -40,7 +48,14 @@ class Scene3D(pg.sprite.LayeredDirty):
 		"""
 		pg.sprite.LayeredDirty.update(self)
 
-		# court ground
+		# ground
+		if self.ground.dirty > 0:
+			for r in self.ground.rect_list_to_redraw:
+				self.image.fill(BKGND_TRANSPARENCY_COLOR, r)
+		else:
+			if self.ground.source_rect is not None:
+				self.image.fill(BKGND_TRANSPARENCY_COLOR, self.ground.source_rect)
+		# court lines
 
 		# shadows
 
@@ -49,3 +64,5 @@ class Scene3D(pg.sprite.LayeredDirty):
 		# net
 
 		# characters and ball if same camera side
+
+		self.rect_list = pg.sprite.LayeredDirty.draw(self, self.image)

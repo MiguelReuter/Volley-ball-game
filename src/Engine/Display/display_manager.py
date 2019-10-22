@@ -16,23 +16,23 @@ class DisplayManager:
 		return DisplayManager.s_instance
 
 	def __init__(self):
+		DisplayManager.s_instance = self
+
+		self.camera = Camera(CAMERA_POS, FOCUS_POINT, FOV_ANGLE)
+
 		self.scene_3d = Scene3D()
 		self.debug_3d = Debug3D()
 		self.debug_text = DebugText()
 		self.hud = HUD()
-		
+
 		self.screen = None
 		self.screen_size = None  # size of screen
 		self.scaled_size = None  # size of scaled surface ie f * self.nominal_size
 		self.f_scale = 1
 		self.rect_list = []
-		
-		self.camera = Camera(CAMERA_POS, FOCUS_POINT, FOV_ANGLE)
-		
+
 		self.create_window()
 
-		DisplayManager.s_instance = self
-		
 	def create_window(self):
 		"""
 		Create pygame window and different images.
