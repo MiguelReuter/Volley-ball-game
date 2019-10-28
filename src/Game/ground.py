@@ -8,6 +8,8 @@ from Settings import NOMINAL_RESOLUTION, COURT_DIM_X
 from pygame import Vector3
 import pygame as pg
 
+from random import randint
+
 
 X_MAX = COURT_DIM_X / 2 + 5
 
@@ -35,13 +37,29 @@ class Ground(ScalableSprite):
 
 		# image is still at same size, only changing rect
 		raw_image = pg.Surface(NOMINAL_RESOLUTION)
-		raw_image.fill((255, 255, 0))
 
 		self.update_raw_rect(cam)
 		self.set_raw_image(raw_image)
 
+		self.fill_surface()
+
+	def fill_surface(self):
+		col1 = (0, 150, 0)
+		col2 = (20, 120, 20)
+		col3 = (0, 200, 100)
+
+		cols = [col1, col2, col3]
+
+		self.raw_image.fill(col1)
+
+		w, h = self.raw_image.get_size()
+		for y in range(h):
+			for x in range(w):
+				col = cols[randint(0, 2)]
+				self.raw_image.set_at((x, y), col)
+
 	def update_raw_rect(self, camera):
-		# self.dirty = 1
+		self.dirty = 1
 
 		_, v = camera.world_to_pixel_coords(Vector3(-X_MAX, 0, 0), NOMINAL_RESOLUTION)
 		size = (NOMINAL_RESOLUTION[0], NOMINAL_RESOLUTION[1] - v)
@@ -76,17 +94,7 @@ class Ground(ScalableSprite):
 			self.prev_cam_focus_point = Vector3(cam.focus_point)
 
 			r = [self.update_raw_rect(cam)]
-
-			source_rect = get_scaled_rect_from(r[0], self._f_scale)
-			print("source rect", source_rect)
-			print("image clip", self.image.get_clip())
-			source_rect.x = -(self.image.get_clip().x - source_rect.x)
-			source_rect.y = -(self.image.get_clip().y - source_rect.y)
-
-			self.source_rect = source_rect
 			# r : rect to redraw
-		else:
-			self.source_rect = None
 
 		# update scale
 		f_scale = Engine.Display.display_manager.DisplayManager.get_instance().f_scale
