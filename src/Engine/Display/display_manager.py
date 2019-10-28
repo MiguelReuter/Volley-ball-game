@@ -17,6 +17,8 @@ class DisplayManager:
 
 	def __init__(self):
 		DisplayManager.s_instance = self
+		# load palette
+		self.palette = load_palette_from_pal_file(PALETTE_DIR)
 
 		self.camera = Camera(CAMERA_POS, FOCUS_POINT, FOV_ANGLE)
 
@@ -147,4 +149,61 @@ class DisplayManager:
 				res = i
 				break
 		return res
-	
+
+
+def load_palette_from_pal_file(filename):
+	"""
+	Load palette from PAL file and return list of colors.
+
+	:param str filename: pal file
+	:return: list of colors
+	:rtype: list([int, int, int])
+	"""
+	with open(filename, "r") as pal:
+		lines = pal.readlines()[2:]
+
+		n_colors = int(lines[0])
+
+		colors = [line.split(" ") for line in lines[1:]]
+		colors = [[int(col[i]) for i in range(3)] for col in colors]
+
+		assert len(colors) == n_colors
+
+		return colors
+
+
+if __name__ == "__main__":
+	"""
+	Open a window and display palette colors.
+	"""
+	pg.init()
+
+	# parameters
+	colors = load_palette_from_pal_file("../../" + PALETTE_DIR)
+	font = pg.font.Font("../../" + FONT_DIR, 20)
+	size = 64
+
+	# open pygame window and fill it with colors
+	window = pg.display.set_mode((len(colors) * size, size))
+	window.fill((0, 0, 0))
+	for i, col in enumerate(colors):
+		# color
+		rect = pg.Rect(i * size, 0, size, size)
+		window.fill(col, rect)
+
+		# text
+		text_surface = font.render(str(i), False, (255, 255, 255))
+		window.blit(text_surface, rect)
+	pg.display.flip()
+
+	# loop, escape or close window to quit
+	done = False
+	while not done:
+		for ev in pg.event.get():
+			if ev.type == KEYDOWN:
+				if ev.key == K_ESCAPE:
+					done = True
+			elif ev.type == QUIT:
+				done = True
+	pg.quit()
+
