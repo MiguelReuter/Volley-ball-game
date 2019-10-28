@@ -172,9 +172,11 @@ def load_palette_from_pal_file(filename):
 		return colors
 
 
-if __name__ == "__main__":
+def visualise_colors():
 	"""
 	Open a window and display palette colors.
+
+	:return: None
 	"""
 	pg.init()
 
@@ -206,4 +208,9 @@ if __name__ == "__main__":
 			elif ev.type == QUIT:
 				done = True
 	pg.quit()
+
+
+if __name__ == "__main__":
+	visualise_colors()
+
 
