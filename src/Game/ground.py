@@ -44,18 +44,14 @@ class Ground(ScalableSprite):
 		self.fill_surface()
 
 	def fill_surface(self):
-		col1 = (0, 150, 0)
-		col2 = (20, 120, 20)
-		col3 = (0, 200, 100)
-
-		cols = [col1, col2, col3]
-
-		self.raw_image.fill(col1)
+		palette = Engine.Display.display_manager.DisplayManager.get_instance().palette
+		cols = [palette[5], palette[11], palette[14]]
+		# cols = [palette[5]]
 
 		w, h = self.raw_image.get_size()
 		for y in range(h):
 			for x in range(w):
-				col = cols[randint(0, 2)]
+				col = cols[randint(0, len(cols)-1)]
 				self.raw_image.set_at((x, y), col)
 
 	def update_raw_rect(self, camera):
