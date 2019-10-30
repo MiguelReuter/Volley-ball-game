@@ -21,7 +21,7 @@ TIME_SPEED = 1  # < 1 to slow down, > 1 to speed up
 G = 10
 
 # CAMERA
-CAMERA_POS = (11, 0, 3)
+CAMERA_POS = (11, -1, 7)
 FOCUS_POINT = (0, 0, 3)
 FOV_ANGLE = 60.
 
