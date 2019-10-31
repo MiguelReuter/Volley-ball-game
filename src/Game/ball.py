@@ -4,14 +4,15 @@ from pygame import Vector3
 import pygame as pg
 
 from Engine.Display import debug3D_utils
+from Engine.Display.scalable_sprite import ScalableSprite
 from Engine.Collisions import SphereCollider
 from Settings.general_settings import *
 import Engine
 
 
-class Ball(pg.sprite.DirtySprite):
+class Ball(ScalableSprite):
 	def __init__(self, position=None, radius=0.5, sprite_groups=[]):
-		pg.sprite.DirtySprite.__init__(self, *sprite_groups)
+		ScalableSprite.__init__(self, 1.0, *sprite_groups)
 		self.radius = radius
 		self.acceleration = Vector3()
 		self.velocity = Vector3()
@@ -26,12 +27,17 @@ class Ball(pg.sprite.DirtySprite):
 		self.will_be_served = False
 		
 		# sprite
-		self.rect_shadow = pg.Rect(0, 0, 0, 0)
-		self.rect = pg.Rect(0, 0, 0, 0)
+		#	real sprite
+		self.raw_rect = pg.Rect(0, 0, 0, 0)
+		self.raw_image = pg.image.load("../assets/sprites/ball.png").convert_alpha()
+
+		# 	debug
+		self.dbg_rect_shadow = pg.Rect(0, 0, 0, 0)
+		self.dbg_rect = pg.Rect(0, 0, 0, 0)
 		
 		# game rules
 		self._current_team_touches = []
-	
+
 	def add_team_touch(self, character):
 		team_id = character.team.id
 		if len(self._current_team_touches) == 0 or self._current_team_touches[-1] != team_id:
@@ -110,13 +116,13 @@ class Ball(pg.sprite.DirtySprite):
 		self.collider.center = self._position
 	
 	def draw_debug(self):
-		prev_rect = self.rect
-		prev_rect_shadow = self.rect_shadow
+		prev_rect = self.dbg_rect
+		prev_rect_shadow = self.dbg_rect_shadow
 		
-		self.rect = debug3D_utils.draw_horizontal_ellipse(Vector3(self.position[0], self.position[1], 0), self.radius)
-		self.rect_shadow = self.collider.draw_debug()
+		self.dbg_rect = debug3D_utils.draw_horizontal_ellipse(Vector3(self.position[0], self.position[1], 0), self.radius)
+		self.dbg_rect_shadow = self.collider.draw_debug()
 		
-		return [prev_rect.union(self.rect), prev_rect_shadow.union(self.rect_shadow)]
+		return [prev_rect.union(self.dbg_rect), prev_rect_shadow.union(self.dbg_rect_shadow)]
 	
 	def move_rel(self, dxyz):
 		self.position += Vector3(dxyz)
@@ -144,3 +150,33 @@ class Ball(pg.sprite.DirtySprite):
 			self.move_rel(0.001 * dt * self.velocity)
 		else:
 			self.velocity = Vector3()
+
+	def update(self, new_scale_factor=None, raw_rects_to_redraw=None, raw_rects_to_erase=None):
+		"""
+
+		:param new_scale_factor:
+		:param raw_rects_to_redraw:
+		:param raw_rects_to_erase:
+		:return:
+		"""
+		display_manager = Engine.Display.display_manager.DisplayManager.get_instance()
+		camera = display_manager.camera
+
+		top_left_px = camera.world_to_pixel_coords(self.position + Vector3(0, -self.radius, self.radius), NOMINAL_RESOLUTION)
+		btm_right_px = camera.world_to_pixel_coords(self.position + Vector3(0, self.radius, -self.radius), NOMINAL_RESOLUTION)
+		# TODO: process r_px for self.raw_rect; radius in pixel as for debug3D
+
+		# self.set_raw_rect(pg.Rect(top_left_px[0], top_left_px[1],
+		# 						  btm_right_px[0] - top_left_px[0], btm_right_px[1] - top_left_px[1]))
+
+		# TODO: not dirty for each frame...
+		self.dirty = 1
+		if raw_rects_to_redraw is None:
+			raw_rects_to_redraw = [self.raw_rect.copy()]
+		self.raw_rects_to_redraw = raw_rects_to_redraw
+
+		self.set_raw_rect(pg.Rect(top_left_px[0], top_left_px[1], 32, 32))
+
+		f_scale = display_manager.f_scale
+		ScalableSprite.update(self, f_scale, raw_rects_to_redraw=self.raw_rects_to_redraw)
+

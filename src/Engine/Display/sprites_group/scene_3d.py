@@ -14,6 +14,7 @@ class Scene3D(pg.sprite.LayeredDirty):
 
 		# sprites
 		self.ground = None
+		self.ball = None
 
 		self.rect_list = []
 
@@ -60,9 +61,24 @@ class Scene3D(pg.sprite.LayeredDirty):
 		# shadows
 
 		# characters and ball if opposite camera side (along y axis)
+		if self.ball is not None:
+			if self.ball.dirty > 0:
+				for r in self.ball.rect_list_to_redraw:
+					self.image.fill(BKGND_TRANSPARENCY_COLOR, r)
+			else:
+				if self.ball.source_rect is not None:
+					self.image.fill(BKGND_TRANSPARENCY_COLOR, self.ball.source_rect)
 
 		# net
 
 		# characters and ball if same camera side
 
 		self.rect_list = pg.sprite.LayeredDirty.draw(self, self.image)
+
+	def set_ball_sprite(self, ball):
+		# remove old ball sprite
+		self.remove(self.ball)
+
+		# set new ball sprite
+		self.ball = ball
+		self.add(self.ball)
