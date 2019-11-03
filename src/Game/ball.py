@@ -12,7 +12,7 @@ import Engine
 
 class Ball(ScalableSprite):
 	def __init__(self, position=None, radius=0.5, sprite_groups=[]):
-		ScalableSprite.__init__(self, 1.0, *sprite_groups)
+		ScalableSprite.__init__(self, *sprite_groups)
 		self.radius = radius
 		self.acceleration = Vector3()
 		self.velocity = Vector3()
@@ -28,8 +28,7 @@ class Ball(ScalableSprite):
 		
 		# sprite
 		#	real sprite
-		self.raw_rect = pg.Rect(0, 0, 0, 0)
-		self.raw_image = pg.image.load("../assets/sprites/ball.png").convert_alpha()
+		self.image = pg.image.load("../assets/sprites/ball.png").convert_alpha()
 
 		# 	debug
 		self.dbg_rect_shadow = pg.Rect(0, 0, 0, 0)
@@ -151,14 +150,13 @@ class Ball(ScalableSprite):
 		else:
 			self.velocity = Vector3()
 
-	def update(self, new_scale_factor=None, raw_rects_to_redraw=None, raw_rects_to_erase=None):
+	def update(self, raw_rect_to_redraw=None):
 		"""
 
-		:param new_scale_factor:
-		:param raw_rects_to_redraw:
-		:param raw_rects_to_erase:
+		:param raw_rect_to_redraw:
 		:return:
 		"""
+
 		display_manager = Engine.Display.display_manager.DisplayManager.get_instance()
 		camera = display_manager.camera
 
@@ -171,12 +169,10 @@ class Ball(ScalableSprite):
 
 		# TODO: not dirty for each frame...
 		self.dirty = 1
-		if raw_rects_to_redraw is None:
-			raw_rects_to_redraw = [self.raw_rect.copy()]
-		self.raw_rects_to_redraw = raw_rects_to_redraw
+		if raw_rect_to_redraw is None:
+			raw_rect_to_redraw = self._raw_rect.copy()
 
-		self.set_raw_rect(pg.Rect(top_left_px[0], top_left_px[1], 32, 32))
+		self.rect = pg.Rect(top_left_px[0], top_left_px[1], 32, 32)
 
-		f_scale = display_manager.f_scale
-		ScalableSprite.update(self, f_scale, raw_rects_to_redraw=self.raw_rects_to_redraw)
+		ScalableSprite.update(self, raw_rect_to_redraw=raw_rect_to_redraw)
 

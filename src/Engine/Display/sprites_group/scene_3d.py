@@ -51,11 +51,8 @@ class Scene3D(pg.sprite.LayeredDirty):
 
 		# ground
 		if self.ground.dirty > 0:
-			for r in self.ground.rect_list_to_redraw:
-				self.image.fill(BKGND_TRANSPARENCY_COLOR, r)
-		else:
-			if self.ground.source_rect is not None:
-				self.image.fill(BKGND_TRANSPARENCY_COLOR, self.ground.source_rect)
+			self.image.fill(BKGND_TRANSPARENCY_COLOR, self.ground.rect_to_redraw)
+
 		# court lines
 
 		# shadows
@@ -63,11 +60,7 @@ class Scene3D(pg.sprite.LayeredDirty):
 		# characters and ball if opposite camera side (along y axis)
 		if self.ball is not None:
 			if self.ball.dirty > 0:
-				for r in self.ball.rect_list_to_redraw:
-					self.image.fill(BKGND_TRANSPARENCY_COLOR, r)
-			else:
-				if self.ball.source_rect is not None:
-					self.image.fill(BKGND_TRANSPARENCY_COLOR, self.ball.source_rect)
+				self.image.fill(BKGND_TRANSPARENCY_COLOR, self.ball.rect_to_redraw)
 
 		# net
 
@@ -82,3 +75,4 @@ class Scene3D(pg.sprite.LayeredDirty):
 		# set new ball sprite
 		self.ball = ball
 		self.add(self.ball)
+

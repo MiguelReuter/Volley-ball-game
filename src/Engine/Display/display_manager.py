@@ -2,6 +2,7 @@
 
 from Engine.Display.camera import Camera
 from Settings import *
+from Engine.Display.scalable_sprite import ScalableSprite
 
 import pygame as pg
 
@@ -30,10 +31,20 @@ class DisplayManager:
 		self.screen = None
 		self.screen_size = None  # size of screen
 		self.scaled_size = None  # size of scaled surface ie f * self.nominal_size
-		self.f_scale = 1
+		self._f_scale = 1
 		self.rect_list = []
 
 		self.create_window()
+
+	@property
+	def f_scale(self):
+		return self._f_scale
+
+	@f_scale.setter
+	def f_scale(self, val):
+		ScalableSprite.set_display_scale_factor(val)
+		self._f_scale = val
+
 
 	def create_window(self):
 		"""
