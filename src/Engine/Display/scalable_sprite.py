@@ -2,81 +2,92 @@
 
 import pygame as pg
 
+import Engine
+
 
 class ScalableSprite(pg.sprite.DirtySprite):
 	"""
 	Dirty Sprite Class with scaling features.
 	"""
-	def __init__(self, scale_factor, *groups):
+	objects = []
+	_display_scale_factor = 1
+
+	@staticmethod
+	def get_display_scale_factor():
+		return ScalableSprite._display_scale_factor
+
+	@staticmethod
+	def set_display_scale_factor(val):
+		ScalableSprite._display_scale_factor = val
+		for ob in ScalableSprite.objects:
+			ob.display_scale_factor = val
+
+	def __init__(self, *groups):
 		pg.sprite.DirtySprite.__init__(self, *groups)
-		self._f_scale = scale_factor
-		
-		self.raw_rect = pg.Rect((0, 0), (0, 0))
-		self.raw_image = pg.Surface((0, 0))
-		
-		self.rect = pg.Rect((0, 0), (0, 0))
-		self.image = pg.Surface((0, 0))
 
-		self.rect_list_to_redraw = []
-		self.rect_list_to_erase = []
+		self.rect_to_redraw = pg.Rect(0, 0, 0, 0)
 
-	def set_raw_rect(self, raw_rect):
-		"""
-		Set raw rect and update scaled :val rect: attribute.
-		
-		:param pygame.Rect raw_rect: new raw rect
-		:return: None
-		"""
-		self.raw_rect = raw_rect
-		self.rect = get_scaled_rect_from(raw_rect, self._f_scale)
+		# refactor
+		self._raw_rect = pg.Rect(0, 0, 0, 0)
+		self._raw_image = pg.Surface((0, 0))
 
-	def set_raw_image(self, raw_image):
-		"""
-		Set raw rect and update scaled :val image: attribute.
+		self._scaled_rect = pg.Rect(0, 0, 0, 0)
+		self._scaled_image = pg.Surface((0, 0))
 
-		:param pygame.Surface raw_image: new raw image
-		:return: None
-		"""
-		self.raw_image = raw_image
-		
-		new_size = [int(self._f_scale * raw_image.get_size()[i]) for i in (0, 1)]
-		self.image = pg.Surface(new_size)
-		self.image = pg.transform.scale(raw_image, new_size)
-	
-	def update(self, new_scale_factor=None, raw_rects_to_redraw=None, raw_rects_to_erase=None):
+		self._display_scale_factor = ScalableSprite.display_scale_factor
+
+		# TODO: remove list: use ScalableSprite.display_scale_factor instead
+		ScalableSprite.objects.append(self)
+
+	@property
+	def display_scale_factor(self):
+		return self._display_scale_factor
+
+	@display_scale_factor.setter
+	def display_scale_factor(self, val):
+		self._display_scale_factor = val
+		self.rect = self._raw_rect
+		self.image = self._raw_image
+
+	@property
+	def rect(self):
+		return self._scaled_rect
+
+	@rect.setter
+	def rect(self, raw_val):
+		self._raw_rect = raw_val
+		self._scaled_rect = get_scaled_rect_from(raw_val, self.get_display_scale_factor())
+
+	@property
+	def image(self):
+		return self._scaled_image
+
+	@image.setter
+	def image(self, raw_val):
+		self._raw_image = raw_val
+		new_size = [self.get_display_scale_factor() * raw_val.get_size()[i] for i in (0, 1)]
+
+		self._scaled_image = pg.Surface(new_size)
+		self._scaled_image = pg.transform.scale(raw_val, new_size)
+
+	def __del__(self):
+		ScalableSprite.objects.remove(self)
+
+	def update(self, raw_rect_to_redraw=None):
 		"""
 		Update :var rect: and :var image: if needed.
 		
 		Rect and image are updated if scale factor changed or if sprite is dirty.
 		
-		:param float new_scale_factor: new scaling factor to use
-		:param list(pygame.Rect) raw_rects_to_redraw:
-		:param list(pygame.Rect) raw_rects_to_erase:
+		:param pygame.Rect raw_rect_to_redraw:
 		:return: None
 		"""
 		if self.dirty > 0:
 			# rects to redraw
-			if raw_rects_to_redraw is None:
-				self.rect_list_to_redraw = [self.rect.copy()]
+			if raw_rect_to_redraw is None:
+				self.rect_to_redraw = self.rect.copy()
 			else:
-				self.rect_list_to_redraw = [get_scaled_rect_from(r, self._f_scale) for r in raw_rects_to_redraw]
-
-		if new_scale_factor is not None and new_scale_factor != self._f_scale:
-			self.dirty = 1
-			self._f_scale = new_scale_factor
-			
-			# image
-			new_size = [int(self._f_scale * self.raw_image.get_size()[i]) for i in (0, 1)]
-			self.image = pg.Surface(new_size)
-			self.image = pg.transform.scale(self.raw_image, new_size)
-			
-			# rect
-			self.rect = get_scaled_rect_from(self.raw_rect, self._f_scale)
-			self.rect_list_to_redraw = [self.rect.copy()]
-
-		# rects to erase
-		if raw_rects_to_erase is not None:
-			self.rect_list_to_erase = [get_scaled_rect_from(r, self._f_scale) for r in raw_rects_to_erase]
+				self.rect_to_redraw = get_scaled_rect_from(raw_rect_to_redraw, self.get_display_scale_factor())
 
 
 def get_scaled_rect_from(raw_rect, scale_factor):
