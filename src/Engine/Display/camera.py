@@ -121,7 +121,18 @@ class Camera(ActionObject):
 			u = int(floor((-w / (2 * self._fov) * pt_3c[0] / pt_3c[2]) / (w / max(w, h))) + w / 2)
 			v = int(floor((-h / (2 * self._fov) * pt_3c[1] / pt_3c[2]) / (h / max(w, h))) + h / 2)
 		return u, v
-		
+
+	def get_length_in_pixels_at(self, pos, length, resolution, y_dependent=False, z_dependent=True):
+		c_pos = Vector3(pos)
+		if not y_dependent:
+			c_pos.y = self.position.y
+		if not z_dependent:
+			c_pos.z = self.position.z
+
+		pt_a = Vector2(self.world_to_pixel_coords(c_pos, resolution))
+		pt_b = Vector2(self.world_to_pixel_coords(c_pos + length * Vector3(0, 1, 0), resolution))
+		return int((pt_a - pt_b).magnitude())
+
 	def update_actions(self, action_events, **kwargs):
 		filtered_action_events = self.filter_action_events_by_player_id(action_events)
 		

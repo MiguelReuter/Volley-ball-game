@@ -5,8 +5,8 @@ from Engine.Display import DisplayManager
 
 
 # flags
-SIZE_INDEPENDENT_FROM_Y_POS = True
-SIZE_INDEPENDENT_FROM_Z_POS = False
+Y_DEPENDENT_SIZE = False
+Z_DEPENDENT_SIZE = True
 
 # colors
 DBG_COLOR_LINE = (100, 100, 255)
@@ -35,14 +35,8 @@ def draw_sphere(center, radius, col=None):
 	camera = display_manager.camera
 	surface = display_manager.debug_3d.image
 	surface_size = surface.get_size()
-	
-	c_pos = Vector3(center)
-	if SIZE_INDEPENDENT_FROM_Y_POS:
-		c_pos.y = camera.position.y
-	if SIZE_INDEPENDENT_FROM_Z_POS:
-		c_pos.z = camera.position.z
-	r_px = int((Vector2(camera.world_to_pixel_coords(c_pos, surface_size) -
-	            Vector2(camera.world_to_pixel_coords(c_pos + radius * Vector3(0, 1, 0), surface_size))).magnitude()))
+
+	r_px = camera.get_length_in_pixels_at(center, radius, surface_size, Y_DEPENDENT_SIZE, Z_DEPENDENT_SIZE)
 
 	return draw.circle(surface, col, camera.world_to_pixel_coords(center, surface_size), r_px)
 
