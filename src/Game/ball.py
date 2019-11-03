@@ -29,6 +29,8 @@ class Ball(ScalableSprite):
 		# sprite
 		#	real sprite
 		self.image = pg.image.load("../assets/sprites/ball.png").convert_alpha()
+		# TODO: not dirty for each frame...
+		self.dirty = 2
 
 		# 	debug
 		self.dbg_rect_shadow = pg.Rect(0, 0, 0, 0)
@@ -156,6 +158,7 @@ class Ball(ScalableSprite):
 		:param raw_rect_to_redraw:
 		:return:
 		"""
+		ScalableSprite.update(self, raw_rect_to_redraw=raw_rect_to_redraw)
 
 		display_manager = Engine.Display.display_manager.DisplayManager.get_instance()
 		camera = display_manager.camera
@@ -164,15 +167,6 @@ class Ball(ScalableSprite):
 		btm_right_px = camera.world_to_pixel_coords(self.position + Vector3(0, self.radius, -self.radius), NOMINAL_RESOLUTION)
 		# TODO: process r_px for self.raw_rect; radius in pixel as for debug3D
 
-		# self.set_raw_rect(pg.Rect(top_left_px[0], top_left_px[1],
-		# 						  btm_right_px[0] - top_left_px[0], btm_right_px[1] - top_left_px[1]))
-
-		# TODO: not dirty for each frame...
-		self.dirty = 1
-		if raw_rect_to_redraw is None:
-			raw_rect_to_redraw = self._raw_rect.copy()
-
 		self.rect = pg.Rect(top_left_px[0], top_left_px[1], 32, 32)
 
-		ScalableSprite.update(self, raw_rect_to_redraw=raw_rect_to_redraw)
 
