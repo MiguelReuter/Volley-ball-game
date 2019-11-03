@@ -28,7 +28,9 @@ class Ball(ScalableSprite):
 		
 		# sprite
 		#	real sprite
-		self.image = pg.image.load("../assets/sprites/ball.png").convert_alpha()
+		self._original_raw_image = pg.image.load("../assets/sprites/ball.png").convert_alpha()
+		self.image = self._original_raw_image.copy()
+
 		# TODO: not dirty for each frame...
 		self.dirty = 2
 
@@ -160,13 +162,19 @@ class Ball(ScalableSprite):
 		"""
 		ScalableSprite.update(self, raw_rect_to_redraw=raw_rect_to_redraw)
 
-		display_manager = Engine.Display.display_manager.DisplayManager.get_instance()
-		camera = display_manager.camera
+		camera = Engine.Display.display_manager.DisplayManager.get_instance().camera
 
-		top_left_px = camera.world_to_pixel_coords(self.position + Vector3(0, -self.radius, self.radius), NOMINAL_RESOLUTION)
-		btm_right_px = camera.world_to_pixel_coords(self.position + Vector3(0, self.radius, -self.radius), NOMINAL_RESOLUTION)
-		# TODO: process r_px for self.raw_rect; radius in pixel as for debug3D
+		# get top left position and size in pixels
+		center_px = camera.world_to_pixel_coords(self.position, NOMINAL_RESOLUTION)
+		radius_px = camera.get_length_in_pixels_at(self.position, self.radius, NOMINAL_RESOLUTION)
+		top_left_px = [int(center_px[i] - radius_px) for i in (0, 1)]
+		sprite_size = [2 * radius_px, 2 * radius_px]
 
-		self.rect = pg.Rect(top_left_px[0], top_left_px[1], 32, 32)
+		# scale image
+		self.image = pg.Surface(sprite_size)
+		self.image = pg.transform.scale(self._original_raw_image.copy(), sprite_size)
+
+		# update rect (pos and size)
+		self.rect = pg.Rect(top_left_px, sprite_size)
 
 
