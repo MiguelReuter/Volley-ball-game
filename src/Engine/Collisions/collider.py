@@ -22,7 +22,7 @@ class SphereCollider(Collider):
 		self.radius = radius
 		
 	def draw_debug(self):
-		return debug3D_utils.draw_sphere(self.center, self.radius)
+		return debug3D_utils.draw_sphere(self.center, self.radius, width=2)
 
 	def get_bound_coords(self, axis=0, m_to_p=True):
 		if m_to_p:
