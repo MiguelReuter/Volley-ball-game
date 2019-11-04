@@ -49,18 +49,17 @@ class Scene3D(pg.sprite.LayeredDirty):
 		"""
 		pg.sprite.LayeredDirty.update(self)
 
+		for sp in self.sprites():
+			if sp.dirty > 0:
+				self.image.fill(BKGND_TRANSPARENCY_COLOR, sp.rect_to_redraw)
+
 		# ground
-		if self.ground.dirty > 0:
-			self.image.fill(BKGND_TRANSPARENCY_COLOR, self.ground.rect_to_redraw)
 
 		# court lines
 
 		# shadows
 
 		# characters and ball if opposite camera side (along y axis)
-		if self.ball is not None:
-			if self.ball.dirty > 0:
-				self.image.fill(BKGND_TRANSPARENCY_COLOR, self.ball.rect_to_redraw)
 
 		# net
 

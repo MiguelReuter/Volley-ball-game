@@ -88,9 +88,24 @@ class ScalableSprite(pg.sprite.DirtySprite):
 				self.rect_to_redraw = self.rect.copy()
 			else:
 				self.rect_to_redraw = get_scaled_rect_from(raw_rect_to_redraw, self.get_display_scale_factor())
+			# shift rect
+			shift_rect_ip(self.rect_to_redraw)
 
 
 def get_scaled_rect_from(raw_rect, scale_factor):
 	x, y = [int(scale_factor * raw_rect.topleft[i]) for i in (0, 1)]
 	w, h = [int(scale_factor * raw_rect.size[i]) for i in (0, 1)]
 	return pg.Rect((x, y), (w, h))
+
+
+def shift_rect_ip(rect):
+	"""
+	Shift rect in place by avoiding negative coordinates for top-left pixel.
+
+	:param pygame.Rect rect: rect to shift
+	:return: None
+	"""
+	rect.w = max(0, rect.w + min(0, rect.x))
+	rect.h = max(0, rect.h + min(0, rect.y))
+	rect.x = max(0, rect.x)
+	rect.y = max(0, rect.y)
