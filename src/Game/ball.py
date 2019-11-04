@@ -122,8 +122,8 @@ class Ball(ScalableSprite):
 		prev_rect = self.dbg_rect
 		prev_rect_shadow = self.dbg_rect_shadow
 		
-		self.dbg_rect = debug3D_utils.draw_horizontal_ellipse(Vector3(self.position[0], self.position[1], 0), self.radius)
-		self.dbg_rect_shadow = self.collider.draw_debug()
+		self.dbg_rect_shadow = debug3D_utils.draw_horizontal_ellipse(Vector3(self.position[0], self.position[1], 0), self.radius)
+		self.dbg_rect = self.collider.draw_debug()
 		
 		return [prev_rect.union(self.dbg_rect), prev_rect_shadow.union(self.dbg_rect_shadow)]
 	
