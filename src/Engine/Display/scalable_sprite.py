@@ -93,6 +93,16 @@ class ScalableSprite(pg.sprite.DirtySprite):
 
 
 def get_scaled_rect_from(raw_rect, scale_factor):
+	"""
+	Get rect scaled by scale factor, scaling x and y too.
+
+	x, y, w and h of new scaled rect are integers.
+
+	:param pygame.Rect raw_rect: rect before scaling
+	:param float scale_factor: scale factor to use
+	:return:scaled rect
+	:rtype: pygame.Rect
+	"""
 	x, y = [int(scale_factor * raw_rect.topleft[i]) for i in (0, 1)]
 	w, h = [int(scale_factor * raw_rect.size[i]) for i in (0, 1)]
 	return pg.Rect((x, y), (w, h))
