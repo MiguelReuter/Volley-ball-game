@@ -168,11 +168,12 @@ class Ball(ScalableSprite):
 		center_px = camera.world_to_pixel_coords(self.position, NOMINAL_RESOLUTION)
 		radius_px = camera.get_length_in_pixels_at(self.position, self.radius, NOMINAL_RESOLUTION)
 		top_left_px = [int(center_px[i] - radius_px) for i in (0, 1)]
-		sprite_size = [2 * radius_px, 2 * radius_px]
+		sprite_size = (2 * radius_px, 2 * radius_px)
 
 		# scale image
-		self.image = pg.Surface(sprite_size)
-		self.image = pg.transform.scale(self._original_raw_image.copy(), sprite_size)
+		if sprite_size != self._raw_image.get_size():
+			self.image = pg.Surface(sprite_size)
+			self.image = pg.transform.scale(self._original_raw_image.copy(), sprite_size)
 
 		# update rect (pos and size)
 		self.rect = pg.Rect(top_left_px, sprite_size)
