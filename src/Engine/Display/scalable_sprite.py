@@ -70,7 +70,8 @@ class ScalableSprite(pg.sprite.DirtySprite):
 		self._scaled_image = pg.Surface(new_size)
 		self._scaled_image = pg.transform.scale(raw_val, new_size)
 
-	def __del__(self):
+	def kill(self):
+		pg.sprite.DirtySprite.kill(self)
 		ScalableSprite.objects.remove(self)
 
 	def update(self, raw_rect_to_redraw=None):
