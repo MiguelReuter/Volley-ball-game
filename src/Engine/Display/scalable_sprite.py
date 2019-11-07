@@ -65,10 +65,15 @@ class ScalableSprite(pg.sprite.DirtySprite):
 	@image.setter
 	def image(self, raw_val):
 		self._raw_image = raw_val
+		
 		new_size = [self.get_display_scale_factor() * raw_val.get_size()[i] for i in (0, 1)]
-
-		self._scaled_image = pg.Surface(new_size)
 		self._scaled_image = pg.transform.scale(raw_val, new_size)
+
+	def set_fit_image(self, raw_image, size):
+		self._raw_image = pg.transform.scale(raw_image, size)
+
+		scaled_size = [self.get_display_scale_factor() * size[i] for i in (0, 1)]
+		self._scaled_image = pg.transform.scale(raw_image, scaled_size)
 
 	def kill(self):
 		pg.sprite.DirtySprite.kill(self)

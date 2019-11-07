@@ -172,8 +172,7 @@ class Ball(ScalableSprite):
 
 		# scale image
 		if sprite_size != self._raw_image.get_size():
-			self.image = pg.Surface(sprite_size)
-			self.image = pg.transform.scale(self._original_raw_image.copy(), sprite_size)
+			self.set_fit_image(self._original_raw_image, sprite_size)
 
 		# update rect (pos and size)
 		self.rect = pg.Rect(top_left_px, sprite_size)
