@@ -81,14 +81,11 @@ class Ground(ScalableSprite):
 		"""
 		# update image
 		cam = Engine.Display.display_manager.DisplayManager.get_instance().camera
-		r = None
 		if cam.position.z != self.prev_camera_position.z or cam.focus_point.z != self.prev_cam_focus_point.z:
 			self.prev_camera_position = Vector3(cam.position)
 			self.prev_cam_focus_point = Vector3(cam.focus_point)
 
 			r = self.update_raw_rect(cam)
-			# r : rect to redraw
-
-		ScalableSprite.update(self, raw_rect_to_redraw=r)
+			ScalableSprite.update(self, r)
 
 

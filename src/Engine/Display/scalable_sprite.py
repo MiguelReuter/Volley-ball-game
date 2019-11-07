@@ -79,7 +79,7 @@ class ScalableSprite(pg.sprite.DirtySprite):
 		pg.sprite.DirtySprite.kill(self)
 		ScalableSprite.objects.remove(self)
 
-	def update(self, raw_rect_to_redraw=None):
+	def update(self, *args):
 		"""
 		Update :var rect: and :var image: if needed.
 		
@@ -88,6 +88,11 @@ class ScalableSprite(pg.sprite.DirtySprite):
 		:param pygame.Rect raw_rect_to_redraw:
 		:return: None
 		"""
+		if len(args) == 1:
+			raw_rect_to_redraw = args[0]
+		else:
+			raw_rect_to_redraw = None
+
 		if self.dirty > 0:
 			# rects to redraw
 			if raw_rect_to_redraw is None:

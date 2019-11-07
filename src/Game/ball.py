@@ -154,11 +154,13 @@ class Ball(ScalableSprite):
 		else:
 			self.velocity = Vector3()
 
-	def update(self, raw_rect_to_redraw=None):
+	def update(self, *args):
 		"""
+		Update ball sprite.
 
-		:param raw_rect_to_redraw:
-		:return:
+		A raw rect to redraw could be specified in args[0].
+		:param list args: list with args.
+		:return: None
 		"""
 		ScalableSprite.update(self, raw_rect_to_redraw=raw_rect_to_redraw)
 
