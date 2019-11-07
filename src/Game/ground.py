@@ -62,6 +62,7 @@ class Ground(ScalableSprite):
 		if self._raw_rect is None:
 			return_rect = raw_rect
 		else:
+			# TODO: maybe change this
 			x = 0
 			y = min(raw_rect.y, self._raw_rect.y)
 			w = self._raw_rect.w

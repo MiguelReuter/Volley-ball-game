@@ -27,14 +27,11 @@ class Ball(ScalableSprite):
 		self.will_be_served = False
 		
 		# sprite
-		#	real sprite
+		# TODO: change image load
 		self._original_raw_image = pg.image.load("../assets/sprites/ball.png").convert_alpha()
 		self.image = self._original_raw_image.copy()
 
-		# TODO: not dirty for each frame...
-		self.dirty = 2
-
-		# 	debug
+		# debug sprite
 		self.dbg_rect_shadow = pg.Rect(0, 0, 0, 0)
 		self.dbg_rect = pg.Rect(0, 0, 0, 0)
 		
@@ -162,21 +159,22 @@ class Ball(ScalableSprite):
 		:param list args: list with args.
 		:return: None
 		"""
-		ScalableSprite.update(self, raw_rect_to_redraw=raw_rect_to_redraw)
-
 		camera = Engine.Display.display_manager.DisplayManager.get_instance().camera
 
 		# get top left position and size in pixels
 		center_px = camera.world_to_pixel_coords(self.position, NOMINAL_RESOLUTION)
 		radius_px = camera.get_length_in_pixels_at(self.position, self.radius, NOMINAL_RESOLUTION)
-		top_left_px = [int(center_px[i] - radius_px) for i in (0, 1)]
+		top_left_px = (int(center_px[0] - radius_px), int(center_px[1] - radius_px))
 		sprite_size = (2 * radius_px, 2 * radius_px)
 
-		# scale image
-		if sprite_size != self._raw_image.get_size():
-			self.set_fit_image(self._original_raw_image, sprite_size)
-
-		# update rect (pos and size)
-		self.rect = pg.Rect(top_left_px, sprite_size)
+		# update image and rect if pos or size changed
+		if sprite_size != self._raw_rect.size or self._raw_rect.topleft != top_left_px:
+			self.dirty = 1
+			ScalableSprite.update(self, *args)
+			# update size image
+			if sprite_size != self._raw_rect.size:
+				self.set_fit_image(self._original_raw_image, sprite_size)
+			# update rect (pos and size)
+			self.rect = pg.Rect(top_left_px, sprite_size)
 
 
