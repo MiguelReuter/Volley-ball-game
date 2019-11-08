@@ -27,15 +27,44 @@ class AnimatedSprite(pg.sprite.DirtySprite):
 			self.name = frame_tag_dict["name"]
 			self.frames = all_frames[frame_tag_dict["from"]:frame_tag_dict["to"]+1]
 			self.direction = frame_tag_dict["direction"]
+			self._generator = None
+
+		def init(self):
+			"""
+			Call this when changing current animation to this one
+			:return:
+			"""
+			self._generator = self.play_generator()
+
+		def play_generator(self):
+			# generator who yields image
+			i = 0
+			n = len(self.frames)
+			prev_t = pg.time.get_ticks()
+
+			_current_frame = self.frames[i]
+			while 1:  # if loop
+				curr_t = pg.time.get_ticks()
+
+				if curr_t - prev_t > _current_frame.duration:
+					prev_t = curr_t
+
+					if self.direction == "forward":
+						i = (i + 1) % n
+					else:
+						print("animation direction {} not implemented".format(self.direction))
+
+					_current_frame = self.frames[i]
+				yield _current_frame.image
+
+		def play(self):
+			return self._generator.__next__()
 
 	def __init__(self, *groups):
 		pg.sprite.DirtySprite.__init__(self, *groups)
 		self.sprite_sheet = pg.Surface((0, 0))
 		self.animations = {}
-		self.current_animation = None
-		self.current_frame = None
-
-		self._prev_t = 0
+		self._current_animation = None
 
 		self.image = pg.Surface((0, 0))
 
@@ -57,26 +86,15 @@ class AnimatedSprite(pg.sprite.DirtySprite):
 			for frame_tag in meta.frame_tags:
 				self.animations[frame_tag["name"]] = AnimatedSprite.Animation(frame_tag, _frames)
 
-	def play_animation(self, animation_name):
-		self.current_animation = self.animations[animation_name]
-		self.current_frame = self.current_animation.frames[0]
-		self.image = self.current_frame.image
-		
-	def next_frame(self):
-		# TODO: use generator
-		i = self.current_animation.frames.index(self.current_frame)
-		n = len(self.current_animation.frames)
-
-		self.current_frame = self.current_animation.frames[(i + 1) % n]
-		self.image = self.current_frame.image
+	def set_current_animation(self, animation_name):
+		self._current_animation = self.animations[animation_name]
+		self._current_animation.init()
+		self.image = self._current_animation.play()
 
 	def update(self, *args):
 		pg.sprite.DirtySprite.update(self, *args)
 
-		t = pg.time.get_ticks()
-		if t - self._prev_t > self.current_frame.duration:
-			self._prev_t = t
-			self.next_frame()
+		self.image = self._current_animation.play()
 
 
 if __name__ == "__main__":
@@ -95,14 +113,17 @@ if __name__ == "__main__":
 		animated_sprite = AnimatedSprite()
 		animated_sprite.load_aseprite_json(aseprite_json)
 
-		animated_sprite.play_animation(animation_name)
+		animated_sprite.set_current_animation(animation_name)
 
 		# infinite loop, esc. to quit
 		_done = False
 		while not _done:
 			for ev in pg.event.get():
-				if ev.type == pg.KEYDOWN and ev.key == pg.K_ESCAPE:
-					_done = True
+				if ev.type == pg.KEYDOWN:
+					if ev.key == pg.K_ESCAPE:
+						_done = True
+					elif ev.key == pg.K_SPACE:
+						animated_sprite.set_current_animation("Flying")
 
 			screen.fill((0, 0, 0))
 			screen.blit(animated_sprite.image, animated_sprite.image.get_clip())
