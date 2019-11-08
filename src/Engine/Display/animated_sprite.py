@@ -31,7 +31,6 @@ class AnimatedSprite(pg.sprite.DirtySprite):
 	def __init__(self, *groups):
 		pg.sprite.DirtySprite.__init__(self, *groups)
 		self.sprite_sheet = pg.Surface((0, 0))
-		self._frames = []
 		self.animations = {}
 		self.current_animation = None
 		self.current_frame = None
@@ -44,26 +43,25 @@ class AnimatedSprite(pg.sprite.DirtySprite):
 		with open(file, mode='r') as json_file:
 			data = json.load(json_file)
 
-			frames = data["frames"]
 			meta = AnimatedSprite.Meta(data["meta"])
 
 			self.sprite_sheet = pg.image.load(meta.image_filename).convert_alpha()
 
 			# all frames
-			self._frames = []
-			for f in frames:
-				self._frames.append(AnimatedSprite.Frame(f, self.sprite_sheet))
+			_frames = []
+			for f in data["frames"]:
+				_frames.append(AnimatedSprite.Frame(f, self.sprite_sheet))
 
 			# animations
 			self.animations = {}
 			for frame_tag in meta.frame_tags:
-				self.animations[frame_tag["name"]] = AnimatedSprite.Animation(frame_tag, self._frames)
+				self.animations[frame_tag["name"]] = AnimatedSprite.Animation(frame_tag, _frames)
 
 	def play_animation(self, animation_name):
 		self.current_animation = self.animations[animation_name]
 		self.current_frame = self.current_animation.frames[0]
 		self.image = self.current_frame.image
-
+		
 	def next_frame(self):
 		# TODO: use generator
 		i = self.current_animation.frames.index(self.current_frame)
@@ -82,23 +80,35 @@ class AnimatedSprite(pg.sprite.DirtySprite):
 
 
 if __name__ == "__main__":
-	pg.init()
+	def visualize_animation(aseprite_json, animation_name):
+		"""
+		Open window and play a specified animation.
 
-	screen = pg.display.set_mode((64, 64))
+		:param str aseprite_json: path to json
+		:param str animation_name: name of animation to play
+		:return:
+		"""
+		pg.init()
 
-	animated_sprite = AnimatedSprite()
-	animated_sprite.load_aseprite_json("/home/miguel/chicken_fox/chicken_array.json")
+		screen = pg.display.set_mode((64, 64))
 
-	animated_sprite.play_animation("Idle")
+		animated_sprite = AnimatedSprite()
+		animated_sprite.load_aseprite_json(aseprite_json)
 
-	# infinite loop, esc. to quit
-	_done = False
-	while not _done:
-		for ev in pg.event.get():
-			if ev.type == pg.KEYDOWN and ev.key == pg.K_ESCAPE:
-				_done = True
+		animated_sprite.play_animation(animation_name)
 
-		screen.fill((0, 0, 0))
-		screen.blit(animated_sprite.image, animated_sprite.image.get_clip())
-		animated_sprite.update()
-		pg.display.flip()
+		# infinite loop, esc. to quit
+		_done = False
+		while not _done:
+			for ev in pg.event.get():
+				if ev.type == pg.KEYDOWN and ev.key == pg.K_ESCAPE:
+					_done = True
+
+			screen.fill((0, 0, 0))
+			screen.blit(animated_sprite.image, animated_sprite.image.get_clip())
+			animated_sprite.update()
+			pg.display.flip()
+		pg.quit()
+
+
+	visualize_animation("/home/miguel/chicken_fox/chicken_array.json", "Idle")
