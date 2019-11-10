@@ -50,7 +50,7 @@ class AnimatedSprite(pg.sprite.DirtySprite):
 		Animation objects are only defined by the following attributes:
 			- :var name: :type str: name of animation
 			- :var frames: :type list of Frame objects: list of animation's frames
-			- :var direction: :type float: direction of animation in ("forward", "backward")
+			- :var direction: :type float: direction of animation in ("forward", "reverse", "pingpong")
 		"""
 		def __init__(self, frame_tag_dict, all_frames):
 			self.name = frame_tag_dict["name"]
@@ -125,6 +125,14 @@ class AnimatedSprite(pg.sprite.DirtySprite):
 		n = len(self._current_animation.frames)
 		prev_t = pg.time.get_ticks()
 
+		if self._current_animation.direction == "reverse":
+			_low_to_high = False
+		else:
+			_low_to_high = True
+
+		if self._current_animation.direction not in ("forward", "reverse", "pingpong"):
+			print("animation direction {} not implemented".format(self._current_animation.direction))
+
 		_current_frame = self._current_animation.frames[i]
 		self.image = _current_frame.image
 		while 1:  # if loop
@@ -134,12 +142,13 @@ class AnimatedSprite(pg.sprite.DirtySprite):
 				# change current frame and image
 				prev_t = curr_t
 
-				if self._current_animation.direction == "forward":
+				if _low_to_high:
 					i = (i + 1) % n
-				elif self._current_animation.direction == "backward":
-					i = (i - 1) % n
 				else:
-					print("animation direction {} not implemented".format(self._current_animation.direction))
+					i = (i - 1) % n
+				if self._current_animation.direction == "pingpong":
+					if i == n - 1 or i == 0:
+						_low_to_high = not _low_to_high
 
 				_current_frame = self._current_animation.frames[i]
 				self.image = _current_frame.image
@@ -162,21 +171,21 @@ if __name__ == "__main__":
 	from Engine.Display.scalable_sprite import ScalableSprite
 
 
-	class Foo(AnimatedSprite, ScalableSprite):
+	class AnimatedAndScalableSpriteTest(AnimatedSprite, ScalableSprite):
 		"""
-		Foo class for testing multiple inheritance with animated and scalable sprite.
+		Class for testing multiple inheritance with animated and scalable sprite.
 		"""
 		def __init__(self, *groups):
 			AnimatedSprite.__init__(self, *groups)
 			ScalableSprite.__init__(self, *groups)
 
 
-	def visualize_animation(aseprite_json, animation_name=None):
+	def visualize_animations(aseprite_json, animation_name=None):
 		"""
 		Open window and play animations.
 
 		A list of animations name can be specified, or None for playing all animations contained in aseprite_json.
-		A press on space bar key change current animation
+		A press on space bar key change current animation.
 
 		:param str aseprite_json: path to json
 		:param str animation_name: name of animation to play. Could be:
@@ -185,23 +194,22 @@ if __name__ == "__main__":
 			- None to play all animations
 		:return:
 		"""
-		if isinstance(animation_name, str):
-			animation_name = (animation_name, )
-
-		i_anim = 0
-
 		pg.init()
 
 		screen = pg.display.set_mode((128, 128))
 
-		animated_sprite = Foo()
-		ScalableSprite.set_display_scale_factor(8)
+		animated_sprite = AnimatedAndScalableSpriteTest()
+		ScalableSprite.set_display_scale_factor(16)
 		animated_sprite.load_aseprite_json(aseprite_json)
 
-		if animation_name is None:
+		if isinstance(animation_name, str):
+			animation_name = (animation_name, )
+		elif animation_name is None:
 			animation_name = list(animated_sprite.animations.keys())
 
-		animated_sprite.set_current_animation(animation_name[0])
+		i_anim = 0
+		animated_sprite.set_current_animation(animation_name[i_anim])
+		print("set {} animation".format(animation_name[i_anim]))
 
 		# infinite loop, esc. to quit
 		_done = False
@@ -210,11 +218,14 @@ if __name__ == "__main__":
 				if ev.type == pg.KEYDOWN:
 					if ev.key == pg.K_ESCAPE:
 						_done = True
+
+					# change current animation
 					elif ev.key == pg.K_SPACE:
 						i_anim = (i_anim + 1) % len(animation_name)
 						animated_sprite.set_current_animation(animation_name[i_anim])
 						print("set {} animation".format(animation_name[i_anim]))
 
+			# clean screen and blit image
 			screen.fill((0, 0, 0))
 			animated_sprite.update()
 			screen.blit(animated_sprite.image, animated_sprite.image.get_clip())
@@ -222,7 +233,7 @@ if __name__ == "__main__":
 		pg.quit()
 
 
-	visualize_animation("../../../assets/sprites/animation_test.json")
+	visualize_animations("../../../assets/sprites/animation_test.json")
 
 
 
