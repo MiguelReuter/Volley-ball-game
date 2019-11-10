@@ -171,14 +171,25 @@ if __name__ == "__main__":
 			ScalableSprite.__init__(self, *groups)
 
 
-	def visualize_animation(aseprite_json, animation_name):
+	def visualize_animation(aseprite_json, animation_name=None):
 		"""
-		Open window and play a specified animation.
+		Open window and play animations.
+
+		A list of animations name can be specified, or None for playing all animations contained in aseprite_json.
+		A press on space bar key change current animation
 
 		:param str aseprite_json: path to json
-		:param str animation_name: name of animation to play
+		:param str animation_name: name of animation to play. Could be:
+			- :type str: to specify an unique animation
+			- :type list(str): to specify several animations
+			- None to play all animations
 		:return:
 		"""
+		if isinstance(animation_name, str):
+			animation_name = (animation_name, )
+
+		i_anim = 0
+
 		pg.init()
 
 		screen = pg.display.set_mode((128, 128))
@@ -187,7 +198,10 @@ if __name__ == "__main__":
 		ScalableSprite.set_display_scale_factor(8)
 		animated_sprite.load_aseprite_json(aseprite_json)
 
-		animated_sprite.set_current_animation(animation_name)
+		if animation_name is None:
+			animation_name = list(animated_sprite.animations.keys())
+
+		animated_sprite.set_current_animation(animation_name[0])
 
 		# infinite loop, esc. to quit
 		_done = False
@@ -197,7 +211,9 @@ if __name__ == "__main__":
 					if ev.key == pg.K_ESCAPE:
 						_done = True
 					elif ev.key == pg.K_SPACE:
-						animated_sprite.set_current_animation("Flying")
+						i_anim = (i_anim + 1) % len(animation_name)
+						animated_sprite.set_current_animation(animation_name[i_anim])
+						print("set {} animation".format(animation_name[i_anim]))
 
 			screen.fill((0, 0, 0))
 			animated_sprite.update()
@@ -206,7 +222,7 @@ if __name__ == "__main__":
 		pg.quit()
 
 
-	visualize_animation("/home/miguel/chicken_fox/chicken_array.json", "Idle")
+	visualize_animation("../../../assets/sprites/animation_test.json")
 
 
 
