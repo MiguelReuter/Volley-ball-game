@@ -71,6 +71,7 @@ class AnimatedSprite(pg.sprite.DirtySprite):
 		"""
 		Load aseprite JSON file, containing animations and images.
 
+		Load animations and images defined in JSON file too.
 		Tested with Libresprite v1.1.8.
 		In Aseprite, when exporting sprite sheet :
 			- check "JSON File"
@@ -83,16 +84,16 @@ class AnimatedSprite(pg.sprite.DirtySprite):
 		with open(file, mode='r') as json_file:
 			data = json.load(json_file)
 
+			# load meta data and sprite sheet
 			meta = AnimatedSprite.Meta(data["meta"])
-
 			self.sprite_sheet = pg.image.load(meta.image_filename).convert_alpha()
 
-			# all frames
+			# load all frames
 			_frames = []
 			for f in data["frames"]:
 				_frames.append(AnimatedSprite.Frame(f, self.sprite_sheet))
 
-			# animations
+			# load animations, with frames and images
 			self.animations = {}
 			for frame_tag in meta.frame_tags:
 				self.animations[frame_tag["name"]] = AnimatedSprite.Animation(frame_tag, _frames)

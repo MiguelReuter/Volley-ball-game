@@ -70,7 +70,7 @@ class ScalableSprite(pg.sprite.DirtySprite):
 	@image.setter
 	def image(self, raw_val):
 		self._raw_image = raw_val
-		if "_fit_size" in self.__dict__.keys():
+		if "_fit_size" in self.__dict__.keys():  # necessary if a class inherits from a class A and this class
 			raw_size = raw_val.get_size() if self._fit_size is None else self._fit_size
 		else:
 			raw_size = raw_val.get_size()
