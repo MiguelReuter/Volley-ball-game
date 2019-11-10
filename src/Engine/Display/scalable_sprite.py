@@ -58,8 +58,9 @@ class ScalableSprite(pg.sprite.DirtySprite):
 	@rect.setter
 	def rect(self, raw_val):
 		self._raw_rect = raw_val
-		if self._fit_size is not None and self._raw_rect.size != self._fit_size:
-			self._raw_rect.w, self._raw_rect.h = self._fit_size
+		if "_fit_size" in self.__dict__.keys():  # necessary if a class inherits from a class A and this class
+			if self._fit_size is not None and self._raw_rect.size != self._fit_size:
+				self._raw_rect.w, self._raw_rect.h = self._fit_size
 
 		self._scaled_rect = get_scaled_rect_from(raw_val, self.get_display_scale_factor())
 

@@ -62,9 +62,6 @@ class AnimatedSprite(pg.sprite.DirtySprite):
 		self.sprite_sheet = pg.Surface((0, 0))
 		self.animations = {}
 		self._current_animation = None
-
-		self.image = pg.Surface((0, 0))
-
 		self._animation_generator = None
 
 	def load_aseprite_json(self, file):
