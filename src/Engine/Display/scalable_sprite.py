@@ -34,6 +34,8 @@ class ScalableSprite(pg.sprite.DirtySprite):
 		self._scaled_rect = pg.Rect(0, 0, 0, 0)
 		self._scaled_image = pg.Surface((0, 0))
 
+		self._fit_size = None
+
 		self._display_scale_factor = ScalableSprite.display_scale_factor
 
 		# TODO: remove list: use ScalableSprite.display_scale_factor instead
@@ -56,6 +58,9 @@ class ScalableSprite(pg.sprite.DirtySprite):
 	@rect.setter
 	def rect(self, raw_val):
 		self._raw_rect = raw_val
+		if self._fit_size is not None and self._raw_rect.size != self._fit_size:
+			self._raw_rect.w, self._raw_rect.h = self._fit_size
+
 		self._scaled_rect = get_scaled_rect_from(raw_val, self.get_display_scale_factor())
 
 	@property
@@ -65,15 +70,26 @@ class ScalableSprite(pg.sprite.DirtySprite):
 	@image.setter
 	def image(self, raw_val):
 		self._raw_image = raw_val
-		
-		new_size = [self.get_display_scale_factor() * raw_val.get_size()[i] for i in (0, 1)]
+		if "_fit_size" in self.__dict__.keys():
+			raw_size = raw_val.get_size() if self._fit_size is None else self._fit_size
+		else:
+			raw_size = raw_val.get_size()
+
+		new_size = [self.get_display_scale_factor() * raw_size[i] for i in (0, 1)]
 		self._scaled_image = pg.transform.scale(raw_val, new_size)
 
-	def set_fit_image(self, raw_image, size):
-		self._raw_image = pg.transform.scale(raw_image, size)
+	def set_fit_size(self, new_size):
+		"""
+		Set fit size, to force to fit raw image and raw rect.
 
-		scaled_size = [self.get_display_scale_factor() * size[i] for i in (0, 1)]
-		self._scaled_image = pg.transform.scale(raw_image, scaled_size)
+		If given new size is None, raw image size and raw rect size are used without any change.
+		:param tuple(int, int) new_size: new size to fit
+		:return: None
+		"""
+		if self._fit_size != new_size:
+			self._fit_size = new_size
+			self.image = self._raw_image
+			self.rect = self._raw_rect
 
 	def kill(self):
 		pg.sprite.DirtySprite.kill(self)

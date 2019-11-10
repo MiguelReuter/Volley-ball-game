@@ -171,9 +171,8 @@ class Ball(ScalableSprite):
 		if sprite_size != self._raw_rect.size or self._raw_rect.topleft != top_left_px:
 			self.dirty = 1
 			ScalableSprite.update(self, *args)
-			# update size image
-			if sprite_size != self._raw_rect.size:
-				self.set_fit_image(self._original_raw_image, sprite_size)
+			# update size image and size rect
+			self.set_fit_size(sprite_size)
 			# update rect (pos and size)
 			self.rect = pg.Rect(top_left_px, sprite_size)
 
