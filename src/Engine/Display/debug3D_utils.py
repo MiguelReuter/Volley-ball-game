@@ -41,6 +41,9 @@ def draw_sphere(center, radius, col=None, width=0):
 
 	r_px = camera.get_length_in_pixels_at(center, radius, surface_size, Y_DEPENDENT_SIZE, Z_DEPENDENT_SIZE)
 
+	# prevent to have width greater than radius in pygame.draw.circle
+	if width > r_px:
+		width = 0
 	# draw circle
 	bounding_rect = draw.circle(surface, col, camera.world_to_pixel_coords(center, surface_size), r_px, width)
 
