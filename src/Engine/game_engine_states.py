@@ -120,7 +120,7 @@ class Running(GameEngineState, ActionObject):
 				self._pending_rule = None
 				return
 		if ENABLE_RULES and len(rules_break_events) > 0 and not self.has_pending_rule():
-			self._pending_rule = rules_break_events[-1]
+			self._pending_rule = rules_break_events[0]
 			print("rule:", self._pending_rule.rule_type, "faulty team:", self._pending_rule.faulty_team, "time", self._pending_rule.time_stamp)
 
 			# update winner team's score
