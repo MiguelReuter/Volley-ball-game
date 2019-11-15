@@ -114,13 +114,14 @@ def get_time_at_z(vz_0, z_0, z):
 	:param float vz_0: initial vertical velocity ( > 0 for ascending)
 	:param float z_0: initial z value
 	:param float z: target z value
-	:return: time in sec which when z is reached
+	:return: time in sec which when z is reached, None if no solution
 	:rtype float:
 	"""
 	a, b, c, delta = get_time_polynomial_fun(vz_0, z_0, z)
 
-	assert delta > 0
-	return (-b + sqrt(delta)) / (2 * a)
+	if delta >= 0:
+		return (-b + sqrt(delta)) / (2 * a)
+	return None
 
 
 def get_time_at_y(vy_0, y_0, y):
