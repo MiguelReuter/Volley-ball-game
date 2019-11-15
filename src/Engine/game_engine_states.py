@@ -81,7 +81,7 @@ class Running(GameEngineState, ActionObject):
 		game_engine.thrower_manager.update(pg.event.get(THROW_EVENT), game_engine.ball)
 		
 		# manage rules
-		self.update_rules(pg.event.get(RULES_BREAK_EVENT))
+		self.manage_rules(pg.event.get(RULES_BREAK_EVENT))
 		
 		# DISPLAY
 		game_engine.display_manager.update([*game_engine.objects, game_engine.thrower_manager])
@@ -109,7 +109,22 @@ class Running(GameEngineState, ActionObject):
 				# game_engine.thrower_manager.throw_ball(game_engine.ball, INITIAL_POS, TARGET_POS, WANTED_H)
 				# game_engine.thrower_manager.throw_at_random_target_position(game_engine.ball, INITIAL_POS, WANTED_H)
 	
-	def update_rules(self, rules_break_events):
+	def manage_rules(self, rules_break_events):
+		"""
+		Manage rules by launching game actions and updating scores.
+
+		If ENABLE_RULES global constant is True, given rules break events are used to updating scores and launching
+		needed game actions. Only the first event of :var rules_break_events: is considered.
+		When a rule is broken:
+			- a service is given to the winner team
+			- score is incremented for winner team
+		These previous actions are launched after rules break with a delay, specified by PENDING_RULE_DURATION global
+		constant in ms.
+
+		:param list(pygame.event.Event of type RULES_BREAK_EVENT) rules_break_events: list containing rules break
+		events. Only the first one is considered.
+		:return: None
+		"""
 		if self.has_pending_rule():
 			game_engine = Engine.game_engine.GameEngine.get_instance()
 			if game_engine.get_running_ticks() - self._pending_rule.time_stamp > PENDING_RULE_DURATION:

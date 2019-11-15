@@ -131,6 +131,13 @@ class Ball(pg.sprite.DirtySprite):
 		self.velocity += Vector3(d_vel)
 
 	def update_rules(self):
+		"""
+		Update rules and post a RULES_BREAK_EVENT event if needed.
+
+		Note that several events could be sent at a same call. See update_rules method in Running GameEngineState.
+
+		:return: None
+		"""
 		self.check_if_out_of_bounds()
 		self.check_if_under_net()
 
