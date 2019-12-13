@@ -152,6 +152,19 @@ class Ball(AnimatedSprite, ScalableSprite):
 		else:
 			self.velocity = Vector3()
 
+	def adapt_animation_speed(self):
+		"""
+		Adapt current animation speed to physics velocity.
+
+		The faster the ball moves (in 3D space), the speeder current animation is played.
+		"""
+		# TODO: simplify to not call set_frame_duration at each frame ?
+		v = abs(self.velocity[0]) + abs(self.velocity[1]) + abs(self.velocity[2])
+		if v > 0.1:
+			self._current_animation.set_frame_duration(2000 / v)
+		else:
+			self._current_animation.set_frame_duration(0)
+
 	def update(self, *args):
 		"""
 		Update ball sprite.
@@ -160,6 +173,7 @@ class Ball(AnimatedSprite, ScalableSprite):
 		:param list args: list with args.
 		:return: None
 		"""
+		self.adapt_animation_speed()
 		AnimatedSprite.update(self)
 
 		camera = Engine.Display.display_manager.DisplayManager.get_instance().camera
