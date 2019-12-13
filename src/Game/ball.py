@@ -5,13 +5,15 @@ import pygame as pg
 
 from Engine.Display import debug3D_utils
 from Engine.Display.scalable_sprite import ScalableSprite
+from Engine.Display.animated_sprite import AnimatedSprite
 from Engine.Collisions import SphereCollider
 from Settings.general_settings import *
 import Engine
 
 
-class Ball(ScalableSprite):
+class Ball(AnimatedSprite, ScalableSprite):
 	def __init__(self, position=None, radius=0.5, sprite_groups=[]):
+		AnimatedSprite.__init__(self, *sprite_groups)
 		ScalableSprite.__init__(self, *sprite_groups)
 		self.radius = radius
 		self.acceleration = Vector3()
@@ -27,9 +29,8 @@ class Ball(ScalableSprite):
 		self.will_be_served = False
 		
 		# sprite
-		# TODO: change image load
-		self._original_raw_image = pg.image.load("../assets/sprites/ball.png").convert_alpha()
-		self.image = self._original_raw_image.copy()
+		self.load_aseprite_json("../assets/sprites/ball.json")
+		self.set_current_animation("Default", duration=200)
 
 		# debug sprite
 		self.dbg_rect_shadow = pg.Rect(0, 0, 0, 0)
@@ -159,6 +160,8 @@ class Ball(ScalableSprite):
 		:param list args: list with args.
 		:return: None
 		"""
+		AnimatedSprite.update(self)
+
 		camera = Engine.Display.display_manager.DisplayManager.get_instance().camera
 
 		# get top left position and size in pixels
@@ -168,7 +171,7 @@ class Ball(ScalableSprite):
 		sprite_size = (2 * radius_px, 2 * radius_px)
 
 		# update image and rect if pos or size changed
-		if sprite_size != self._raw_rect.size or self._raw_rect.topleft != top_left_px:
+		if sprite_size != self._raw_rect.size or self._raw_rect.topleft != top_left_px or self.dirty:
 			self.dirty = 1
 			ScalableSprite.update(self, *args)
 			# update size image and size rect
