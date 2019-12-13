@@ -52,10 +52,31 @@ class AnimatedSprite(pg.sprite.DirtySprite):
 			- :var frames: :type list of Frame objects: list of animation's frames
 			- :var direction: :type float: direction of animation in ("forward", "reverse", "pingpong")
 		"""
-		def __init__(self, frame_tag_dict, all_frames):
+		def __init__(self, frame_tag_dict, all_frames, **kwargs):
 			self.name = frame_tag_dict["name"]
 			self.frames = all_frames[frame_tag_dict["from"]:frame_tag_dict["to"]+1]
 			self.direction = frame_tag_dict["direction"]
+
+			if "duration" in kwargs.keys():
+				self.set_frame_duration(kwargs["duration"])
+
+		def set_frame_duration(self, duration):
+			"""
+			Set duration for all frames.
+
+			Duration is in ms. A list of int can be passed, each value corresponds to a frame.
+			An int can also be passed to set an unique duration for all frames.
+
+			:param [list|int] duration: list or an int containing frames' duration.
+			"""
+
+			if isinstance(duration, int) or isinstance(duration, float):
+				for fr in self.frames:
+					fr.duration = int(duration)
+			elif isinstance(duration, list):
+				n_values = len(duration)
+				for i, fr in enumerate(self.frames):
+					fr.duration = int(duration[i % n_values])
 
 	def __init__(self, *groups):
 		pg.sprite.DirtySprite.__init__(self, *groups)
@@ -71,7 +92,7 @@ class AnimatedSprite(pg.sprite.DirtySprite):
 		Load animations and images defined in JSON file too.
 		Tested with Libresprite v1.1.8.
 		In Aseprite, when exporting sprite sheet :
-			- check "JSON File"
+			- check "JSON Data"
 			- choose "Array" (not "Hash")
 			- check "Layers" and "Frame Tags" in Meta options
 
@@ -92,20 +113,29 @@ class AnimatedSprite(pg.sprite.DirtySprite):
 
 			# load animations, with frames and images
 			self.animations = {}
+			if len(meta.frame_tags) == 0:
+				print("No frame tags in {} !".format(file))
+
 			for frame_tag in meta.frame_tags:
 				self.animations[frame_tag["name"]] = AnimatedSprite.Animation(frame_tag, _frames)
 
-	def set_current_animation(self, animation_name):
+	def set_current_animation(self, animation_name, **kwargs):
 		"""
 		Change current animation to the specified one.
 
 		Desired animation must be in self.animations dict, else nothing is done.
+		'duration' can be specified to set currant animation frames' duration according to the
+		AnimatedSprite.Animation.set_frame_duration method.
 
 		:param str animation_name:
+		:param **dict kwargs: 'duration' for frames' duration
 		:return: None
 		"""
 		if animation_name in self.animations.keys():
 			self._current_animation = self.animations[animation_name]
+			if "duration" in kwargs.keys():
+				self._current_animation.set_frame_duration(kwargs["duration"])
+
 			self._animation_generator = self.play_generator()
 			self.play_current_animation()
 		else:
@@ -115,9 +145,8 @@ class AnimatedSprite(pg.sprite.DirtySprite):
 		"""
 		Basic generator used to play current animation.
 
-		This generator yields None and change :var self.image: if needed.
-
-		:return: None
+		This generator yields None and change :var self.image: if needed. If a frame has a duration of '0', animation
+		will be stopped on this frame, until duration is changed.
 		"""
 		i = 0
 		n = len(self._current_animation.frames)
@@ -136,7 +165,8 @@ class AnimatedSprite(pg.sprite.DirtySprite):
 		while 1:  # if loop
 			curr_t = pg.time.get_ticks()
 
-			if curr_t - prev_t > _current_frame.duration:
+			if curr_t - prev_t > _current_frame.duration > 0:
+				self.dirty = 1
 				# change current frame and image
 				prev_t = curr_t
 
