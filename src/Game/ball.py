@@ -30,7 +30,7 @@ class Ball(AnimatedSprite, ScalableSprite):
 		
 		# sprite
 		self.load_aseprite_json("../assets/sprites/ball.json")
-		self.set_current_animation("Default", duration=200)
+		self.set_current_animation("Default")
 
 		# debug sprite
 		self.dbg_rect_shadow = pg.Rect(0, 0, 0, 0)

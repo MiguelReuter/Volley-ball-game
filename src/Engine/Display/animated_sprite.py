@@ -82,6 +82,7 @@ class AnimatedSprite(pg.sprite.DirtySprite):
 		pg.sprite.DirtySprite.__init__(self, *groups)
 		self.sprite_sheet = pg.Surface((0, 0))
 		self.animations = {}
+		self._speed_factor = 1.0
 		self._current_animation = None
 		self._animation_generator = None
 
@@ -141,6 +142,12 @@ class AnimatedSprite(pg.sprite.DirtySprite):
 		else:
 			print("{} not in {} animations".format(animation_name, self))
 
+	def get_current_animation(self):
+		return self._current_animation
+
+	def set_speed(self, val):
+		self._speed_factor = val
+
 	def play_generator(self):
 		"""
 		Basic generator used to play current animation.
@@ -165,7 +172,7 @@ class AnimatedSprite(pg.sprite.DirtySprite):
 		while 1:  # if loop
 			curr_t = pg.time.get_ticks()
 
-			if curr_t - prev_t > _current_frame.duration > 0:
+			if self._speed_factor * (curr_t - prev_t) > _current_frame.duration > 0:
 				self.dirty = 1
 				# change current frame and image
 				prev_t = curr_t
