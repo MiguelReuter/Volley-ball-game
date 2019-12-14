@@ -3,6 +3,8 @@
 import pygame as pg
 import json
 
+import Engine
+
 
 class AnimatedSprite(pg.sprite.DirtySprite):
 	"""
@@ -155,9 +157,16 @@ class AnimatedSprite(pg.sprite.DirtySprite):
 		This generator yields None and change :var self.image: if needed. If a frame has a duration of '0', animation
 		will be stopped on this frame, until duration is changed.
 		"""
+		def get_ticks():
+			if Engine.GameEngine.get_instance() is not None:
+				# TODO: play animation when game is paused ?
+				return Engine.GameEngine.get_instance().get_running_ticks()
+			else:
+				return pg.time.get_ticks()
+
 		i = 0
 		n = len(self._current_animation.frames)
-		prev_t = pg.time.get_ticks()
+		prev_t = get_ticks()
 
 		if self._current_animation.direction == "reverse":
 			_low_to_high = False
@@ -170,7 +179,7 @@ class AnimatedSprite(pg.sprite.DirtySprite):
 		_current_frame = self._current_animation.frames[i]
 		self.image = _current_frame.image
 		while 1:  # if loop
-			curr_t = pg.time.get_ticks()
+			curr_t = get_ticks()
 
 			if self._speed_factor * (curr_t - prev_t) > _current_frame.duration > 0:
 				self.dirty = 1
