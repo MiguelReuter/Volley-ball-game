@@ -158,7 +158,7 @@ class Ball(AnimatedSprite, ScalableSprite):
 
 		The faster the ball moves (in 3D space), the speeder current animation is played.
 		"""
-		v = (abs(self.velocity[0]) + abs(self.velocity[1]) + abs(self.velocity[2])) / 20
+		v = (abs(self.velocity[0]) + abs(self.velocity[1]) + abs(self.velocity[2])) / 15
 		AnimatedSprite.set_speed(self, v)
 
 	def update(self, *args):
