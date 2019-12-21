@@ -5,8 +5,8 @@ from Engine.Display import DisplayManager
 
 
 # flags
-SIZE_INDEPENDENT_FROM_Y_POS = True
-SIZE_INDEPENDENT_FROM_Z_POS = False
+Y_DEPENDENT_SIZE = False
+Z_DEPENDENT_SIZE = True
 
 # colors
 DBG_COLOR_LINE = (100, 100, 255)
@@ -17,34 +17,41 @@ DBG_COLOR_HOR_ELLIPSE = (20, 20, 20)
 DBG_COLOR_SHADOW_HOR_ELLIPSE_TRAPEZE = (255, 0, 255)
 
 
-def draw_sphere(center, radius, col=None):
+def draw_sphere(center, radius, col=None, width=0):
 	"""
-	Draw a filled sphere on camera screen.
-	
+	Draw a sphere on camera screen.
+
+	width in kwargs could be specified.
+
 	:param pygame.Vector3 center: center of sphere
 	:param float radius: radius (world scale, not in pixel) of sphere
 	:param tuple(int, int, int) col: drawing color. default is :var DBG_COLOR_SPHERE:
+	:param int width: width of drawn sphere
 	:return: rect bounding the changed pixels
-	:rtype pygame.Rect:
+	:rtype: pygame.Rect
 	"""
 	display_manager = DisplayManager.get_instance()
 	if col is None:
 		col = DBG_COLOR_SPHERE
-	
+
 	# process r_px : radius in pixel
 	camera = display_manager.camera
 	surface = display_manager.debug_3d.image
 	surface_size = surface.get_size()
-	
-	c_pos = Vector3(center)
-	if SIZE_INDEPENDENT_FROM_Y_POS:
-		c_pos.y = camera.position.y
-	if SIZE_INDEPENDENT_FROM_Z_POS:
-		c_pos.z = camera.position.z
-	r_px = int((Vector2(camera.world_to_pixel_coords(c_pos, surface_size) -
-	            Vector2(camera.world_to_pixel_coords(c_pos + radius * Vector3(0, 1, 0), surface_size))).magnitude()))
 
-	return draw.circle(surface, col, camera.world_to_pixel_coords(center, surface_size), r_px)
+	r_px = camera.get_length_in_pixels_at(center, radius, surface_size, Y_DEPENDENT_SIZE, Z_DEPENDENT_SIZE)
+
+	# prevent to have width greater than radius in pygame.draw.circle
+	if width > r_px:
+		width = 0
+	# draw circle
+	bounding_rect = draw.circle(surface, col, camera.world_to_pixel_coords(center, surface_size), r_px, width)
+
+	# inflate rect (with width > 1, circle is drawn out of bounds else)
+	if width != 0:
+		bounding_rect.inflate_ip(2 * width, 2 * width)
+
+	return bounding_rect
 
 
 def draw_horizontal_ellipse(center, radius):

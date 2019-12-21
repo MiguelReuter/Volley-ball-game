@@ -112,6 +112,9 @@ class GameEngine(ActionObject):
 
 		self.teams = {TeamId.LEFT: l_team, TeamId.RIGHT: r_team}
 
+		# display manager - scene 3D
+		self.display_manager.scene_3d.set_ball_sprite(self.ball)
+
 	def update_actions(self, action_events, **kwargs):
 		for ev in action_events:
 			if ev.action == PlayerAction.QUIT:

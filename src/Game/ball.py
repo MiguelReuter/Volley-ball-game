@@ -4,14 +4,17 @@ from pygame import Vector3
 import pygame as pg
 
 from Engine.Display import debug3D_utils
+from Engine.Display.scalable_sprite import ScalableSprite
+from Engine.Display.animated_sprite import AnimatedSprite, AnimationDirectionEnum
 from Engine.Collisions import SphereCollider
 from Settings.general_settings import *
 import Engine
 
 
-class Ball(pg.sprite.DirtySprite):
+class Ball(AnimatedSprite, ScalableSprite):
 	def __init__(self, position=None, radius=0.5, sprite_groups=[]):
-		pg.sprite.DirtySprite.__init__(self, *sprite_groups)
+		AnimatedSprite.__init__(self, *sprite_groups)
+		ScalableSprite.__init__(self, *sprite_groups)
 		self.radius = radius
 		self.acceleration = Vector3()
 		self.velocity = Vector3()
@@ -26,12 +29,16 @@ class Ball(pg.sprite.DirtySprite):
 		self.will_be_served = False
 		
 		# sprite
-		self.rect_shadow = pg.Rect(0, 0, 0, 0)
-		self.rect = pg.Rect(0, 0, 0, 0)
+		self.load_aseprite_json("../assets/sprites/ball.json")
+		self.get_current_animation().set_direction(AnimationDirectionEnum.RANDOM)
+
+		# debug sprite
+		self.dbg_rect_shadow = pg.Rect(0, 0, 0, 0)
+		self.dbg_rect = pg.Rect(0, 0, 0, 0)
 		
 		# game rules
 		self._current_team_touches = []
-	
+
 	def add_team_touch(self, character):
 		team_id = character.team.id
 		if len(self._current_team_touches) == 0 or self._current_team_touches[-1] != team_id:
@@ -110,13 +117,13 @@ class Ball(pg.sprite.DirtySprite):
 		self.collider.center = self._position
 	
 	def draw_debug(self):
-		prev_rect = self.rect
-		prev_rect_shadow = self.rect_shadow
+		prev_rect = self.dbg_rect
+		prev_rect_shadow = self.dbg_rect_shadow
 		
-		self.rect = debug3D_utils.draw_horizontal_ellipse(Vector3(self.position[0], self.position[1], 0), self.radius)
-		self.rect_shadow = self.collider.draw_debug()
+		self.dbg_rect_shadow = debug3D_utils.draw_horizontal_ellipse(Vector3(self.position[0], self.position[1], 0), self.radius)
+		self.dbg_rect = self.collider.draw_debug()
 		
-		return [prev_rect.union(self.rect), prev_rect_shadow.union(self.rect_shadow)]
+		return [prev_rect.union(self.dbg_rect), prev_rect_shadow.union(self.dbg_rect_shadow)]
 	
 	def move_rel(self, dxyz):
 		self.position += Vector3(dxyz)
@@ -151,3 +158,42 @@ class Ball(pg.sprite.DirtySprite):
 			self.move_rel(0.001 * dt * self.velocity)
 		else:
 			self.velocity = Vector3()
+
+	def adapt_animation_speed(self):
+		"""
+		Adapt current animation speed to physics velocity.
+
+		The faster the ball moves (in 3D space), the speeder current animation is played.
+		"""
+		v = (abs(self.velocity[0]) + abs(self.velocity[1]) + abs(self.velocity[2])) / 15
+		AnimatedSprite.set_speed(self, v)
+
+	def update(self, *args):
+		"""
+		Update ball sprite.
+
+		A raw rect to redraw could be specified in args[0].
+		:param list args: list with args.
+		:return: None
+		"""
+		self.adapt_animation_speed()
+		AnimatedSprite.update(self)
+
+		camera = Engine.Display.display_manager.DisplayManager.get_instance().camera
+
+		# get top left position and size in pixels
+		center_px = camera.world_to_pixel_coords(self.position, NOMINAL_RESOLUTION)
+		radius_px = camera.get_length_in_pixels_at(self.position, self.radius, NOMINAL_RESOLUTION)
+		top_left_px = (int(center_px[0] - radius_px), int(center_px[1] - radius_px))
+		sprite_size = (2 * radius_px, 2 * radius_px)
+
+		# update image and rect if pos or size changed
+		if sprite_size != self._raw_rect.size or self._raw_rect.topleft != top_left_px or self.dirty:
+			self.dirty = 1
+			ScalableSprite.update(self, *args)
+			# update size image and size rect
+			self.set_fit_size(sprite_size)
+			# update rect (pos and size)
+			self.rect = pg.Rect(top_left_px, sprite_size)
+
+
