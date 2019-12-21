@@ -2,8 +2,10 @@
 
 import pygame as pg
 import json
+from random import randint
 
 import Engine
+from .utils import *
 
 
 class AnimatedSprite(pg.sprite.DirtySprite):
@@ -52,12 +54,12 @@ class AnimatedSprite(pg.sprite.DirtySprite):
 		Animation objects are only defined by the following attributes:
 			- :var name: :type str: name of animation
 			- :var frames: :type list of Frame objects: list of animation's frames
-			- :var direction: :type float: direction of animation in ("forward", "reverse", "pingpong")
+			- :var direction: :type float: direction of animation in AnimationDirectionEnum
 		"""
 		def __init__(self, frame_tag_dict, all_frames, **kwargs):
 			self.name = frame_tag_dict["name"]
 			self.frames = all_frames[frame_tag_dict["from"]:frame_tag_dict["to"]+1]
-			self.direction = frame_tag_dict["direction"]
+			self.direction = AnimationDirectionEnum(frame_tag_dict["direction"])
 
 			if "duration" in kwargs.keys():
 				self.set_frame_duration(kwargs["duration"])
@@ -80,6 +82,12 @@ class AnimatedSprite(pg.sprite.DirtySprite):
 				for i, fr in enumerate(self.frames):
 					fr.duration = int(duration[i % n_values])
 
+		def set_direction(self, new_direction):
+			if new_direction in AnimationDirectionEnum:
+				self.direction = new_direction
+			else:
+				print(new_direction + "not in" + AnimationDirectionEnum)
+
 	def __init__(self, *groups):
 		pg.sprite.DirtySprite.__init__(self, *groups)
 		self.sprite_sheet = pg.Surface((0, 0))
@@ -92,7 +100,7 @@ class AnimatedSprite(pg.sprite.DirtySprite):
 		"""
 		Load aseprite JSON file, containing animations and images.
 
-		Load animations and images defined in JSON file too.
+		Load animations and images defined in JSON file. Set current animation to a random one.
 		Tested with Libresprite v1.1.8.
 		In Aseprite, when exporting sprite sheet :
 			- check "JSON Data"
@@ -122,7 +130,9 @@ class AnimatedSprite(pg.sprite.DirtySprite):
 			for frame_tag in meta.frame_tags:
 				self.animations[frame_tag["name"]] = AnimatedSprite.Animation(frame_tag, _frames)
 
-	def set_current_animation(self, animation_name, **kwargs):
+			self.set_current_animation()
+
+	def set_current_animation(self, animation_name=None, **kwargs):
 		"""
 		Change current animation to the specified one.
 
@@ -134,6 +144,9 @@ class AnimatedSprite(pg.sprite.DirtySprite):
 		:param **dict kwargs: 'duration' for frames' duration
 		:return: None
 		"""
+		if animation_name is None:
+			animation_name = list(self.animations.keys())[0]
+
 		if animation_name in self.animations.keys():
 			self._current_animation = self.animations[animation_name]
 			if "duration" in kwargs.keys():
@@ -168,12 +181,12 @@ class AnimatedSprite(pg.sprite.DirtySprite):
 		n = len(self._current_animation.frames)
 		prev_t = get_ticks()
 
-		if self._current_animation.direction == "reverse":
+		if self._current_animation.direction == AnimationDirectionEnum.REVERSE:
 			_low_to_high = False
 		else:
 			_low_to_high = True
 
-		if self._current_animation.direction not in ("forward", "reverse", "pingpong"):
+		if self._current_animation.direction not in AnimationDirectionEnum:
 			print("animation direction {} not implemented".format(self._current_animation.direction))
 
 		_current_frame = self._current_animation.frames[i]
@@ -190,9 +203,11 @@ class AnimatedSprite(pg.sprite.DirtySprite):
 					i = (i + 1) % n
 				else:
 					i = (i - 1) % n
-				if self._current_animation.direction == "pingpong":
+				if self._current_animation.direction == AnimationDirectionEnum.PINGPONG:
 					if i == n - 1 or i == 0:
 						_low_to_high = not _low_to_high
+				elif self._current_animation.direction == AnimationDirectionEnum.RANDOM and n >= 2:
+					i = (i + randint(0, n - 2)) % n  # prevent to have 2 same images in a row
 
 				_current_frame = self._current_animation.frames[i]
 				self.image = _current_frame.image

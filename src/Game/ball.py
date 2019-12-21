@@ -5,7 +5,7 @@ import pygame as pg
 
 from Engine.Display import debug3D_utils
 from Engine.Display.scalable_sprite import ScalableSprite
-from Engine.Display.animated_sprite import AnimatedSprite
+from Engine.Display.animated_sprite import AnimatedSprite, AnimationDirectionEnum
 from Engine.Collisions import SphereCollider
 from Settings.general_settings import *
 import Engine
@@ -30,7 +30,7 @@ class Ball(AnimatedSprite, ScalableSprite):
 		
 		# sprite
 		self.load_aseprite_json("../assets/sprites/ball.json")
-		self.set_current_animation("Default")
+		self.get_current_animation().set_direction(AnimationDirectionEnum.RANDOM)
 
 		# debug sprite
 		self.dbg_rect_shadow = pg.Rect(0, 0, 0, 0)
