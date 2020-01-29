@@ -160,6 +160,7 @@ class CharacterStateType(Enum):
 # DIRECTORIES
 FONT_DIR = "../assets/font/PressStart2P.ttf"
 PALETTE_DIR = "../assets/palette/dawnbringer-16.pal"
+SPRITES_DIR = "../assets/sprites"
 
 # COLORS
 BKGND_TRANSPARENCY_COLOR = (1, 1, 1)  # color used for transparency

@@ -5,6 +5,7 @@ import json
 from random import randint
 
 import Engine
+from Settings import SPRITES_DIR
 from .utils import *
 
 
@@ -40,7 +41,7 @@ class AnimatedSprite(pg.sprite.DirtySprite):
 		Meta information contained in ase JSON file.
 		"""
 		def __init__(self, meta_dict):
-			self.image_filename = meta_dict["image"]
+			self.image_filename = SPRITES_DIR + "/" + meta_dict["image"].split('/')[-1]
 			self.image_size = meta_dict["size"]
 			self.frame_tags = meta_dict["frameTags"]
 
