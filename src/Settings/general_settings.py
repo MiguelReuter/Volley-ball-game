@@ -158,8 +158,8 @@ class CharacterStateType(Enum):
 
 
 # DIRECTORIES
-FONT_DIR = "../assets/font/PressStart2P.ttf"
-PALETTE_DIR = "../assets/palette/dawnbringer-16.pal"
+FONT_PATH = "../assets/font/PressStart2P.ttf"
+PALETTE_PATH = "../assets/palette/dawnbringer-16.pal"
 SPRITES_DIR = "../assets/sprites"
 
 # COLORS
